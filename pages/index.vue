@@ -1,3 +1,5 @@
 <template>
-  <div>主页测试</div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
