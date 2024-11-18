@@ -1,5 +1,5 @@
 <template>
-  <div>测试</div>
+  <div>文章列表</div>
 </template>
 
 <script setup lang="ts"></script>

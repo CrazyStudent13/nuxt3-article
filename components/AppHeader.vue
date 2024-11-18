@@ -11,9 +11,7 @@
 const header = reactive({
   data: [
     { title: '主页', path: '/' },
-    { title: '攻略', path: '/article' },
-    { title: '新闻', path: '/news' },
-    { title: '游戏', path: '/ask' },
+    { title: '文章', path: '/article' },
     { title: '关于', path: '/about' }
   ]
 })
