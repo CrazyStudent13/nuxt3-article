@@ -13,7 +13,7 @@
 <style lang="less" scoped>
 .main-container {
   max-width: 800px;
-  height: 100vh;
+  min-height: 100vh;
   margin: 20px auto;
 }
 </style>

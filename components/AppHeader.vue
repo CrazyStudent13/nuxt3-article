@@ -19,6 +19,8 @@ const header = reactive({
 
 <style lang="less" scoped>
 .header {
+  position: sticky;
+  top: 0;
   background-color: #020420;
   z-index: 999;
   height: 55px;
