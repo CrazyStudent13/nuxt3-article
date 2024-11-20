@@ -10,9 +10,10 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .main-container {
-  width: 100%;
+  max-width: 800px;
   height: 100vh;
+  margin: 20px auto;
 }
 </style>
