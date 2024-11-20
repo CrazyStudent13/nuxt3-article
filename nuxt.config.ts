@@ -15,5 +15,6 @@ export default defineNuxtConfig({
       link: []
     }
   },
-  css: ['/assets/style/base.less']
+  css: ['/assets/style/base.less', 'element-plus/dist/index.css'],
+  modules: ['@element-plus/nuxt']
 })
