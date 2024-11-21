@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app">
     <AppHeader />
 
     <div class="main-container">
@@ -11,6 +11,10 @@
 </template>
 
 <style lang="less" scoped>
+.app {
+  background-color: #f2f3f5;
+}
+
 .main-container {
   max-width: 800px;
   min-height: 100vh;
