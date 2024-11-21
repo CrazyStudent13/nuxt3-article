@@ -1,16 +1,16 @@
 <template>
   <el-card shadow="hover" class="card">
-    <div class="article-row">
-      <div class="article-row-cover">
-        <el-image style="width: 120px; height: 120px" :src="props.article.cover" fit="fill" />
+    <div class="row">
+      <div class="row-cover">
+        <el-image style="width: 120px; height: 120px" :src="props.cardInfo.cover" fit="fill" />
       </div>
-      <div class="article-row-text">
-        <h3>{{ props.article.title }}</h3>
-        <p class="article-row-text-item content">{{ props.article.content }}</p>
-        <p class="article-row-text-item article-row-text-footer">
-          <span class="date">发布时间：{{ props.article.date }}</span>
-          <span class="author">作者：{{ props.article.author || '暂无作者' }}</span>
-          <span class="author">阅读量：{{ props.article.read || '暂无作者' }}</span>
+      <div class="row-text">
+        <h3>{{ props.cardInfo.title }}</h3>
+        <p class="row-text-item content">{{ props.cardInfo.content }}</p>
+        <p class="row-text-item row-text-footer">
+          <span class="date">发布时间：{{ props.cardInfo.date || '-' }}</span>
+          <span class="author">作者：{{ props.cardInfo.author || '暂无作者' }}</span>
+          <span class="read">阅读量：{{ props.cardInfo.read || '暂无作者' }}</span>
         </p>
       </div>
     </div>
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  article: {
+  cardInfo: {
     type: Object,
     default: () => ({})
   }
@@ -31,7 +31,7 @@ const props = defineProps({
   margin-bottom: 18px;
 }
 
-.article-row {
+.row {
   height: 120px;
   background-color: #fff;
   overflow: hidden;
@@ -58,16 +58,16 @@ const props = defineProps({
     }
 
     &-footer {
-      display: flex;
       color: #909399;
       margin-top: 8px;
       font-size: 12px;
 
-      .date {
+      span {
         margin-right: 20px;
       }
-      .author {
-        margin-left: 20px;
+
+      .date {
+        text-align: right;
       }
     }
   }

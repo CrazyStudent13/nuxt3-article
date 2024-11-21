@@ -15,9 +15,11 @@
 .footer {
   width: 100%;
   text-align: center;
+  padding-bottom: 24px;
   &-end {
     line-height: 32px;
     font-size: 12px;
+    color: #909399;
   }
 }
 </style>

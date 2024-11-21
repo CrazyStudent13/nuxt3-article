@@ -10,15 +10,16 @@
 <script setup>
 const header = reactive({
   data: [
-    { title: '主页', path: '/' },
-    { title: '文章', path: '/article' },
-    { title: '关于', path: '/about' }
+    { title: '文章', path: '/article/list' },
+    { title: '专栏', path: '/column/list' }
   ]
 })
 </script>
 
 <style lang="less" scoped>
 .header {
+  position: sticky;
+  top: 0;
   background-color: #020420;
   z-index: 999;
   height: 55px;
