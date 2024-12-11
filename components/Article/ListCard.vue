@@ -6,9 +6,9 @@
       </div>
       <div class="row-text">
         <h3>{{ props.cardInfo.title }}</h3>
-        <p class="row-text-item content">{{ props.cardInfo.content }}</p>
+        <p class="row-text-item content">{{ props.cardInfo.remark }}</p>
         <p class="row-text-item row-text-footer">
-          <span class="date">发布时间：{{ props.cardInfo.date || '-' }}</span>
+          <span class="date">发布时间：{{ publishTime || '-' }}</span>
           <span class="author">作者：{{ props.cardInfo.author || '暂无作者' }}</span>
           <span class="read">阅读量：{{ props.cardInfo.read || '暂无作者' }}</span>
         </p>
@@ -18,11 +18,16 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
 const props = defineProps({
   cardInfo: {
     type: Object,
     default: () => ({})
   }
+})
+
+const publishTime = computed(() => {
+  return dayjs(props.cardInfo.publishTime).format('YYYY-MM-DD HH:mm:ss') || '-'
 })
 </script>
 

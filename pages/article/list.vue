@@ -4,36 +4,19 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 const article = reactive({
-  list: [
-    {
-      title: '白夜追凶2开播啦！！！',
-      cover: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-      date: '2023-05-01',
-      author: '小片片',
-      read: 123,
-      like: 123,
-      share: 123,
-      content:
-        '前不久解说了《庭外·盲区》，大家普遍对后续剧情不是很满意。也有很多小伙伴想起了和《庭外》同编剧的另一部剧《白夜追凶》。《庭外》没有达到《白夜追凶》的高度有点可惜。所以今天就让我们重新回顾一下，那部在上映时震惊观众的9分好剧吧。关注微信公众号：小片片说大片，更多宠粉福利等你来！'
-    }
-  ]
+  list: [],
+  request: async () => {
+    const { data } = await useFetch('http://111.229.29.214:8080/game/article/guest/list?title=测试&pageNum=1&pageSize=10')
+
+    article.list = data.value.data.list
+    console.log(article.list, 'haha h')
+  }
 })
 
-for (let i = 0; i < 20; i++) {
-  article.list.push({
-    title: '白夜追凶2开播啦！！！',
-    cover: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg',
-    date: '2023-05-01',
-    author: '小片片',
-    read: 123,
-    like: 123,
-    share: 123,
-    content:
-      '前不久解说了《庭外·盲区》，大家普遍对后续剧情不是很满意。也有很多小伙伴想起了和《庭外》同编剧的另一部剧《白夜追凶》。《庭外》没有达到《白夜追凶》的高度有点可惜。所以今天就让我们重新回顾一下，那部在上映时震惊观众的9分好剧吧。关注微信公众号：小片片说大片，更多宠粉福利等你来！'
-  })
-}
+// 调用请求方法以获取数据
+article.request()
 </script>
 
 <style lang="less" scoped></style>
