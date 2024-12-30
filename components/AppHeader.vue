@@ -10,8 +10,8 @@
 <script setup>
 const header = reactive({
   data: [
-    { title: '文章', path: '/article/list' },
-    { title: '专栏', path: '/column/list' }
+    { title: '文章', path: '/article/list' }
+    // { title: '专栏', path: '/column/list' }
   ]
 })
 </script>

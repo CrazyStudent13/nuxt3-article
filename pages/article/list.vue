@@ -1,5 +1,5 @@
 <template>
-  <div v-for="(item, index) in article.list" :key="index">
+  <div v-for="(item, index) in article.list" :key="index" @click="article.handleRowClick(item)">
     <article-list-card :card-info="item" />
   </div>
 </template>
@@ -11,7 +11,14 @@ const article = reactive({
     const { data } = await useFetch('http://111.229.29.214:8080/game/article/guest/list?title=测试&pageNum=1&pageSize=10')
 
     article.list = data.value.data.list
-    console.log(article.list, 'haha h')
+  },
+  handleRowClick: (item) => {
+    useRouter().push({
+      path: '/article/detail',
+      query: {
+        id: item.id
+      }
+    })
   }
 })
 
