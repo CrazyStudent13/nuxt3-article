@@ -16,5 +16,8 @@ export default defineNuxtConfig({
     }
   },
   css: ['/assets/style/base.less', 'element-plus/dist/index.css'],
-  modules: ['@element-plus/nuxt']
+  modules: ['@element-plus/nuxt'],
+  elementPlus: {
+    defaultLocale: 'zh-cn'
+  }
 })
