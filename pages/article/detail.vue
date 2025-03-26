@@ -10,6 +10,8 @@
     </template>
     <!-- card body -->
     <MdViewer :value="article.model.content" />
+
+    <el-backtop :right="50" :bottom="50" />
   </el-card>
 </template>
 
@@ -19,7 +21,7 @@ import dayjs from 'dayjs'
 const article = reactive({
   model: {},
   request: async () => {
-    const { data } = await useFetch('http://111.229.29.214:8080/game/article/guest/detail?gameId=31')
+    const { data } = await useFetch('http://111.229.29.214:8080/game/article/guest/detail?gameId=' + article.model.id)
 
     article.model = data.value.data
     article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
@@ -28,6 +30,9 @@ const article = reactive({
 })
 
 // 调用请求方法以获取数据
+const route = useRoute()
+article.model.id = route.query.id //拿到传递参数
+
 article.request()
 </script>
 
