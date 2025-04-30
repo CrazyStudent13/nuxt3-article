@@ -24,22 +24,6 @@ export default defineNuxtConfig({
         defaultLocale: 'zh-cn'
       }
     ],
-    // 添加 @nuxt/content 模块
-    [
-      '@nuxt/content',
-      {
-        build: {
-          markdown: {
-            highlight: {
-              // See the available themes on https://github.com/shikijs/shiki/blob/main/docs/themes.md#all-theme
-              theme: {
-                dark: 'github-dark',
-                default: 'github-light'
-              }
-            }
-          }
-        }
-      }
-    ]
+    '@nuxtjs/color-mode'
   ]
 })
