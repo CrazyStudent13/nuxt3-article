@@ -16,8 +16,30 @@ export default defineNuxtConfig({
     }
   },
   css: ['/assets/style/base.less', 'element-plus/dist/index.css'],
-  modules: ['@element-plus/nuxt'],
-  elementPlus: {
-    defaultLocale: 'zh-cn'
-  }
+  modules: [
+    // 添加 elementUI -Plus 模块
+    [
+      '@element-plus/nuxt',
+      {
+        defaultLocale: 'zh-cn'
+      }
+    ],
+    // 添加 @nuxt/content 模块
+    [
+      '@nuxt/content',
+      {
+        build: {
+          markdown: {
+            highlight: {
+              // See the available themes on https://github.com/shikijs/shiki/blob/main/docs/themes.md#all-theme
+              theme: {
+                dark: 'github-dark',
+                default: 'github-light'
+              }
+            }
+          }
+        }
+      }
+    ]
+  ]
 })

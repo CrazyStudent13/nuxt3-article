@@ -26,6 +26,7 @@ const props = defineProps({
   }
 })
 
+// MarkdownIt 配置
 const md = new MarkdownIt({
   html: true,
   linkify: true,
@@ -69,6 +70,7 @@ const md = new MarkdownIt({
   }
 })
 
+// 创建 clipboard 实例, 并挂载到页面
 onMounted(() => {
   const clipboard = new Clipboard('.copy-btn')
 
@@ -82,6 +84,7 @@ onMounted(() => {
   })
 })
 
+// 渲染 markdown,处理 markdown 字符串
 const resultStr = computed(() => {
   const val = props.value
   let result = ''
