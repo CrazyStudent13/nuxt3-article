@@ -85,11 +85,33 @@ onMounted(() => {
 const resultStr = computed(() => {
   const val = props.value
   let result = ''
-  if (val !== null && typeof val !== 'undefined' && val !== '') {
-    // 处理换行问题,后续考虑将这段逻辑转到后端去处理
-    const tempStr = val.slice(1, -1).replace(/\\n/g, '\n')
-    result = md.render(tempStr)
+
+  if (typeof val === 'string' && val.length > 0) {
+    // 处理换行及首尾引号
+    const tempStr = val.length >= 2 ? val.slice(1, -1).replace(/\\n/g, '\n') : ''
+
+    // 替换 '<', '>', '&'
+    const decodedContent = tempStr.replace(/\\u003c|\\u003e|\\u0026/g, (match) => {
+      switch (match) {
+        case '\\u003c':
+          return '<'
+        case '\\u003e':
+          return '>'
+        case '\\u0026':
+          return '&'
+        default:
+          return match
+      }
+    })
+
+    // 确保 md 已正确初始化
+    if (typeof md !== 'undefined' && md.render) {
+      result = md.render(decodedContent)
+    } else {
+      console.warn('Markdown 渲染器未定义')
+    }
   }
+
   return result || ''
 })
 </script>
