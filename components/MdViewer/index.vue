@@ -15,9 +15,9 @@
 import MarkdownIt from 'markdown-it'
 import Clipboard from 'clipboard'
 import 'highlight.js/styles/github-dark.css'
-import '@/assets/style/github-markdown.less'
-import '@/assets/style/github-markdown-dark.less'
-import '@/assets/style/github-markdown-light.less'
+import './styles/github-markdown.less'
+import './styles/github-markdown-dark.less'
+import './styles/github-markdown-light.less'
 
 const props = defineProps({
   value: {
