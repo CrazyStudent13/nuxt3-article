@@ -1,10 +1,14 @@
 <template>
   <div class="home">
     <h1>尽可能的收集整理一些好用的游戏攻略，让游戏通关不再痛苦</h1>
+    <h2>测试</h2>
+    <login-form></login-form>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import loginForm from '../components/Login/index.vue'
+</script>
 
 <style lang="less" scoped>
 .home {
