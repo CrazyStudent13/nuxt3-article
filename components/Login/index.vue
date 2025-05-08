@@ -41,7 +41,7 @@ onMounted(() => {
 })
 
 const loginForm = reactive({
-  visible: true,
+  visible: false,
   title: '用户登录',
   rules: {
     username: [
