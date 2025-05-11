@@ -17,7 +17,8 @@
 
 .main-container {
   max-width: 800px;
-  min-height: 100vh;
-  margin: 20px auto;
+  min-height: calc(100vh - 111px);
+  margin: 0 auto;
+  padding: 20px 0;
 }
 </style>
