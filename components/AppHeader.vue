@@ -1,10 +1,14 @@
 <template>
   <header class="header">
-    <nav class="inner" role="navigation">
-      <NuxtLink v-for="(item, key) in header.data" :key="key" :to="`${item.path}`">
+    <nav class="header-left header-item" role="navigation">
+      <NuxtLink v-for="(item, key) in header.data" :key="key" :to="`${item.path}`" class="link">
         {{ item.title }}
       </NuxtLink>
     </nav>
+    <div class="header-right header-item">
+      <NuxtLink to="/login" class="login">登录</NuxtLink>
+      <!-- <el-icon class="login"><User /></el-icon> -->
+    </div>
   </header>
 </template>
 <script setup>
@@ -25,14 +29,13 @@ const header = reactive({
   background-color: #020420;
   z-index: 999;
   height: 55px;
+  display: flex;
+  justify-content: space-around;
 
-  .inner {
-    max-width: 800px;
+  &-item {
     box-sizing: border-box;
     margin: 0px auto;
     padding: 12px 5px;
-    display: flex;
-    place-items: center;
   }
 
   & a {
@@ -44,6 +47,7 @@ const header = reactive({
     font-weight: 300;
     letter-spacing: 0.075em;
     margin-right: 1.8em;
+    text-decoration: none;
 
     &:hover {
       color: #00dc82;
