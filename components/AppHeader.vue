@@ -14,8 +14,7 @@
 <script setup>
 const header = reactive({
   data: [
-    { title: '新闻', path: '/' },
-    { title: '攻略', path: '/article/list' }
+    { title: '攻略', path: '/' }
     // { title: '存档', path: '/gameSL/list' }
     // { title: '关于', path: '/about' }
   ]

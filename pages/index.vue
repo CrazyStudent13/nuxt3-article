@@ -23,7 +23,8 @@
 </template>
 
 <script setup>
-import httpRequest from '@/utils/request'
+import { getArticleList } from '@/api/article'
+
 const article = reactive({
   list: [],
   pageSize: 10,
@@ -36,9 +37,10 @@ const article = reactive({
       pageSize: article.pageSize
     }
 
-    const response = await httpRequest.get('/game/article/guest/list', params)
-    const res = response.data.value.data
+    const { data } = await getArticleList(params)
+    const res = data.value.data
 
+    console.log(res, data, '测试')
     article.total = res.total
     article.list = res.list
   },

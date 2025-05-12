@@ -71,18 +71,18 @@ const md = new MarkdownIt({
 })
 
 // 创建 clipboard 实例, 并挂载到页面
-onMounted(() => {
-  const clipboard = new Clipboard('.copy-btn')
+// onMounted(() => {
+const clipboard = new Clipboard('.copy-btn')
 
-  console.log(clipboard)
-  clipboard.on('success', function (e) {
-    e.clearSelection()
-  })
-  clipboard.on('error', function (e) {
-    console.error('Action:', e.action)
-    console.error('Trigger:', e.trigger)
-  })
+console.log(clipboard)
+clipboard.on('success', function (e) {
+  e.clearSelection()
 })
+clipboard.on('error', function (e) {
+  console.error('Action:', e.action)
+  console.error('Trigger:', e.trigger)
+})
+// })
 
 // 渲染 markdown,处理 markdown 字符串
 const resultStr = computed(() => {

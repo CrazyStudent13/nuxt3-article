@@ -78,8 +78,7 @@ class HttpRequest {
               timestamp: Date.now()
             })
           }
-
-          console.log('res测试', res)
+          console.log('res', res)
           resolve(res)
         })
         .catch((error) => {

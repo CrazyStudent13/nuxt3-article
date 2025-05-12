@@ -82,27 +82,27 @@ watch(
 
 function handleLogin() {
   loginRef.value.validate((valid) => {
-    // if (valid) {
-    //   authCodeInfo.loading = true
-    //   loginForm.model.uuid = authCodeInfo.uuid
-    //   // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-    //   useAuthCode.setUserCookie(loginForm.model)
-    //   // 调用action的登录方法
-    //   userStore
-    //     .login(loginForm.model)
-    //     .then(() => {
-    //       router.push({ path: redirect.value || '/' })
-    //     })
-    //     .catch(() => {
-    //       // 重新获取验证码
-    //       if (authCodeInfo.captchaEnabled) {
-    //         useAuthCode.getValidateCode(loginForm.model, true)
-    //       }
-    //     })
-    //     .finally(() => {
-    //       authCodeInfo.loading = false
-    //     })
-    // }
+    if (valid) {
+      authCodeInfo.loading = true
+      loginForm.model.uuid = authCodeInfo.uuid
+      // // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
+      // useAuthCode.setUserCookie(loginForm.model)
+      // // 调用action的登录方法
+      // userStore
+      //   .login(loginForm.model)
+      //   .then(() => {
+      //     router.push({ path: redirect.value || '/' })
+      //   })
+      //   .catch(() => {
+      //     // 重新获取验证码
+      //     if (authCodeInfo.captchaEnabled) {
+      //       useAuthCode.getValidateCode(loginForm.model, true)
+      //     }
+      //   })
+      //   .finally(() => {
+      //     authCodeInfo.loading = false
+      //   })
+    }
   })
 }
 
