@@ -23,15 +23,21 @@
 </template>
 
 <script setup>
+import httpRequest from '@/utils/request'
 const article = reactive({
   list: [],
   pageSize: 10,
   pageNum: 1,
   total: 0,
   request: async () => {
-    const url = `http://111.229.29.214:8080/game/article/guest/list?title=测试&pageNum=${article.pageNum}&pageSize=${article.pageSize}`
-    const { data } = await useFetch(url)
-    const res = data.value.data
+    const params = {
+      title: '',
+      pageNum: article.pageNum,
+      pageSize: article.pageSize
+    }
+
+    const response = await httpRequest.get('/game/article/guest/list', params)
+    const res = response.data.value.data
 
     article.total = res.total
     article.list = res.list
