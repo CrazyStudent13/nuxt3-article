@@ -2,17 +2,17 @@ import request from '@/utils/request'
 
 // 获取文章列表
 export function getArticleList(data: any) {
-  return request.get({
+  return request({
     url: '/game/article/guest/list',
-    data
+    params: data
   })
 }
 
 // 获取文章详情
 export function getArticleDetail(id: string) {
-  return request.get({
+  return request({
     url: `/game/article/guest/detail`,
-    data: {
+    params: {
       gameId: id
     }
   })

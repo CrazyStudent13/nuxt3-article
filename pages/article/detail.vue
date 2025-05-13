@@ -22,12 +22,14 @@ import { getArticleDetail } from '@/api/article'
 const article = reactive({
   model: {},
   request: async () => {
-    const { data } = await getArticleDetail(article.model.id)
-    const result = data.value.data
-    article.model = result
+    const res = await getArticleDetail(article.model.id)
+    const result = res.data
 
-    article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
-    article.model.createTime = dayjs(article.model.createTime).format('YYYY-MM-DD HH:mm:ss')
+    console.log(result)
+    // article.model = result
+
+    // article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
+    // article.model.createTime = dayjs(article.model.createTime).format('YYYY-MM-DD HH:mm:ss')
   }
 })
 
