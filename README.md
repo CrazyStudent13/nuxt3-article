@@ -2,6 +2,30 @@
 
 项目基于 nuxt3 开发，主要以展示文章为主。
 
+## 业务方向
+
+目前主要有以下几个方向，目前主要包含一下几个模块，后续会根据个人兴趣持续推进项目的发展。
+
+### 文章模块
+
+- [ ] 文章列表
+- [ ] 文章详情
+- [ ] 文章编辑（简介和内容）
+
+### 用户模块
+
+- [ ] 用户登录
+- [ ] 用户注册
+- [ ] 个人空间（主要是展示个人信息）
+
+### 评论模块
+
+- [ ] 通知列表
+- [ ] 公告列表
+- [ ] 文章评论区
+
+
+
 希望能形成标准化的项目结构。
 
 ## 目录结构
@@ -32,9 +56,7 @@
 
 ```
 
-## Setup
-
-Make sure to install dependencies:
+## 构建项目
 
 ```bash
 # npm
@@ -50,7 +72,7 @@ yarn install
 bun install
 ```
 
-## Development Server
+## 启动项目
 
 Start the development server on `http://localhost:3000`:
 
@@ -68,7 +90,7 @@ yarn dev
 bun run dev
 ```
 
-## Production
+## 部署打包
 
 Build the application for production:
 
@@ -86,7 +108,7 @@ yarn build
 bun run build
 ```
 
-Locally preview production build:
+## 本地预览
 
 ```bash
 # npm
