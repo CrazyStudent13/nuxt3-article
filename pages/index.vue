@@ -38,9 +38,8 @@ const article = reactive({
     }
 
     const { data } = await getArticleList(params)
-    const res = data.value.data
 
-    console.log(res, data, '测试')
+    const res = data.value.data
     article.total = res.total
     article.list = res.list
   },

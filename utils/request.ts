@@ -64,6 +64,8 @@ class HttpRequest {
 
       useFetch(url, newOptions)
         .then((res) => {
+          const data = res.data as any
+
           // 如果是 GET 请求，缓存结果
           if (method === 'GET' && res.data.value) {
             // 如果缓存达到上限，删除最旧的一条数据
@@ -74,12 +76,14 @@ class HttpRequest {
 
             // 直接设置新的缓存数据
             cache.value.set(cacheKey, {
-              data: res.data.value,
+              data: data.value,
               timestamp: Date.now()
             })
           }
-          console.log('res', res)
-          resolve(res)
+          // todo：返回厨具不用响应式赋值就不会刷新页面，很奇怪
+          // const result = { ...data.value } as IResultData<T>
+
+          resolve(data.value)
         })
         .catch((error) => {
           reject(error)
@@ -88,21 +92,20 @@ class HttpRequest {
   }
 
   // 封装常用方法
-
-  get<T = any>(url: string, params?: any, options?: UseFetchOptions<T>) {
-    return this.request(url, 'GET', params, options)
+  get<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
+    return this.request(url, 'GET', data, options)
   }
 
-  post<T = any>(url: string, data: any, options?: UseFetchOptions<T>) {
+  post<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
     return this.request(url, 'POST', data, options)
   }
 
-  Put<T = any>(url: string, data: any, options?: UseFetchOptions<T>) {
+  put<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
     return this.request(url, 'PUT', data, options)
   }
 
-  Delete<T = any>(url: string, params: any, options?: UseFetchOptions<T>) {
-    return this.request(url, 'DELETE', params, options)
+  delete<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
+    return this.request(url, 'DELETE', data, options)
   }
 
   // 清除缓存的方法

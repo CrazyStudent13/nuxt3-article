@@ -21,14 +21,16 @@
         </el-input>
       </el-form-item>
 
-      <!-- <el-form-item prop="code" v-if="authCodeInfo.captchaEnabled">
+      <el-form-item prop="code" v-show="authCodeInfo.captchaEnabled">
         <el-input v-model.trim="loginForm.model.code" maxlength="3" size="large" auto-complete="off" placeholder="验证码" style="width: 63%" @keyup.enter="handleLogin">
           <template #prefix>
-            <svg-icon icon-class="validCode" class="input-icon" />
+            <Key class="input-icon" />
           </template>
         </el-input>
-        <div class="login-code" v-html="authCodeInfo.imgUrl" @click="useAuthCode.getValidateCode(loginForm.model, true)" />
-      </el-form-item> -->
+        <ClientOnly>
+          <div class="login-code" v-html="authCodeInfo.imgUrl" @click="useAuthCode.getValidateCode(loginForm.model, true)" />
+        </ClientOnly>
+      </el-form-item>
 
       <div class="login-tips">
         <el-checkbox v-model="loginForm.model.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
@@ -106,7 +108,7 @@ function handleLogin() {
   })
 }
 
-// useAuthCode.getValidateCode(loginForm.model, false)
+useAuthCode.getValidateCode(loginForm.model, false)
 // loginForm.model = useAuthCode.getUserCookie(loginForm.model)
 </script>
 

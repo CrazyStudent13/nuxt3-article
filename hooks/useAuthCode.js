@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from '@/utils/jsencrypt'
+// import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCodeImg } from '@/api/login'
@@ -34,11 +34,12 @@ const getValidateCode = async (form, isClick) => {
     }
 
     const { data } = await getCodeImg()
+    const result = data.value.data
     authCodeInfo.loading = true
-    authCodeInfo.captchaEnabled = data.captchaEnabled === undefined ? true : data.captchaEnabled
-    authCodeInfo.uuid = data.uuid
+    authCodeInfo.captchaEnabled = result.captchaEnabled === undefined ? true : result.captchaEnabled
+    authCodeInfo.uuid = result.uuid
     if (authCodeInfo.captchaEnabled) {
-      authCodeInfo.imgUrl = data.img
+      authCodeInfo.imgUrl = result.img
       authCodeInfo.loading = false
     }
   } catch (err) {
@@ -53,7 +54,8 @@ const getUserCookie = async (data) => {
   const rememberMe = useCookie('rememberMe')
   const form = {
     username: username === undefined ? data.username : username,
-    password: password === undefined ? data.password : await decrypt(password),
+    // password: password === undefined ? data.password : await decrypt(password),
+    password: password === undefined ? data.password : password,
     rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
   }
   return form
@@ -63,7 +65,8 @@ const getUserCookie = async (data) => {
 const setUserCookie = async (data) => {
   if (data.rememberMe) {
     Cookies.set('username', data.username, { expires: 30 })
-    Cookies.set('password', await encrypt(data.password), { expires: 30 })
+    // Cookies.set('password', await encrypt(data.password), { expires: 30 })
+    Cookies.set('password', data.password, { expires: 30 })
     Cookies.set('rememberMe', data.rememberMe, { expires: 30 })
   } else {
     Cookies.remove('username')

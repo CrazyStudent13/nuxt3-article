@@ -23,6 +23,7 @@ const article = reactive({
   model: {},
   request: async () => {
     const { data } = await getArticleDetail(article.model.id)
+
     article.model = data.value.data
 
     article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
