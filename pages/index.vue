@@ -38,10 +38,14 @@ const article = reactive({
     }
 
     const { data } = await getArticleList(params)
+    const result = data.value.data
 
-    const res = data.value.data
-    article.total = res.total
-    article.list = res.list
+    // const url = `http://111.229.29.214:8080/game/article/guest/list?title=测试&pageNum=${article.pageNum}&pageSize=${article.pageSize}`
+    // const { data } = await useFetch(url)
+    // const result = data.value.data
+
+    article.total = result.total
+    article.list = result.list
   },
   handleRowClick: (item) => {
     console.log(item, '测试')
