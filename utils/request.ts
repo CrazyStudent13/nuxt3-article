@@ -18,103 +18,70 @@ export interface IResultData<T> {
   msg: string
 }
 
-class HttpRequest {
-  // 最大缓存条数
-  private readonly MAX_CACHE_SIZE = 50
-  // 缓存过期时间 5分钟
-  private readonly CACHE_EXPIRE_TIME = 5 * 60 * 1000
-
-  private getCache() {
-    return useState('http-cache', () => new Map<string, CacheItem>())
-  }
-
-  request<T = any>(url: string, method: Methods, data: any, options?: UseFetchOptions<T>) {
-    const { $i18n } = useNuxtApp()
-    return new Promise((resolve, reject) => {
-      // 生成缓存键
-      const cacheKey = method === 'GET' ? `${url}-${JSON.stringify(data)}` : ''
-      const cache = this.getCache()
-
-      // 如果是 GET 请求且存在缓存，检查是否过期
-      if (method === 'GET' && cache.value.has(cacheKey)) {
-        const cachedItem = cache.value.get(cacheKey)!
-        if (Date.now() - cachedItem.timestamp < this.CACHE_EXPIRE_TIME) {
-          return resolve({ data: ref(cachedItem.data) })
-        }
-        // 如果缓存过期，直接删除
-        cache.value.delete(cacheKey)
-      }
-
-      const newOptions: UseFetchOptions<T> = {
-        baseURL: BASE_URL,
-        method: method,
-        headers: {
-          'tenant-id': '164'
-          //   'Accept-Language': $i18n.locale || 'zh'
-        },
-        ...options
-      }
-
-      if (method === 'GET' || method === 'DELETE') {
-        newOptions.params = data
-      }
-      if (method === 'POST' || method === 'PUT') {
-        newOptions.body = data
-      }
-
-      useFetch(url, newOptions)
-        .then((res) => {
-          const data = res.data as any
-
-          // 如果是 GET 请求，缓存结果
-          if (method === 'GET' && res.data.value) {
-            // 如果缓存达到上限，删除最旧的一条数据
-            if (cache.value.size >= this.MAX_CACHE_SIZE) {
-              const oldestKey = Array.from(cache.value.keys())[0]
-              cache.value.delete(oldestKey)
-            }
-
-            // 直接设置新的缓存数据
-            cache.value.set(cacheKey, {
-              data: data.value,
-              timestamp: Date.now()
-            })
-          }
-          // todo：返回厨具不用响应式赋值就不会刷新页面，很奇怪
-          // const result = { ...data.value } as IResultData<T>
-
-          resolve(data.value)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
-  }
-
-  // 封装常用方法
-  get<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
-    return this.request(url, 'GET', data, options)
-  }
-
-  post<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
-    return this.request(url, 'POST', data, options)
-  }
-
-  put<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
-    return this.request(url, 'PUT', data, options)
-  }
-
-  delete<T = any>({ url, data, options }: { url: string; data?: any; options?: UseFetchOptions<T> }) {
-    return this.request(url, 'DELETE', data, options)
-  }
-
-  // 清除缓存的方法
-  clearCache() {
-    const cache = this.getCache()
-    cache.value.clear()
-  }
+interface Params {
+  url: string
+  params?: any
+  method?: Methods
+  key?: string
 }
 
-const httpRequest = new HttpRequest()
+const httpRequest = async ({ url, params, method = 'GET' }: Params) => {
+  // 接口传参要求
+  interface QueryItem {
+    uid?: string
+    token?: any
+  }
+  const route = useRoute()
+  const query: QueryItem = route.query
+
+  const config = useRuntimeConfig()
+
+  // 拼接str，但是方法有点烂，后续还得重写
+  let str = ''
+  if (method === 'GET') {
+    for (const key in params) {
+      if (params.hasOwnProperty(key)) {
+        str += `${key}=${params[key]}&`
+      }
+    }
+  }
+
+  const { data } = await useFetch(url, {
+    // method此处仅仅只处理了get与post请求
+    method,
+    // ofetch库会自动识别请求地址，对于url已包含域名的请求不会再拼接baseURL
+    baseURL: BASE_URL,
+    // onRequest相当于请求拦截
+    onRequest({ request, options }) {
+      // 设置请求头
+      // options.headers = { ...options.headers, authorization: '' }
+      // 设置请求参数
+      if (method === 'POST') {
+        options.body = { ...params.data }
+      } else {
+        options.params = {}
+      }
+    },
+    // onResponse相当于响应拦截
+    onResponse({ response }) {
+      // 处理响应数据
+      console.log(response)
+    },
+    onRequestError({ request, options, error }) {
+      // 处理请求错误
+      console.warn('request error', error)
+      ElMessage.warning('Request Error')
+    },
+    onResponseError({ request, response, options }) {
+      // 处理响应错误
+      console.warn('request error', response)
+      ElMessage.warning('Request Error')
+    }
+  })
+
+  // 这里data本身是个ref对象，将其内部值抛出去方便调用时获得数据。
+  const result = unref(data) as IResultData<any>
+  return result
+}
 
 export default httpRequest
