@@ -17,13 +17,14 @@
 
 <script setup>
 import dayjs from 'dayjs'
+import { getArticleDetail } from '@/api/article'
 
 const article = reactive({
   model: {},
   request: async () => {
-    const { data } = await useFetch('http://111.229.29.214:8080/game/article/guest/detail?gameId=' + article.model.id)
-
+    const { data } = await getArticleDetail(article.model.id)
     article.model = data.value.data
+
     article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
     article.model.createTime = dayjs(article.model.createTime).format('YYYY-MM-DD HH:mm:ss')
   }

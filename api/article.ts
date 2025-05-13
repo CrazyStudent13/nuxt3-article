@@ -7,5 +7,5 @@ export function getArticleList(data: any) {
 
 // 获取文章详情
 export function getArticleDetail(id: string) {
-  return request.get(`/game/article/guest/detail/${id}`)
+  return request.get(`/game/article/guest/detail?gameId=${id}`)
 }
