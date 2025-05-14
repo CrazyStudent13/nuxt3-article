@@ -1,7 +1,4 @@
 //  封装axios请求,参考链接如下
-// https://juejin.cn/post/7477875236145102874?searchId=20250512203958AFB70B141BF1B5498369
-
-import { pa } from 'element-plus/es/locales.mjs'
 import type { UseFetchOptions } from 'nuxt/app'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
@@ -75,7 +72,7 @@ const httpRequest = async ({ url, params, method = 'get', options }: Params) => 
     // onResponse相当于响应拦截
     onResponse({ response }) {
       // 处理响应数据
-      console.log(response)
+      // console.log(response)
     },
     onRequestError({ request, options, error }) {
       // 处理请求错误
