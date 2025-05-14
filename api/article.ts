@@ -4,6 +4,7 @@ import request from '@/utils/request'
 export function getArticleList(data: any) {
   return request({
     url: '/game/article/guest/list',
+    method: 'get',
     params: data
   })
 }
@@ -12,6 +13,7 @@ export function getArticleList(data: any) {
 export function getArticleDetail(id: string) {
   return request({
     url: `/game/article/guest/detail`,
+    method: 'get',
     params: {
       gameId: id
     }

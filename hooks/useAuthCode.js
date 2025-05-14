@@ -34,7 +34,7 @@ const getValidateCode = async (form, isClick) => {
     }
 
     const { data } = await getCodeImg()
-    const result = data.value.data
+    const result = data
     authCodeInfo.loading = true
     authCodeInfo.captchaEnabled = result.captchaEnabled === undefined ? true : result.captchaEnabled
     authCodeInfo.uuid = result.uuid

@@ -2,37 +2,41 @@ import request from '@/utils/request'
 
 // 登录
 export function login(data: any) {
-  return request.post({
+  return request({
     url: '/login',
-    data
+    method: 'post',
+    params: data
   })
 }
 
 // 注册
 export function register(data: any) {
-  return request.post({
+  return request({
     url: '/register',
-    data
+    method: 'post',
+    params: data
   })
 }
 
 // 获取用户信息
 export function getInfo() {
-  return request.get({
-    url: '/getInfo'
+  return request({
+    url: '/getInfo',
+    method: 'get'
   })
 }
 
 // 退出
 export function logout() {
-  return request.post({
-    url: '/logout'
+  return request({
+    url: '/logout',
+    method: 'post'
   })
 }
 
 // 获取验证码
 export function getCodeImg() {
-  return request.get({
+  return request({
     url: '/captchaImage'
   })
 }
