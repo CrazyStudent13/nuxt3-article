@@ -3,26 +3,22 @@ import type { UseFetchOptions } from 'nuxt/app'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
 
-interface CacheItem {
-  data: any
-  timestamp: number
-}
-
-const BASE_URL = 'http://111.229.29.214:8080'
-
 export interface IResultData<T> {
   code: number
   data: T
   msg: string
 }
 
-interface Params {
+// 请求参数
+interface options {
   url: string
   params?: any
   method?: Methods
   options?: UseFetchOptions<any>
   key?: string
 }
+
+const BASE_URL = 'http://111.229.29.214:8080'
 
 /**
  * 参数处理
@@ -50,7 +46,7 @@ function tansParams(params: any) {
   return result
 }
 
-const httpRequest = async ({ url, params, method = 'get', options }: Params) => {
+const httpRequest = async ({ url, params, method = 'get', options }: options) => {
   // 如果是get请求，则将参数拼接到url上
   let baseUrl = `${BASE_URL}${url}`
   if (method === 'get' || method === 'delete') {

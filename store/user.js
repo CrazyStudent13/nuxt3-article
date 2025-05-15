@@ -1,4 +1,4 @@
-// import { login, logout, getInfo } from '@/api/login'
+import { login, logout, getInfo } from '@/api/login'
 // import { getToken, setToken, removeToken } from '@/utils/auth'
 
 // store/modules/user.ts
@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 export default defineStore('user', {
   state: () => ({
     // token: getToken(),
+    token: '',
     id: '',
     name: '',
     avatar: '',
@@ -34,7 +35,8 @@ export default defineStore('user', {
 
   actions: {
     // 登录
-    Login({ commit }, userInfo) {
+    Login(userInfo) {
+      console.log(userInfo, '测试>>>')
       const username = userInfo.username.trim()
       const password = userInfo.password
       const code = userInfo.code
@@ -50,31 +52,31 @@ export default defineStore('user', {
             reject(error)
           })
       })
+    },
+    // 获取用户信息
+    GetInfo({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        getInfo()
+          .then((res) => {
+            const user = res.user
+            const avatar = user.avatar == '' || user.avatar == null ? require('@/assets/images/profile.jpg') : process.env.VUE_APP_BASE_API + user.avatar
+            if (res.roles && res.roles.length > 0) {
+              // 验证返回的roles是否是一个非空数组
+              commit('SET_ROLES', res.roles)
+              commit('SET_PERMISSIONS', res.permissions)
+            } else {
+              commit('SET_ROLES', ['ROLE_DEFAULT'])
+            }
+            commit('SET_ID', user.userId)
+            commit('SET_NAME', user.userName)
+            commit('SET_AVATAR', avatar)
+            resolve(res)
+          })
+          .catch((error) => {
+            reject(error)
+          })
+      })
     }
-    // // 获取用户信息
-    // GetInfo({ commit, state }) {
-    //   return new Promise((resolve, reject) => {
-    //     getInfo()
-    //       .then((res) => {
-    //         const user = res.user
-    //         const avatar = user.avatar == '' || user.avatar == null ? require('@/assets/images/profile.jpg') : process.env.VUE_APP_BASE_API + user.avatar
-    //         if (res.roles && res.roles.length > 0) {
-    //           // 验证返回的roles是否是一个非空数组
-    //           commit('SET_ROLES', res.roles)
-    //           commit('SET_PERMISSIONS', res.permissions)
-    //         } else {
-    //           commit('SET_ROLES', ['ROLE_DEFAULT'])
-    //         }
-    //         commit('SET_ID', user.userId)
-    //         commit('SET_NAME', user.userName)
-    //         commit('SET_AVATAR', avatar)
-    //         resolve(res)
-    //       })
-    //       .catch((error) => {
-    //         reject(error)
-    //       })
-    //   })
-    // },
     // // 退出系统
     // LogOut({ commit, state }) {
     //   return new Promise((resolve, reject) => {

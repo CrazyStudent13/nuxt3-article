@@ -2,6 +2,7 @@
 import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCodeImg } from '@/api/login'
+import { da } from 'element-plus/es/locales.mjs'
 
 // 验证码相关信息
 const authCodeInfo = reactive({
@@ -11,12 +12,18 @@ const authCodeInfo = reactive({
   uuid: '' // 验证码唯一标识
 })
 
+interface loginForm {
+  username: string
+  password: string
+  rememberMe?: Boolean
+}
+
 /**
  * 获取图片验证码
  * @param data 表单数据
  * @param isClick 是否点击触发
  */
-const getValidateCode = async (form, isClick) => {
+const getValidateCode = async (form: loginForm, isClick: Boolean) => {
   try {
     if ((form.username === '' || form.username === undefined) && isClick) {
       ElMessage.error('请输入用户账号')
@@ -48,30 +55,41 @@ const getValidateCode = async (form, isClick) => {
 }
 
 // 从cookie中获取登录用户信息
-const getUserCookie = async (data) => {
-  const username = useCookie('username')
-  const password = useCookie('password')
-  const rememberMe = useCookie('rememberMe')
-  const form = {
-    username: username === undefined ? data.username : username,
-    // password: password === undefined ? data.password : await decrypt(password),
-    password: password === undefined ? data.password : password,
-    rememberMe: rememberMe === undefined ? false : Boolean(rememberMe)
-  }
-  return form
+const getUserCookie = async (data: loginForm) => {
+  const loginForm = useCookie('loginForm', {
+    default: () => ({
+      username: data.username,
+      // password: await decrypt(password),
+      password: data.password,
+      rememberMe: data.rememberMe
+    }),
+    watch: false
+  })
+
+  return loginForm
 }
 
 // 在Cookie中的记住用户信息,勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-const setUserCookie = async (data) => {
+const setUserCookie = async (data: loginForm) => {
+  const loginForm = useCookie('loginForm', {
+    default: () => ({
+      username: data.username,
+      // password: await decrypt(password),
+      password: data.password,
+      rememberMe: data.rememberMe
+    }),
+    watch: false
+  })
+
+  alert(data.rememberMe)
+
   if (data.rememberMe) {
-    Cookies.set('username', data.username, { expires: 30 })
-    // Cookies.set('password', await encrypt(data.password), { expires: 30 })
-    Cookies.set('password', data.password, { expires: 30 })
-    Cookies.set('rememberMe', data.rememberMe, { expires: 30 })
-  } else {
-    Cookies.remove('username')
-    Cookies.remove('password')
-    Cookies.remove('rememberMe')
+    loginForm.value = {
+      username: data.username,
+      // password: await decrypt(password),
+      password: data.password,
+      rememberMe: data.rememberMe
+    }
   }
 }
 
