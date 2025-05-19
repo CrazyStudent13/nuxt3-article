@@ -23,21 +23,27 @@
 </template>
 
 <script setup>
+import { getArticleList } from '@/api/article'
+
 const article = reactive({
   list: [],
   pageSize: 10,
   pageNum: 1,
   total: 0,
   request: async () => {
-    const url = `http://111.229.29.214:8080/game/article/guest/list?title=测试&pageNum=${article.pageNum}&pageSize=${article.pageSize}`
-    const { data } = await useFetch(url)
-    const res = data.value.data
+    const params = {
+      title: '',
+      pageNum: article.pageNum,
+      pageSize: article.pageSize
+    }
 
-    article.total = res.total
-    article.list = res.list
+    const res = await getArticleList(params)
+    const result = res.data
+
+    article.total = result.total
+    article.list = result.list
   },
   handleRowClick: (item) => {
-    console.log(item, '测试')
     useRouter().push({
       path: '/article/detail',
       query: {
