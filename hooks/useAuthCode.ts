@@ -1,8 +1,7 @@
-// import { encrypt, decrypt } from '@/utils/jsencrypt'
+import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getCodeImg } from '@/api/login'
-import { da } from 'element-plus/es/locales.mjs'
 
 // 验证码相关信息
 const authCodeInfo = reactive({
@@ -59,8 +58,7 @@ const getUserCookie = async (data: loginForm) => {
   const loginForm = useCookie('loginForm', {
     default: () => ({
       username: data.username,
-      // password: await decrypt(password),
-      password: data.password,
+      password: decrypt(data.password),
       rememberMe: data.rememberMe
     }),
     watch: false
@@ -74,20 +72,16 @@ const setUserCookie = async (data: loginForm) => {
   const loginForm = useCookie('loginForm', {
     default: () => ({
       username: data.username,
-      // password: await decrypt(password),
-      password: data.password,
+      password: encrypt(data.password),
       rememberMe: data.rememberMe
     }),
     watch: false
   })
 
-  alert(data.rememberMe)
-
   if (data.rememberMe) {
     loginForm.value = {
       username: data.username,
-      // password: await decrypt(password),
-      password: data.password,
+      password: decrypt(data.password),
       rememberMe: data.rememberMe
     }
   }

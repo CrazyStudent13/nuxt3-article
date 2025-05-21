@@ -1,4 +1,6 @@
 //  封装axios请求,参考链接如下
+// https://juejin.cn/post/7173507227104313352
+
 import type { UseFetchOptions } from 'nuxt/app'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
@@ -19,6 +21,7 @@ interface options {
 }
 
 const BASE_URL = 'http://111.229.29.214:8080'
+// const BASE_URL = 'http://43.156.233.9:8080'
 
 /**
  * 参数处理
@@ -55,6 +58,8 @@ const httpRequest = async ({ url, params, method = 'get', options }: options) =>
     }
   }
 
+  console.log(params, 'params')
+
   const { data } = await useFetch(baseUrl, {
     // method此处仅仅只处理了get与post请求
     method,
@@ -64,6 +69,14 @@ const httpRequest = async ({ url, params, method = 'get', options }: options) =>
     onRequest({ request, options }) {
       // 示例：添加 token 到 header
       // options.headers = { ...options.headers, authorization: 'Bearer token' }
+      // options.headers = { ...options.headers, authorization: 'Bearer ' + useCookie('token').value }
+      if (method === 'get' || method === 'delete') {
+        options.params = params
+      }
+      if (method === 'post' || method === 'put') {
+        console.log(params, '测试>>>')
+        options.body = params
+      }
     },
     // onResponse相当于响应拦截
     onResponse({ response }) {

@@ -36,13 +36,13 @@ export default defineStore('user', {
   actions: {
     // 登录
     Login(userInfo) {
-      console.log(userInfo, '测试>>>')
       const username = userInfo.username.trim()
       const password = userInfo.password
       const code = userInfo.code
       const uuid = userInfo.uuid
+
       return new Promise((resolve, reject) => {
-        login(username, password, code, uuid)
+        login({ username, password, code, uuid })
           .then((res) => {
             setToken(res.data.token)
             commit('SET_TOKEN', res.data.token)
