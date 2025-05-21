@@ -45,7 +45,6 @@ export default defineStore('user', {
         login({ username, password, code, uuid })
           .then((res) => {
             setToken(res.data.token)
-            commit('SET_TOKEN', res.data.token)
             resolve()
           })
           .catch((error) => {

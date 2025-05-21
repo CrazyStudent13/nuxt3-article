@@ -33,7 +33,7 @@
 
         <div class="login-tips">
           <el-checkbox v-model="loginForm.model.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
-          <el-link v-if="false" class="login-tips-link" type="primary" href="/register" target="_blank">去注册账号</el-link>
+          <el-link class="login-tips-link" type="primary" href="/register" target="_blank">去注册账号</el-link>
         </div>
 
         <el-form-item style="width: 100%">
@@ -53,8 +53,6 @@ import useAuthCode from '@/hooks/useAuthCode'
 
 const userStore = useUserStore()
 const authCodeInfo = useAuthCode.authCodeInfo
-const route = useRoute()
-const router = useRouter()
 const loginRef = ref()
 
 const loginForm = reactive({
@@ -72,41 +70,26 @@ const loginForm = reactive({
   }
 })
 
-const redirect = ref(undefined)
-
-watch(
-  route,
-  (newRoute) => {
-    redirect.value = newRoute.query && newRoute.query.redirect
-  },
-  { immediate: true }
-)
-
 const handleLogin = () => {
-  loginRef.value.validate((valid) => {
+  loginRef.value.validate(async (valid) => {
     if (valid) {
       authCodeInfo.loading = true
       loginForm.model.uuid = authCodeInfo.uuid
       // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
       useAuthCode.setUserCookie(loginForm.model)
 
-      // 调用action的登录方法
-
-      console.log('loginForm.model', { ...loginForm.model })
-      userStore
-        .Login(loginForm.model)
-        .then(() => {
-          router.push({ path: redirect.value || '/' })
-        })
-        .catch(() => {
-          // 重新获取验证码
-          if (authCodeInfo.captchaEnabled) {
-            useAuthCode.getValidateCode(loginForm.model, true)
-          }
-        })
-        .finally(() => {
-          authCodeInfo.loading = false
-        })
+      try {
+        // 调用action的登录方法
+        await userStore.Login(loginForm.model)
+        useRouter().push({ path: '/' })
+      } catch (error) {
+        // 重新获取验证码
+        if (authCodeInfo.captchaEnabled) {
+          useAuthCode.getValidateCode(loginForm.model, true)
+        }
+      } finally {
+        authCodeInfo.loading = false
+      }
     }
   })
 }
