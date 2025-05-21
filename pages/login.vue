@@ -31,12 +31,12 @@
           <div class="login-code" v-html="authCodeInfo.imgUrl" @click="useAuthCode.getValidateCode(loginForm.model, true)" />
         </el-form-item>
 
-        <div class="login-tips">
+        <div v-if="false" class="login-tips">
           <el-checkbox v-model="loginForm.model.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
           <el-link class="login-tips-link" type="primary" href="/register" target="_blank">去注册账号</el-link>
         </div>
 
-        <el-form-item style="width: 100%">
+        <el-form-item style="width: 100%; margin: 32px 0">
           <el-button :loading="authCodeInfo.loading" size="large" type="primary" style="width: 100%" @click.prevent="handleLogin">
             <span v-if="!authCodeInfo.loading">登 录</span>
             <span v-else>登 录 中...</span>
@@ -153,9 +153,10 @@ useAuthCode.getValidateCode(loginForm.model, false)
 .login-tips {
   &-link {
     position: relative;
-    top: -3px;
-    left: 10px;
+    top: 3px;
+    right: 10px;
     font-size: 13px;
+    float: right;
   }
 }
 </style>
