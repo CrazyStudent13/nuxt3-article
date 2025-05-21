@@ -37,7 +37,7 @@ const publishTime = computed(() => {
 }
 
 .row {
-  height: 120px;
+  height: 125px;
   background-color: #fff;
   overflow: hidden;
   display: flex;
