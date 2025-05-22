@@ -2,6 +2,7 @@
 // https://juejin.cn/post/7173507227104313352
 
 import type { UseFetchOptions } from 'nuxt/app'
+import { walk } from '@/utils/tools'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
 
@@ -27,29 +28,19 @@ const BASE_URL = 'http://111.229.29.214:8080'
  * 参数处理
  * @param {*} params  参数
  */
-function tansParams(params: any) {
-  let result = ''
-  for (const propName of Object.keys(params)) {
-    const value = params[propName]
-    var part = encodeURIComponent(propName) + '='
-    if (value !== null && value !== '' && typeof value !== 'undefined') {
-      if (typeof value === 'object') {
-        for (const key of Object.keys(value)) {
-          if (value[key] !== null && value[key] !== '' && typeof value[key] !== 'undefined') {
-            let params = propName + '[' + key + ']'
-            var subPart = encodeURIComponent(params) + '='
-            result += subPart + encodeURIComponent(value[key]) + '&'
-          }
-        }
-      } else {
-        result += part + encodeURIComponent(value) + '&'
-      }
+function tansParams(params: any): string {
+  const result: string[] = []
+
+  for (const key in params) {
+    if (Object.prototype.hasOwnProperty.call(params, key)) {
+      walk(params[key], [key], result)
     }
   }
-  return result
+
+  return result.join('&')
 }
 
-const httpRequest = async ({ url, params, method = 'get', options }: options) => {
+const service = async ({ url, params, method = 'get', options }: options) => {
   // 如果是get请求，则将参数拼接到url上
   let baseUrl = `${BASE_URL}${url}`
   if (method === 'get' || method === 'delete') {
@@ -57,8 +48,6 @@ const httpRequest = async ({ url, params, method = 'get', options }: options) =>
       baseUrl += `?${tansParams(params)}`
     }
   }
-
-  console.log(params, 'params')
 
   const { data } = await useFetch(baseUrl, {
     // method此处仅仅只处理了get与post请求
@@ -74,7 +63,6 @@ const httpRequest = async ({ url, params, method = 'get', options }: options) =>
         options.params = params
       }
       if (method === 'post' || method === 'put') {
-        console.log(params, '测试>>>')
         options.body = params
       }
     },
@@ -101,4 +89,4 @@ const httpRequest = async ({ url, params, method = 'get', options }: options) =>
   return result
 }
 
-export default httpRequest
+export default service

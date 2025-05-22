@@ -1,4 +1,5 @@
 import { defineNuxtConfig } from 'nuxt/config'
+import { fileURLToPath } from 'url'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -15,6 +16,13 @@ export default defineNuxtConfig({
     }
   },
   css: ['/assets/style/base.less', 'element-plus/dist/index.css'],
+  alias: {
+    //配置别名
+    images: fileURLToPath(new URL('./assets/img', import.meta.url)),
+    style: fileURLToPath(new URL('./assets/style', import.meta.url)),
+    '@': fileURLToPath(new URL('./', import.meta.url))
+  },
+
   modules: [
     // 添加 elementUI -Plus 模块
     [

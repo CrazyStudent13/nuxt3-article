@@ -28,7 +28,7 @@
             </template>
           </el-input>
 
-          <div class="login-code" v-html="authCodeInfo.imgUrl" @click="useAuthCode.getValidateCode(loginForm.model, true)" />
+          <div v-dompurify-html="authCodeInfo.imgUrl" class="login-code" @click="handleAuthCode" />
         </el-form-item>
 
         <div v-if="false" class="login-tips">
@@ -92,6 +92,10 @@ const handleLogin = () => {
       }
     }
   })
+}
+
+const handleAuthCode = () => {
+  useAuthCode.getValidateCode(loginForm.model, true)
 }
 
 useAuthCode.getValidateCode(loginForm.model, false)
