@@ -72,6 +72,12 @@ const authLoginRules = {
 
 // 校验用户名
 const authLoginAccount = (username: string) => {
+  // 用户名不能为空
+  if (isEmpty(username)) {
+    ElMessage.warning('用户名不能为空')
+    return false
+  }
+
   // 不能输入空格
   if (hasWhiteSpace(username)) {
     ElMessage.warning('用户名不包含空格')
@@ -89,6 +95,12 @@ const authLoginAccount = (username: string) => {
 
 // 校验密码
 const authLoginPassword = (password: string) => {
+  // 密码不能为空
+  if (isEmpty(password)) {
+    ElMessage.warning('密码不能为空')
+    return false
+  }
+
   // 不能输入中文
   if (isHasChinese(password)) {
     ElMessage.warning('密码不能包含中文')
@@ -106,6 +118,12 @@ const authLoginPassword = (password: string) => {
 
 // 校验验证码
 const authLoginCode = (code: string) => {
+  // 校验码不能为空
+  if (isEmpty(code)) {
+    ElMessage.warning('校验码不能为空')
+    return false
+  }
+
   // 检查是否有空格
   if (isString(code) && hasWhiteSpace(code)) {
     ElMessage.warning('验证码不能包含空格')

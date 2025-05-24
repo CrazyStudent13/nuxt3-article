@@ -74,28 +74,25 @@ const handleLogin = () => {
     if (valid) {
       // 校验登录表单是否符合要求
       const authResult = authLoginForm(loginForm.model)
-      console.log('authResult', authResult)
-      // if (!authResult) {
-      //   return
-      // }
-
-      // 验证码loading隐藏
-      authCodeInfo.loading = false
-      loginForm.model.uuid = authCodeInfo.uuid
-
-      try {
-        // 调用action的登录方法
-        await userStore.Login(loginForm.model)
-        useRouter().push({ path: '/' })
-      } catch (error) {
-        // 重新获取验证码
-        if (authCodeInfo.captchaEnabled) {
-          useAuthCode.getValidateCode(loginForm.model, true)
-        }
-      } finally {
+      if (authResult) {
+        // 验证码loading隐藏
         authCodeInfo.loading = false
-        // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-        useAuthCode.setUserCookie(loginForm.model)
+        loginForm.model.uuid = authCodeInfo.uuid
+
+        try {
+          // 调用action的登录方法
+          await userStore.Login(loginForm.model)
+          useRouter().push({ path: '/' })
+        } catch (error) {
+          // 重新获取验证码
+          if (authCodeInfo.captchaEnabled) {
+            useAuthCode.getValidateCode(loginForm.model, true)
+          }
+        } finally {
+          authCodeInfo.loading = false
+          // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
+          useAuthCode.setUserCookie(loginForm.model)
+        }
       }
     }
   })
