@@ -1,4 +1,5 @@
-//  封装axios请求,参考链接如下
+//  封装axios请求,参考链接如下,后续改为$fetch封装
+// https://juejin.cn/post/7173507227104313352
 // https://juejin.cn/post/7173507227104313352
 
 import type { UseFetchOptions } from 'nuxt/app'

@@ -7,7 +7,7 @@
       <el-form ref="loginRef" :model="loginForm.model" :rules="loginForm.rules" class="login-form">
         <h3 class="title">用户登录</h3>
         <el-form-item prop="username">
-          <el-input v-model.trim="loginForm.model.username" maxlength="10" type="text" size="large" auto-complete="off" placeholder="账号">
+          <el-input v-model.trim="loginForm.model.username" maxlength="20" type="text" size="large" auto-complete="off" placeholder="账号">
             <template #prefix>
               <User class="input-icon" />
             </template>
@@ -53,6 +53,8 @@ import useAuthCode from '@/hooks/useAuthCode'
 
 const userStore = useUserStore()
 const authCodeInfo = useAuthCode.authCodeInfo
+const authLoginRules = useAuthCode.authLoginRules
+const authLoginForm = useAuthCode.authLoginForm
 const loginRef = ref()
 
 const loginForm = reactive({
@@ -63,20 +65,22 @@ const loginForm = reactive({
     code: '',
     uuid: ''
   },
-  rules: {
-    username: [{ required: true, trigger: 'blur', message: '请输入您的账号' }],
-    password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
-    code: [{ required: true, trigger: 'change', message: '请输入验证码' }]
-  }
+  rules: authLoginRules
 })
 
 const handleLogin = () => {
+  console.log('handleLogin', loginForm.rules)
   loginRef.value.validate(async (valid) => {
     if (valid) {
-      authCodeInfo.loading = true
+      // // 校验登录表单是否符合要求
+      // const authResult = authLoginForm(loginForm.model)
+      // if (!authResult) {
+      //   return
+      // }
+
+      // 验证码loading隐藏
+      authCodeInfo.loading = false
       loginForm.model.uuid = authCodeInfo.uuid
-      // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-      useAuthCode.setUserCookie(loginForm.model)
 
       try {
         // 调用action的登录方法
@@ -89,6 +93,8 @@ const handleLogin = () => {
         }
       } finally {
         authCodeInfo.loading = false
+        // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
+        useAuthCode.setUserCookie(loginForm.model)
       }
     }
   })
@@ -136,8 +142,8 @@ useAuthCode.getValidateCode(loginForm.model, false)
   height: 48px;
   float: right;
   text-align: right;
+  cursor: pointer;
   img {
-    cursor: pointer;
     vertical-align: middle;
   }
 }
