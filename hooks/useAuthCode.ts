@@ -1,12 +1,12 @@
 import { encrypt, decrypt } from '@/utils/jsencrypt'
-import { isHasChinese, isLegalChars, validHasWhiteSpace } from '@/utils/validate'
+import { isNumeric, isHasChinese, isLegalChars, hasWhiteSpace } from '@/utils/validate'
 import { ElMessage } from 'element-plus'
 import { getCodeImg } from '@/api/login'
-import { isNumber } from 'element-plus/es/utils/types.mjs'
 
 interface loginForm {
   username: string
   password: string
+  code: string
   rememberMe?: Boolean
 }
 
@@ -73,7 +73,7 @@ const authLoginRules = {
 // 校验用户名
 const authLoginAccount = (username: string) => {
   // 不能输入空格
-  if (validHasWhiteSpace(username)) {
+  if (hasWhiteSpace(username)) {
     ElMessage.warning('用户名不包含空格')
     return false
   }
@@ -96,7 +96,7 @@ const authLoginPassword = (password: string) => {
   }
 
   // 不能输入空格
-  if (validHasWhiteSpace(password)) {
+  if (hasWhiteSpace(password)) {
     ElMessage.warning('密码不能包含空格')
     return false
   }
@@ -106,21 +106,28 @@ const authLoginPassword = (password: string) => {
 
 // 校验验证码
 const authLoginCode = (code: string) => {
-  // 当启用验证码的时候，只许输入数字
-  if (authCodeInfo.captchaEnabled && !isNumber(code)) {
+  // 检查是否有空格
+  if (isString(code) && hasWhiteSpace(code)) {
     ElMessage.warning('验证码不能包含空格')
     return false
-  } else {
-    return true
   }
+
+  // 检查是否全是数字
+  if (!isNumeric(code)) {
+    ElMessage.warning('验证码必须为数字')
+    return false
+  }
+
+  return true
 }
 
-// 校验登录表单,综合用户名和密码校验，如有必要，添加辅助校验信息
+// 校验登录表单 综合用户名，密码，验证码校验。如有必要，后续会添加其他辅助校验信息
 const authLoginForm = (form: loginForm) => {
   const accountState = authLoginAccount(form.username)
   const passwordState = authLoginPassword(form.password)
+  const codeState = authCodeInfo.captchaEnabled ? authLoginCode(form.code) : true
 
-  return accountState && passwordState
+  return accountState && passwordState && codeState
 }
 
 // -------------------------------- 记住密码 -----------------------------

@@ -102,7 +102,7 @@ export function validLowerCase(str: string) {
  * @param {string} str
  * @returns {Boolean}
  */
-export function validHasWhiteSpace(str: string): boolean {
+export function hasWhiteSpace(str: string): boolean {
   const reg = /\s/
   return reg.test(str)
 }
@@ -115,4 +115,32 @@ export function validHasWhiteSpace(str: string): boolean {
 export function isLegalChars(str: string): boolean {
   const reg = /^[a-zA-Z0-9]+$/
   return reg.test(str)
+}
+
+/**
+ * 验证是否为数字
+ * @param {string} str
+ * @returns {Boolean} 如果为空则返回 true
+ */
+export function isNumeric(value: string | number): boolean {
+  if (typeof value === 'number') {
+    return !isNaN(value) && isFinite(value)
+  }
+  if (typeof value === 'string') {
+    const num = Number(value)
+    return !isNaN(num) && isFinite(num)
+  }
+  return false
+}
+
+/**
+ * 验证是否为空值
+ * @param {any} val
+ * @returns {Boolean} 如果为空则返回 true
+ */
+export function isEmpty(val: any): boolean {
+  if (val === null || typeof val === 'undefined' || val === '') {
+    return true
+  }
+  return false
 }

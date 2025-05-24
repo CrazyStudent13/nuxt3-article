@@ -72,8 +72,9 @@ const handleLogin = () => {
   console.log('handleLogin', loginForm.rules)
   loginRef.value.validate(async (valid) => {
     if (valid) {
-      // // 校验登录表单是否符合要求
-      // const authResult = authLoginForm(loginForm.model)
+      // 校验登录表单是否符合要求
+      const authResult = authLoginForm(loginForm.model)
+      console.log('authResult', authResult)
       // if (!authResult) {
       //   return
       // }
