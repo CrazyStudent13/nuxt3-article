@@ -36,6 +36,8 @@ const getValidateCode = async (form: loginForm, isClick: Boolean) => {
       return
     }
 
+    console.log('???', authCodeInfo.loading)
+
     if (authCodeInfo.loading) {
       ElMessage.warning('正在请求验证码，请稍等')
     } else {

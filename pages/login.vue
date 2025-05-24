@@ -69,10 +69,9 @@ const loginForm = reactive({
 })
 
 const handleLogin = () => {
-  console.log('handleLogin', loginForm.rules)
   loginRef.value.validate(async (valid) => {
     if (valid) {
-      // 校验登录表单是否符合要求
+      // 校验登录表单是否符合接口要求
       const authResult = authLoginForm(loginForm.model)
       if (authResult) {
         // 验证码loading隐藏
