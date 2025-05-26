@@ -11,9 +11,12 @@ Object.assign(process.env, envData) // 将环境配置信息，添加到process.
 // 环境变量解决方式，先参考
 // https://juejin.cn/post/6844904066175205390#heading-10
 // https://juejin.cn/post/7197315175643643959
-// https://juejin.cn/post/7197315175643643959
+// https://juejin.cn/post/7242195696413982779?searchId=2025052622314151A1D4B557016677FFC7
 
-console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
+// 引入删除控制台信息输出
+// vite-plugin-remove-console
+
+https: console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
@@ -23,9 +26,9 @@ export default defineNuxtConfig({
       apiBase: `${import.meta.env.VITE_BASE_API}`
     }
   },
-  // vite: {
-  //   envDir: '~/env'
-  // },
+  vite: {
+    envDir: '~/env'
+  },
   app: {
     head: {
       title: '游戏速递',
