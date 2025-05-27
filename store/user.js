@@ -44,7 +44,8 @@ export default defineStore('user', {
       return new Promise((resolve, reject) => {
         login({ username, password, code, uuid })
           .then((res) => {
-            setToken(res.data.token)
+            // setToken(res.data.token)
+
             resolve()
           })
           .catch((error) => {

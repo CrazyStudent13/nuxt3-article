@@ -1,5 +1,3 @@
-import request from '@/utils/request'
-
 // 登录
 export function login(data: any) {
   return request({
@@ -38,10 +36,6 @@ export function logout() {
 export function getCodeImg() {
   return request({
     url: '/captchaImage',
-    // headers: {
-    //   isToken: false
-    // },
-    // timeout: 20000,
     method: 'get'
   })
 }

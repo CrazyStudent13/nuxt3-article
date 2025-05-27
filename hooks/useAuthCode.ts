@@ -36,13 +36,13 @@ const getValidateCode = async (form: loginForm, isClick: Boolean) => {
       return
     }
 
-    console.log('???', authCodeInfo.loading)
-
     if (authCodeInfo.loading) {
       ElMessage.warning('正在请求验证码，请稍等')
     } else {
       const { data } = await getCodeImg()
+
       const result = data
+
       authCodeInfo.loading = true
       authCodeInfo.captchaEnabled = typeof result.captchaEnabled === 'undefined' ? true : result.captchaEnabled
       authCodeInfo.uuid = result.uuid

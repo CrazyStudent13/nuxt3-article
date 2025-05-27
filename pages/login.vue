@@ -78,20 +78,25 @@ const handleLogin = () => {
         authCodeInfo.loading = false
         loginForm.model.uuid = authCodeInfo.uuid
 
-        try {
-          // 调用action的登录方法
-          await userStore.Login(loginForm.model)
-          useRouter().push({ path: '/' })
-        } catch (error) {
-          // 重新获取验证码
-          if (authCodeInfo.captchaEnabled) {
-            useAuthCode.getValidateCode(loginForm.model, true)
-          }
-        } finally {
-          authCodeInfo.loading = false
-          // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-          useAuthCode.setUserCookie(loginForm.model)
-        }
+        userStore
+          .Login(loginForm.model)
+          .then((res) => {
+            console.log('登录成功信息:', res)
+            ElMessage.success('登录成功！')
+            useRouter().push({ path: '/' })
+          })
+          .catch((err) => {
+            console.log('登录错误信息:', err)
+            // 重新获取验证码
+            if (authCodeInfo.captchaEnabled) {
+              useAuthCode.getValidateCode(loginForm.model, true)
+            }
+          })
+          .finally(() => {
+            authCodeInfo.loading = false
+            // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
+            useAuthCode.setUserCookie(loginForm.model)
+          })
       }
     }
   })
