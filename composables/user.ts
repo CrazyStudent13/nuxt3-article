@@ -38,8 +38,6 @@ const useUserStore = defineStore('user', {
             if (res.code) {
               ElMessage.error(res.msg)
             } else {
-              ElMessage.success('登录成功！')
-              useRouter().push({ path: '/' })
               const { token } = res
               setToken(token)
             }
