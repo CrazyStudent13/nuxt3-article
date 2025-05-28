@@ -33,7 +33,7 @@ const authCodeInfo = reactive({
 })
 
 // 引入pina 实例,不要在setup中使用，而是等实例化之后再用
-import useUserStore from '@/store/user'
+import useUserStore from '@/composables/user'
 const userStore = useUserStore()
 
 onMounted(() => {

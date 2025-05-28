@@ -1,12 +1,12 @@
 <template>
-  <div class="article-list">
-    <div class="article-list-main">
+  <div class="list">
+    <div class="list-main">
       <div v-for="(item, index) in article.list" :key="index" @click="article.handleRowClick(item)">
         <article-list-card :card-info="item" />
       </div>
     </div>
 
-    <div class="article-list-pagination">
+    <div class="list-pagination">
       <el-pagination
         v-model:current-page="article.pageNum"
         v-model:page-size="article.pageSize"
@@ -65,7 +65,7 @@ article.request()
 </script>
 
 <style lang="less" scoped>
-.article-list {
+.list {
   margin: 20px 0;
   &-pagination {
     padding: 8px 16px;

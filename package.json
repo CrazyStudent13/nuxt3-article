@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "dev": "nuxt dev --mode dev",
+    "build": "nuxt build --mode .env.production",
+    "generate": "nuxt generate --mode .env.production",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
@@ -20,8 +20,9 @@
     "jsencrypt": "^3.3.2",
     "markdown-it": "^14.1.0",
     "md-editor-v3": "^5.5.1",
-    "nuxt": "^3.15.4",
+    "nuxt": "^3.17.3",
     "vue": "latest",
+    "vue-dompurify-html": "^5.3.0",
     "vue-router": "latest"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",

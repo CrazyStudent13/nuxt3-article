@@ -27,7 +27,7 @@ const props = defineProps({
 })
 
 const publishTime = computed(() => {
-  return dayjs(props.cardInfo.publishTime).format('YYYY-MM-DD HH:mm:ss') || '-'
+  return dayjs(props?.cardInfo?.publishTime).format('YYYY-MM-DD HH:mm:ss') || '-'
 })
 </script>
 
@@ -37,7 +37,7 @@ const publishTime = computed(() => {
 }
 
 .row {
-  height: 120px;
+  height: 125px;
   background-color: #fff;
   overflow: hidden;
   display: flex;

@@ -7,7 +7,7 @@
       <el-form ref="loginRef" :model="loginForm.model" :rules="loginForm.rules" class="login-form">
         <h3 class="title">用户登录</h3>
         <el-form-item prop="username">
-          <el-input v-model.trim="loginForm.model.username" maxlength="10" type="text" size="large" auto-complete="off" placeholder="账号">
+          <el-input v-model.trim="loginForm.model.username" maxlength="20" type="text" size="large" auto-complete="off" placeholder="账号">
             <template #prefix>
               <User class="input-icon" />
             </template>
@@ -28,15 +28,15 @@
             </template>
           </el-input>
 
-          <div class="login-code" v-html="authCodeInfo.imgUrl" @click="useAuthCode.getValidateCode(loginForm.model, true)" />
+          <div v-dompurify-html="authCodeInfo.imgUrl" class="login-code" @click="handleAuthCode" />
         </el-form-item>
 
-        <div class="login-tips">
+        <div v-if="false" class="login-tips">
           <el-checkbox v-model="loginForm.model.rememberMe" style="margin: 0px 0px 25px 0px">记住密码</el-checkbox>
-          <el-link v-if="false" class="login-tips-link" type="primary" href="/register" target="_blank">去注册账号</el-link>
+          <el-link class="login-tips-link" type="primary" href="/register" target="_blank">去注册账号</el-link>
         </div>
 
-        <el-form-item style="width: 100%">
+        <el-form-item style="width: 100%; margin: 32px 0">
           <el-button :loading="authCodeInfo.loading" size="large" type="primary" style="width: 100%" @click.prevent="handleLogin">
             <span v-if="!authCodeInfo.loading">登 录</span>
             <span v-else>登 录 中...</span>
@@ -48,13 +48,13 @@
 </template>
 
 <script setup>
-import useUserStore from '@/store/user'
+import useUserStore from '@/composables/user'
 import useAuthCode from '@/hooks/useAuthCode'
 
 const userStore = useUserStore()
 const authCodeInfo = useAuthCode.authCodeInfo
-const route = useRoute()
-const router = useRouter()
+const authLoginRules = useAuthCode.authLoginRules
+const authLoginForm = useAuthCode.authLoginForm
 const loginRef = ref()
 
 const loginForm = reactive({
@@ -65,50 +65,52 @@ const loginForm = reactive({
     code: '',
     uuid: ''
   },
-  rules: {
-    username: [{ required: true, trigger: 'blur', message: '请输入您的账号' }],
-    password: [{ required: true, trigger: 'blur', message: '请输入您的密码' }],
-    code: [{ required: true, trigger: 'change', message: '请输入验证码' }]
-  }
+  rules: authLoginRules
 })
 
-const redirect = ref(undefined)
-
-watch(
-  route,
-  (newRoute) => {
-    redirect.value = newRoute.query && newRoute.query.redirect
-  },
-  { immediate: true }
-)
-
 const handleLogin = () => {
-  loginRef.value.validate((valid) => {
+  loginRef.value.validate(async (valid) => {
     if (valid) {
-      authCodeInfo.loading = true
-      loginForm.model.uuid = authCodeInfo.uuid
-      // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
-      useAuthCode.setUserCookie(loginForm.model)
+      // 校验登录表单是否符合接口要求
+      const authResult = authLoginForm(loginForm.model)
+      if (authResult) {
+        // 验证码loading隐藏
+        authCodeInfo.loading = true
+        loginForm.model.uuid = authCodeInfo.uuid
 
-      // 调用action的登录方法
-
-      console.log('loginForm.model', { ...loginForm.model })
-      userStore
-        .Login(loginForm.model)
-        .then(() => {
-          router.push({ path: redirect.value || '/' })
-        })
-        .catch(() => {
-          // 重新获取验证码
-          if (authCodeInfo.captchaEnabled) {
-            useAuthCode.getValidateCode(loginForm.model, true)
-          }
-        })
-        .finally(() => {
-          authCodeInfo.loading = false
-        })
+        userStore
+          .Login(loginForm.model)
+          .then(() => {
+            userStore
+              .GetInfo()
+              .then(() => {
+                // 登录成功跳转
+                ElMessage.success('登录成功')
+                useRouter().push('/')
+              })
+              .catch((err) => {
+                console.log('获取用户信息错误信息:', err)
+              })
+          })
+          .catch((err) => {
+            console.log('登录错误信息:', err)
+            // 重新获取验证码
+            if (authCodeInfo.captchaEnabled) {
+              useAuthCode.getValidateCode(loginForm.model, true)
+            }
+          })
+          .finally(() => {
+            authCodeInfo.loading = false
+            // 勾选了需要记住密码设置在 cookie 中设置记住用户名和密码，否则移除
+            useAuthCode.setUserCookie(loginForm.model)
+          })
+      }
     }
   })
+}
+
+const handleAuthCode = () => {
+  useAuthCode.getValidateCode(loginForm.model, true)
 }
 
 useAuthCode.getValidateCode(loginForm.model, false)
@@ -149,8 +151,8 @@ useAuthCode.getValidateCode(loginForm.model, false)
   height: 48px;
   float: right;
   text-align: right;
+  cursor: pointer;
   img {
-    cursor: pointer;
     vertical-align: middle;
   }
 }
@@ -170,9 +172,10 @@ useAuthCode.getValidateCode(loginForm.model, false)
 .login-tips {
   &-link {
     position: relative;
-    top: -3px;
-    left: 10px;
+    top: 3px;
+    right: 10px;
     font-size: 13px;
+    float: right;
   }
 }
 </style>
