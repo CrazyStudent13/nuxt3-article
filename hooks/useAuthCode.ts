@@ -10,6 +10,12 @@ interface loginForm {
   rememberMe?: Boolean
 }
 
+interface authCodeInfo {
+  captchaEnabled: Boolean
+  imgUrl: string
+  uuid: string
+}
+
 // -------------------------------- 验证码相关信息 -----------------------------
 const authCodeInfo = reactive({
   captchaEnabled: true, // 验证码开关
@@ -39,9 +45,7 @@ const getValidateCode = async (form: loginForm, isClick: Boolean) => {
     if (authCodeInfo.loading) {
       ElMessage.warning('正在请求验证码，请稍等')
     } else {
-      const { data } = await getCodeImg()
-
-      const result = data
+      const result: any = await getCodeImg()
 
       authCodeInfo.loading = true
       authCodeInfo.captchaEnabled = typeof result.captchaEnabled === 'undefined' ? true : result.captchaEnabled

@@ -80,11 +80,6 @@ const handleLogin = () => {
 
         userStore
           .Login(loginForm.model)
-          .then((res) => {
-            console.log('登录成功信息:', res)
-            ElMessage.success('登录成功！')
-            useRouter().push({ path: '/' })
-          })
           .catch((err) => {
             console.log('登录错误信息:', err)
             // 重新获取验证码

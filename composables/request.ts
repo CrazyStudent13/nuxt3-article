@@ -1,4 +1,5 @@
 import { ElMessage } from 'element-plus'
+import { da } from 'element-plus/es/locales.mjs'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
 
@@ -65,13 +66,25 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data = response._data as IResultData<any>
-
-    if (data.code !== 200) {
-      ElMessage.warning(data.msg)
+    const result = response._data as IResultData<any>
+    const { code, msg, data } = result
+    if (code !== 200) {
+      switch (code) {
+        case 401:
+          console.log('401', msg)
+          // ElMessage.warning(msg)
+          break
+        case 404:
+          console.log('404', msg)
+          break
+        case 500:
+          console.log('500', msg)
+          // ElMessage.error(msg)
+          break
+      }
     }
 
-    return data
+    return data !== null ? data : result
   } catch (error: any) {
     console.warn('请求错误:', error)
     ElMessage.warning('网络异常，请重试')

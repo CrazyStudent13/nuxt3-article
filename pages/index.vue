@@ -37,8 +37,7 @@ const article = reactive({
       pageSize: article.pageSize
     }
 
-    const { data } = await getArticleList(params)
-    const result = data
+    const result = await getArticleList(params)
 
     article.total = result.total
     article.list = result.list
