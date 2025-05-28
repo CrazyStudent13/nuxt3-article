@@ -55,11 +55,11 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
   try {
     const response = await $fetch.raw(requestUrl, {
       method,
-      body
+      body,
       // headers 可根据需要添加
-      // headers: {
-      //   Authorization: `Bearer ${useCookie('token').value}`
-      // }
+      headers: {
+        Authorization: `Bearer ${useCookie('token').value}`
+      }
     })
 
     // 响应拦截
