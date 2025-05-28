@@ -75,7 +75,7 @@ const handleLogin = () => {
       const authResult = authLoginForm(loginForm.model)
       if (authResult) {
         // 验证码loading隐藏
-        authCodeInfo.loading = false
+        authCodeInfo.loading = true
         loginForm.model.uuid = authCodeInfo.uuid
 
         userStore
