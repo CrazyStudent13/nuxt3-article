@@ -191,4 +191,5 @@ const setUserCookie = async (form: loginForm) => {
   }
 }
 
-export default { getValidateCode, getUserCookie, setUserCookie, authCodeInfo, authLoginRules, authLoginForm }
+const useAuthCode = { getValidateCode, getUserCookie, setUserCookie, authLoginForm, authCodeInfo, authLoginRules }
+export default useAuthCode
