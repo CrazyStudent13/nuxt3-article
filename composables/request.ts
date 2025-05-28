@@ -1,11 +1,11 @@
 import { ElMessage } from 'element-plus'
-import { da } from 'element-plus/es/locales.mjs'
 
 type Methods = 'get' | 'post' | 'delete' | 'put'
 
 export interface IResultData<T> {
   code: number
   data: T
+  token?: string
   msg: string
 }
 
@@ -15,9 +15,11 @@ interface Options {
   method?: Methods
 }
 
-// const config = useRuntimeConfig()
+// const {
+//   public: { apiBase }
+// } = useRuntimeConfig()
 
-// console.log(config.public.apiBase, '》》》》》')
+// console.log(apiBase, '》》》》》')
 
 const BASE_URL = 'http://111.229.29.214:8080'
 

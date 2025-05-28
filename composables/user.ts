@@ -1,8 +1,6 @@
 import { login, logout, getInfo } from '@/api/login'
-// import { getToken, setToken, removeToken } from '@/utils/auth'
-
+import { setToken } from '@/utils/auth'
 // store/modules/user.ts
-import { defineStore } from 'pinia'
 
 interface userInfo {
   username: string
@@ -15,8 +13,7 @@ interface userInfo {
 const useUserStore = defineStore('user', {
   state: () => {
     return {
-      // token: getToken(),
-      token: '',
+      token: getToken(),
       id: '',
       name: '',
       avatar: '',
@@ -43,6 +40,8 @@ const useUserStore = defineStore('user', {
             } else {
               ElMessage.success('登录成功！')
               useRouter().push({ path: '/' })
+              const { token } = res
+              setToken(token)
             }
             resolve(res)
           })

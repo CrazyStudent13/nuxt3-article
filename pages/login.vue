@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import useUserStore from '@/store/user'
+import useUserStore from '@/composables/user'
 import useAuthCode from '@/hooks/useAuthCode'
 
 const userStore = useUserStore()
