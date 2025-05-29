@@ -6,7 +6,8 @@
       </NuxtLink>
     </nav>
     <div class="header-right header-item">
-      <NuxtLink to="/login" class="login">登录</NuxtLink>
+      <LoginAvatar></LoginAvatar>
+      <!-- <NuxtLink to="/login" class="login">登录</NuxtLink> -->
       <!-- <el-icon class="login"><User /></el-icon> -->
     </div>
   </header>
