@@ -1,24 +1,26 @@
 <template>
-  <div class="article-list">
-    <div class="article-list-main">
-      <div v-for="(item, index) in article.list" :key="index" @click="article.handleRowClick(item)">
-        <article-list-card :card-info="item" />
+  <div class="main-container">
+    <div class="article-list">
+      <div class="article-list-main">
+        <div v-for="(item, index) in article.list" :key="index" @click="article.handleRowClick(item)">
+          <article-list-card :card-info="item" />
+        </div>
       </div>
-    </div>
 
-    <div class="article-list-pagination">
-      <el-pagination
-        v-model:current-page="article.pageNum"
-        v-model:page-size="article.pageSize"
-        :page-sizes="[10, 20, 30, 40, 50]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="article.total"
-        @size-change="article.handleSizeChange"
-        @current-change="article.handleCurrentChange"
-      />
-    </div>
+      <div class="article-list-pagination">
+        <el-pagination
+          v-model:current-page="article.pageNum"
+          v-model:page-size="article.pageSize"
+          :page-sizes="[10, 20, 30, 40, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="article.total"
+          @size-change="article.handleSizeChange"
+          @current-change="article.handleCurrentChange"
+        />
+      </div>
 
-    <el-backtop :right="50" :bottom="50" />
+      <el-backtop :right="50" :bottom="50" />
+    </div>
   </div>
 </template>
 

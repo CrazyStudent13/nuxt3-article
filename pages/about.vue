@@ -1,5 +1,5 @@
 <template>
-  <div>关于我们</div>
+  <div class="main-container">关于我们</div>
 </template>
 
 <script setup lang="ts"></script>

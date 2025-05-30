@@ -1,18 +1,20 @@
 <template>
-  <el-card shadow="always" :body-style="{ padding: ' 24px 32px' }">
-    <template #header>
-      <h1 class="title">{{ article.model?.title }}</h1>
-      <el-descriptions>
-        <el-descriptions-item label="发布时间">{{ article.model?.publishTime }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ article.model?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="作者">{{ article.model?.author || '-' }}</el-descriptions-item>
-      </el-descriptions>
-    </template>
-    <!-- card body -->
-    <MdViewer :value="article.model.content" />
+  <div class="main-container">
+    <el-card shadow="always" :body-style="{ padding: ' 24px 32px' }">
+      <template #header>
+        <h1 class="title">{{ article.model?.title }}</h1>
+        <el-descriptions>
+          <el-descriptions-item label="发布时间">{{ article.model?.publishTime }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ article.model?.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="作者">{{ article.model?.author || '-' }}</el-descriptions-item>
+        </el-descriptions>
+      </template>
+      <!-- card body -->
+      <MdViewer :value="article.model.content" />
 
-    <el-backtop :right="50" :bottom="50" />
-  </el-card>
+      <el-backtop :right="50" :bottom="50" />
+    </el-card>
+  </div>
 </template>
 
 <script setup>
