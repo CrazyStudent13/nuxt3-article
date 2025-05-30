@@ -1,8 +1,10 @@
 <template>
-  <MdEditor :autoFoldThreshold="autoFoldThreshold" v-model="text" @onChange="changeEditer" @onUploadImg="onUploadImg" :style="{ height: props.height }" />
+  <MdEditor :autoFoldThreshold="autoFoldThreshold" v-model="text" @onChange="changeEditer" @onUploadImg="onUploadImg" @onSave="handleSave" :style="{ height: props.height }" />
 </template>
 
 <script setup>
+// 在项目中引入md-editor-v3，后续参考要转载这篇文档 https://blog.csdn.net/2401_87546826/article/details/143788483
+// 选择md-editor-v3的文档 https://imzbf.github.io/md-editor-v3/zh-CN/api/
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 
@@ -59,5 +61,9 @@ const onUploadImg = async (files, callback) => {
     }
     callback([res.data])
   })
+}
+
+const handleSave = () => {
+  emit('save', text.value)
 }
 </script>

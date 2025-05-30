@@ -1,35 +1,83 @@
-<!-- todo 待完善，等后续组件太多的时候，进行统一的整合 -->
+<!-- todo： 目前页面的功能待完善，缺少保存草稿，保存提交,顶部最好要像掘金一样有标题栏功能 -->
 <template>
-  <div>
-    <MdEditor v-model="text" :value="value" @save="handleSave" />
+  <div class="write-header">
+    <div class="write-header-title write-header-item">
+      <input v-model="title" placeholder="请输入标题..." />
+    </div>
+    <div class="write-header-actions write-header-item">
+      <el-button type="info" @click="handleCancel">取消</el-button>
+      <el-button type="primary" @click="handleSave">发布</el-button>
+    </div>
   </div>
+  <MdEditor v-model="text" :value="value" @save="handleSave" />
 </template>
 
 <script setup>
 const text = ref('')
+const router = useRouter()
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
-  }
-})
-
-// watch(
-//   () => props.value,
-//   (val, oldVal) => {
-//     // text.value = val.slice(1, -1).replace(/\\n/g, '\n')
-//     console.log(val, '测试>>>')
-//   },
-//   { immediate: true }
-// )
-
-const handleSave = () => {
-  console.log(props.value)
-  console.log(text)
+const handleCancel = () => {
+  ElMessage({ type: 'success', message: '已保存草稿！' })
+  setTimeout(() => {
+    window.close()
+  }, 1000)
 }
-
-defineExpose({
-  handleSave
-})
+const handleSave = () => {
+  ElMessageBox.confirm('您确定要发布文章吗?', '提示', {
+    confirmButtonText: '发布',
+    cancelButtonText: '取消',
+    type: 'info'
+  })
+    .then(() => {
+      ElMessage({ type: 'success', message: '发布成功' })
+      setTimeout(() => {
+        window.close()
+      }, 1000)
+    })
+    .catch(() => {
+      ElMessage({ type: 'info', message: '取消发布' })
+    })
+}
 </script>
+
+<style lang="less" scoped>
+.write-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  width: 100vw;
+  height: 55px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &-title {
+    float: left;
+    margin: 0 12px;
+    font-size: 16px;
+    line-height: 55px;
+    input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 18px;
+      line-height: 55px;
+      color: #333;
+    }
+  }
+
+  &-actions {
+    float: right;
+    padding: 0 8px;
+    &::after {
+      content: ' ';
+      display: block;
+      clear: both;
+    }
+  }
+}
+</style>
