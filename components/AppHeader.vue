@@ -26,9 +26,11 @@ const header = reactive({
 .header {
   position: sticky;
   top: 0;
-  background-color: #020420;
-  z-index: 999;
+  width: 100%;
   height: 55px;
+  margin: 0 auto;
+  background-color: #020420;
+  z-index: 9;
   display: flex;
   justify-content: space-around;
 
