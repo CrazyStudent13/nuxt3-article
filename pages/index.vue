@@ -2,6 +2,7 @@
   <div class="main-container">
     <div class="article-list">
       <div class="article-list-main">
+        <!-- todo：列表也需要添加骨架屏，完善加载时候的用户体验 -->
         <div v-for="(item, index) in article.list" :key="index" @click="article.handleRowClick(item)">
           <article-list-card :card-info="item" />
         </div>

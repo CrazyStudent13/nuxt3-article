@@ -15,6 +15,7 @@
 <script setup>
 const text = ref('')
 const router = useRouter()
+import { draftToPublish } from '@/hooks/useArticle'
 
 const handleCancel = () => {
   ElMessage({ type: 'success', message: '已保存草稿！' })
@@ -23,20 +24,7 @@ const handleCancel = () => {
   }, 1000)
 }
 const handleSave = () => {
-  ElMessageBox.confirm('您确定要发布文章吗?', '提示', {
-    confirmButtonText: '发布',
-    cancelButtonText: '取消',
-    type: 'info'
-  })
-    .then(() => {
-      ElMessage({ type: 'success', message: '发布成功' })
-      setTimeout(() => {
-        window.close()
-      }, 1000)
-    })
-    .catch(() => {
-      ElMessage({ type: 'info', message: '取消发布' })
-    })
+  draftToPublish()
 }
 </script>
 
