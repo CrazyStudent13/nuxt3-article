@@ -27,7 +27,7 @@
 
     <el-tabs v-model="activeName" type="border-card" tab-position="top">
       <el-tab-pane v-for="item in panes" :key="item.key" :label="item.label" :name="item.key">
-        {{ item.name }}
+        <div class="panel-content">{{ item.name }}</div>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -92,5 +92,9 @@ const errorHandler = () => {
       margin: 2px;
     }
   }
+}
+
+.panel-content {
+  min-height: 55vh;
 }
 </style>
