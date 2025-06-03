@@ -1,38 +1,39 @@
 <template>
   <!-- 顶部登录头像 -->
-  <div>
-    <div v-if="userInfo?.state">
-      <NuxtLink to="/login" class="login">登录</NuxtLink>
-    </div>
-    <div v-else>
-      <el-dropdown @command="handleCommand">
-        <el-avatar shape="square" :size="30" :fit="'fill'" :src="userInfo.avatar" class="avatar" />
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item v-for="(item, index) in actionList" :key="index" :command="item.value">
-              <div class="action-item">
-                <i :class="item.icon"></i>
-                <span>{{ item.title }}</span>
-              </div>
-            </el-dropdown-item>
-            <el-dropdown-item command="logout" divided class="logout">
-              <el-icon>
-                <SwitchButton />
-              </el-icon>
-              <span>退出登录</span>
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
-  </div>
+  <NuxtLink to="/login" class="login">登录</NuxtLink>
+  <!-- <NuxtLink v-if="userInfo?.state" to="/login" class="login">登录</NuxtLink>
+  <el-dropdown v-else @command="handleCommand">
+    <el-avatar shape="square" :size="30" :fit="'fill'" :src="userInfo.avatar" class="avatar" />
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item v-for="(item, index) in actionList" :key="index" :command="item.value">
+          <div class="action-item">
+            <i :class="item.icon"></i>
+            <span>{{ item.title }}</span>
+          </div>
+        </el-dropdown-item>
+        <el-dropdown-item command="logout" divided class="logout">
+          <el-icon>
+            <SwitchButton />
+          </el-icon>
+          <span>退出登录</span>
+        </el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown> -->
 </template>
 
 <script setup>
-const router = useRouter()
+// import { useUserStore } from '@/stores/user'
+// const userStore = useUserStore()
 
+// onMounted(() => {
+//   console.log('用户信息测试', userStore.token, '？？？？')
+// })
+
+const router = useRouter()
 const userInfo = reactive({
-  state: false,
+  state: true,
   avatar: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
 })
 

@@ -47,7 +47,9 @@ export default defineNuxtConfig({
     style: fileURLToPath(new URL('./assets/style', import.meta.url)),
     '@': fileURLToPath(new URL('./', import.meta.url))
   },
-
+  // imports: {
+  //   dirs: ['stores/**.{ts,js,mjs,mts}']
+  // },
   modules: [
     // 添加 elementUI -Plus 模块
     [
@@ -61,9 +63,7 @@ export default defineNuxtConfig({
       {
         autoImports: [
           // 自动引入 `defineStore()`
-          'defineStore',
-          // 自动引入 `defineStore()` 并重命名为 `definePiniaStore()`
-          ['defineStore', 'definePiniaStore']
+          'defineStore'
         ]
       }
     ]

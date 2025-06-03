@@ -15,14 +15,6 @@ interface Options {
   method?: Methods
 }
 
-// const {
-//   public: { apiBase }
-// } = useRuntimeConfig()
-
-// console.log(apiBase, '》》》》》')
-
-const BASE_URL = 'http://111.229.29.214:8080'
-
 /**
  * 参数处理
  * @param {*} params 参数
@@ -38,6 +30,8 @@ function tansParams(params: any): string {
 
   return result.join('&')
 }
+
+const BASE_URL = 'http://111.229.29.214:8080'
 
 // 封装请求方法
 const service = async ({ url, params, method = 'get' }: Options): Promise<IResultData<any>> => {

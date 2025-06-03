@@ -1,5 +1,6 @@
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import VueDOMPurifyHTML from 'vue-dompurify-html'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 export default defineNuxtPlugin(async (NuxtApp) => {
   // nuxtApp包含的属性可看文档 https://nuxt.com/docs/guide/going-further/internals
@@ -9,5 +10,6 @@ export default defineNuxtPlugin(async (NuxtApp) => {
     NuxtApp.vueApp.component(key, component)
   }
 
+  NuxtApp.$pinia.use(piniaPluginPersistedstate)
   NuxtApp.vueApp.use(VueDOMPurifyHTML)
 })

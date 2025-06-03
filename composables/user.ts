@@ -10,17 +10,15 @@ interface userInfo {
   uuid: string
 }
 
-const useUserStore = defineStore('user', {
-  state: () => {
-    return {
-      token: getToken(),
-      id: '',
-      name: '',
-      avatar: '',
-      roles: [],
-      permissions: []
-    }
-  },
+export const useUserStore = defineStore('userStore', {
+  state: (): any => ({
+    token: getToken(),
+    id: '',
+    name: '',
+    avatar: '',
+    roles: [],
+    permissions: []
+  }),
 
   actions: {
     // 登录
@@ -91,5 +89,3 @@ const useUserStore = defineStore('user', {
     // }
   }
 })
-
-export default useUserStore

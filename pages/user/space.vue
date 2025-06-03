@@ -1,6 +1,6 @@
 <template>
   <div class="main-container">
-    <el-card shadow="none" :body-style="{ padding: '20px' }">
+    <el-card shadow="never" :body-style="{ padding: '20px' }">
       <el-row :gutter="20">
         <el-col :span="3">
           <el-avatar :size="60" src="https://empty" class="avatar" @error="errorHandler">
