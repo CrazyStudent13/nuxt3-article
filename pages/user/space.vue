@@ -63,8 +63,24 @@ const panes = [
   },
   {
     key: '4',
-    label: '点赞'
+    label: '点赞',
+    name: 'like'
+  },
+  {
+    key: '6',
+    label: '关注',
+    name: 'follow'
+  },
+  {
+    key: '5',
+    label: '通知',
+    name: 'notice'
   }
+  // {
+  //   key: '7',
+  //   label: '黑名单',
+  //   name: 'blacklist'
+  // }
 ]
 
 const errorHandler = () => {
