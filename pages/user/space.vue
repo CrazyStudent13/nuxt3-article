@@ -25,11 +25,13 @@
 
     <br />
 
-    <el-tabs v-model="activeName" type="border-card" tab-position="top">
-      <el-tab-pane v-for="item in panes" :key="item.key" :label="item.label" :name="item.key">
-        <div class="panel-content">{{ item.name }}</div>
-      </el-tab-pane>
-    </el-tabs>
+    <el-card shadow="never" :body-style="{ padding: '20px' }">
+      <el-tabs v-model="activeName" tab-position="top">
+        <el-tab-pane v-for="item in panes" :key="item.key" :label="item.label" :name="item.key">
+          <div class="panel-content">{{ item.name }}</div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-card>
   </div>
 </template>
 
