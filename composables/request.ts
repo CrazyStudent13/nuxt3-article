@@ -46,7 +46,11 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
   // 设置请求体
   const body = method === 'post' || method === 'put' ? params : undefined
 
+  console.log(useCookie('token'))
+
   try {
+    // todo: 这里的拦截器只是配合csr使用的，后续要改成能兼容SSR的拦截器
+    // todo: 后端接口需要重新定义标准类型，不能再用这么随性的写法了
     const response = await $fetch.raw(requestUrl, {
       method,
       body,

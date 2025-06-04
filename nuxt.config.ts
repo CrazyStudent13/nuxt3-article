@@ -20,7 +20,12 @@ https: console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
-
+  // ssr: false, // csr must be false | ssr:ssg npm run generate must be true
+  routeRules: {
+    '/': { prerender: true, ssr: true },
+    '/article/detail': { prerender: true, ssr: true },
+    '/login': { ssr: false }
+  },
   runtimeConfig: {
     // public 下的变量可以在客户端和服务端使用
     public: {
@@ -51,6 +56,7 @@ export default defineNuxtConfig({
   // imports: {
   //   dirs: ['stores/**.{ts,js,mjs,mts}']
   // },
+
   modules: [
     // 添加 elementUI -Plus 模块
     [
@@ -59,14 +65,6 @@ export default defineNuxtConfig({
         defaultLocale: 'zh-cn'
       }
     ],
-    [
-      '@pinia/nuxt',
-      {
-        autoImports: [
-          // 自动引入 `defineStore()`
-          'defineStore'
-        ]
-      }
-    ]
+    '@pinia/nuxt'
   ]
 })

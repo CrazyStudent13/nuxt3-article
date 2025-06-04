@@ -51,12 +51,8 @@
 
 <script setup>
 import useAuthCode from '@/hooks/useAuthCode'
-import useUserStore from '~/stores/user'
+import useUserStore from '@/stores/user'
 const userStore = useUserStore()
-
-const { data } = await useAsyncData('user', () => userStore.fetchUser())
-
-console.log('useUserStore:', useUserStore)
 
 const authCodeInfo = useAuthCode.authCodeInfo
 const authLoginRules = useAuthCode.authLoginRules
@@ -84,16 +80,13 @@ const handleLogin = () => {
         authCodeInfo.loading = true
         loginForm.model.uuid = authCodeInfo.uuid
 
-        useUserStore
+        userStore
           .Login(loginForm.model)
           .then(() => {
-            useUserStore
+            userStore
               .GetInfo()
               .then(() => {
-                // 登录成功跳转
-                ElMessage.success('登录成功')
-                useUserStore.GetInfo()
-                // useRouter().push('/')
+                useRouter().push('/')
               })
               .catch((err) => {
                 console.log('获取用户信息错误信息:', err)

@@ -1,7 +1,9 @@
-import { login, logout, getInfo } from '@/api/login'
-import { setToken } from '@/utils/auth'
-// store/modules/user.ts
+// store/user.ts
 import { defineStore } from 'pinia'
+import { ElMessage } from 'element-plus'
+
+import { login, logout, getInfo, register } from '@/api/login'
+import { setToken } from '@/utils/auth'
 
 interface userInfo {
   username: string
@@ -13,13 +15,13 @@ interface userInfo {
 
 const useUserStore = defineStore('user', {
   state: (): any => ({
-    // token: getToken(),
-    token: '',
-    id: '',
-    name: '',
-    avatar: '',
-    roles: [],
-    permissions: []
+    name: '', // 用户账号
+    nickName: '', // 用户昵称
+    email: '', // 邮箱
+    avatar: '', // 头像
+    registerTime: '', // 注册时间
+    roles: [], // 角色身份
+    permissions: [] // 权限
   }),
 
   actions: {
@@ -35,12 +37,11 @@ const useUserStore = defineStore('user', {
         }
         login(loginFormData)
           .then((res) => {
-            if (res.code) {
-              ElMessage.error(res.msg)
-            } else {
-              const { token } = res
-              setToken(token)
-            }
+            // 登录成功跳转
+            ElMessage.success('登录成功')
+
+            const { data } = res
+            setToken(data?.token)
             resolve(res)
           })
           .catch((error) => {
@@ -53,11 +54,17 @@ const useUserStore = defineStore('user', {
       return new Promise((resolve, reject) => {
         getInfo()
           .then((res) => {
-            console.log(res, '测试>>>')
-            // const user = res.user
-            // if (res.roles && res.roles.length > 0) {
-            //   // 验证返回的roles是否是一个非空数组
-            // }
+            const { user, roles, permissions }: any = res as any
+            // 验证返回的roles是否是一个非空数组,获取当前用户信息
+            if (roles && roles.length > 0) {
+              this.name = user.userName
+              this.nickName = user.nickName
+              this.email = user.email
+              this.registerTime = user.createTime
+              this.avatar = user.avatar
+              this.roles = roles
+              this.permissions = permissions
+            }
             resolve(res)
           })
           .catch((error) => {
