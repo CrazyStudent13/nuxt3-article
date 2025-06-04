@@ -50,10 +50,14 @@
 </template>
 
 <script setup>
-import useUserStore from '@/composables/user'
 import useAuthCode from '@/hooks/useAuthCode'
-
+import useUserStore from '~/stores/user'
 const userStore = useUserStore()
+
+const { data } = await useAsyncData('user', () => userStore.fetchUser())
+
+console.log('useUserStore:', useUserStore)
+
 const authCodeInfo = useAuthCode.authCodeInfo
 const authLoginRules = useAuthCode.authLoginRules
 const authLoginForm = useAuthCode.authLoginForm
@@ -61,8 +65,8 @@ const loginRef = ref()
 
 const loginForm = reactive({
   model: {
-    username: '',
-    password: '',
+    username: 'admin',
+    password: '123456',
     rememberMe: false,
     code: '',
     uuid: ''
@@ -80,15 +84,16 @@ const handleLogin = () => {
         authCodeInfo.loading = true
         loginForm.model.uuid = authCodeInfo.uuid
 
-        userStore
+        useUserStore
           .Login(loginForm.model)
           .then(() => {
-            userStore
+            useUserStore
               .GetInfo()
               .then(() => {
                 // 登录成功跳转
                 ElMessage.success('登录成功')
-                useRouter().push('/')
+                useUserStore.GetInfo()
+                // useRouter().push('/')
               })
               .catch((err) => {
                 console.log('获取用户信息错误信息:', err)
@@ -117,6 +122,10 @@ const handleAuthCode = () => {
 
 useAuthCode.getValidateCode(loginForm.model, false)
 // loginForm.model = useAuthCode.getUserCookie(loginForm.model)
+// onMounted(async () => {
+//   const store = useStore()
+//   const { data } = await useAsyncData('user', () => store.fetchUser())
+// })
 </script>
 
 <style lang="less" scoped>

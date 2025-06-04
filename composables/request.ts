@@ -80,7 +80,7 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
       }
     }
 
-    return data !== null ? data : result
+    return result
   } catch (error: any) {
     console.warn('请求错误:', error)
     ElMessage.warning('网络异常，请重试')

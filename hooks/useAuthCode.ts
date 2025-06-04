@@ -45,7 +45,8 @@ const getValidateCode = async (form: loginForm, isClick: Boolean) => {
     if (authCodeInfo.loading) {
       ElMessage.warning('正在请求验证码，请稍等')
     } else {
-      const result: any = await getCodeImg()
+      const { data }: any = await getCodeImg()
+      const result = data
 
       authCodeInfo.loading = true
       authCodeInfo.captchaEnabled = typeof result.captchaEnabled === 'undefined' ? true : result.captchaEnabled

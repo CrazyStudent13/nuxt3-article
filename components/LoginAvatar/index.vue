@@ -1,7 +1,6 @@
 <template>
   <!-- 顶部登录头像 -->
-  <NuxtLink to="/login" class="login">登录</NuxtLink>
-  <!-- <NuxtLink v-if="userInfo?.state" to="/login" class="login">登录</NuxtLink>
+  <NuxtLink v-if="userInfo?.state" to="/login" class="enter">登录</NuxtLink>
   <el-dropdown v-else @command="handleCommand">
     <el-avatar shape="square" :size="30" :fit="'fill'" :src="userInfo.avatar" class="avatar" />
     <template #dropdown>
@@ -20,11 +19,11 @@
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>
-  </el-dropdown> -->
+  </el-dropdown>
 </template>
 
 <script setup>
-// import { useUserStore } from '@/stores/user'
+// import { useUserStore } from '@/composables/user'
 // const userStore = useUserStore()
 
 // onMounted(() => {
@@ -73,6 +72,11 @@ const handleCommand = (command) => {
       console.log('退出登录')
       window.close()
       break
+    case 'login':
+      router.push({
+        path: '/login'
+      })
+      break
   }
 }
 </script>
@@ -80,6 +84,11 @@ const handleCommand = (command) => {
 <style lang="less" scoped>
 .avatar {
   margin-left: 10px;
+  cursor: pointer;
+}
+
+.enter {
+  color: white;
   cursor: pointer;
 }
 

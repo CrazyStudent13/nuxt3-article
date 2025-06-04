@@ -28,7 +28,8 @@ const article = reactive({
     createTime: ''
   },
   request: async () => {
-    const result = await getArticleDetail(article.model.id)
+    const { data } = await getArticleDetail(article.model.id)
+    const result = data
 
     article.model = result
 

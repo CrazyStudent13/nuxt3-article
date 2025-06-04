@@ -1,6 +1,7 @@
 import { login, logout, getInfo } from '@/api/login'
 import { setToken } from '@/utils/auth'
 // store/modules/user.ts
+import { defineStore } from 'pinia'
 
 interface userInfo {
   username: string
@@ -10,9 +11,10 @@ interface userInfo {
   uuid: string
 }
 
-export const useUserStore = defineStore('userStore', {
+const useUserStore = defineStore('user', {
   state: (): any => ({
-    token: getToken(),
+    // token: getToken(),
+    token: '',
     id: '',
     name: '',
     avatar: '',
@@ -89,3 +91,5 @@ export const useUserStore = defineStore('userStore', {
     // }
   }
 })
+
+export default useUserStore

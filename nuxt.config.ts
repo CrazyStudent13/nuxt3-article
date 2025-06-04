@@ -20,6 +20,7 @@ https: console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
+
   runtimeConfig: {
     // public 下的变量可以在客户端和服务端使用
     public: {
