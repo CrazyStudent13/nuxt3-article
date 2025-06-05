@@ -24,6 +24,8 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { prerender: true, ssr: true },
     '/article/detail': { prerender: true, ssr: true },
+    '/article/list': { prerender: true, ssr: true },
+    '/article/write': { ssr: false },
     '/login': { ssr: false }
   },
   runtimeConfig: {
@@ -65,6 +67,11 @@ export default defineNuxtConfig({
         defaultLocale: 'zh-cn'
       }
     ],
-    '@pinia/nuxt'
+    [
+      '@pinia/nuxt',
+      {
+        autoImports: ['defineStore']
+      }
+    ]
   ]
 })

@@ -46,8 +46,6 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
   // 设置请求体
   const body = method === 'post' || method === 'put' ? params : undefined
 
-  console.log(useCookie('token'))
-
   try {
     // todo: 这里的拦截器只是配合csr使用的，后续要改成能兼容SSR的拦截器
     // todo: 后端接口需要重新定义标准类型，不能再用这么随性的写法了
@@ -82,9 +80,9 @@ const service = async ({ url, params, method = 'get' }: Options): Promise<IResul
           // ElMessage.error(msg)
           break
       }
+    } else {
+      return result
     }
-
-    return result
   } catch (error: any) {
     console.warn('请求错误:', error)
     ElMessage.warning('网络异常，请重试')

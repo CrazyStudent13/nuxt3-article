@@ -1,9 +1,8 @@
 // store/user.ts
-import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
 
 import { login, logout, getInfo, register } from '@/api/login'
-import { setToken } from '@/utils/auth'
+import { setToken, getToken } from '@/utils/auth'
 
 interface userInfo {
   username: string
@@ -15,6 +14,7 @@ interface userInfo {
 
 const useUserStore = defineStore('user', {
   state: (): any => ({
+    token: getToken() || '', // token
     name: '', // 用户账号
     nickName: '', // 用户昵称
     email: '', // 邮箱
@@ -41,6 +41,7 @@ const useUserStore = defineStore('user', {
             ElMessage.success('登录成功')
 
             const { data } = res
+            this.token = data?.token
             setToken(data?.token)
             resolve(res)
           })
@@ -71,31 +72,24 @@ const useUserStore = defineStore('user', {
             reject(error)
           })
       })
+    },
+    // 退出系统
+    Logout() {
+      const { state } = this
+      console.log(state, '猜测是！！')
+      removeToken()
+      window.close()
+      // return new Promise((resolve, reject) => {
+      //   logout(state.token)
+      //     .then(() => {
+      //       removeToken()
+      //       resolve()
+      //     })
+      //     .catch((error) => {
+      //       reject(error)
+      //     })
+      // })
     }
-    // // 退出系统
-    // LogOut({ commit, state }) {
-    //   return new Promise((resolve, reject) => {
-    //     logout(state.token)
-    //       .then(() => {
-    //         commit('SET_TOKEN', '')
-    //         commit('SET_ROLES', [])
-    //         commit('SET_PERMISSIONS', [])
-    //         removeToken()
-    //         resolve()
-    //       })
-    //       .catch((error) => {
-    //         reject(error)
-    //       })
-    //   })
-    // },
-    // // 前端 登出
-    // FedLogOut({ commit }) {
-    //   return new Promise((resolve) => {
-    //     commit('SET_TOKEN', '')
-    //     removeToken()
-    //     resolve()
-    //   })
-    // }
   }
 })
 

@@ -5,10 +5,11 @@
         {{ item.title }}
       </NuxtLink>
     </nav>
+
     <div class="header-right header-item">
-      <LoginAvatar></LoginAvatar>
-      <!-- <NuxtLink to="/login" class="login">登录</NuxtLink> -->
-      <!-- <el-icon class="login"><User /></el-icon> -->
+      <ClientOnly>
+        <LoginAvatar />
+      </ClientOnly>
     </div>
   </header>
 </template>
