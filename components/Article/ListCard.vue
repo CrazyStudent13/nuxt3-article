@@ -18,7 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
 const props = defineProps({
   cardInfo: {
     type: Object,
@@ -27,7 +26,7 @@ const props = defineProps({
 })
 
 const publishTime = computed(() => {
-  return dayjs(props?.cardInfo?.publishTime).format('YYYY-MM-DD HH:mm:ss') || '-'
+  return time.$dayjs(props?.cardInfo?.publishTime).format('YYYY-MM-DD HH:mm:ss') || '-'
 })
 </script>
 

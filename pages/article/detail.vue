@@ -5,7 +5,6 @@
         <h1 class="title">{{ article.model?.title }}</h1>
         <el-descriptions>
           <el-descriptions-item label="发布时间">{{ article.model?.publishTime }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ article.model?.createTime }}</el-descriptions-item>
           <el-descriptions-item label="作者">{{ article.model?.author || '-' }}</el-descriptions-item>
         </el-descriptions>
       </template>
@@ -18,7 +17,6 @@
 </template>
 
 <script setup>
-import dayjs from 'dayjs'
 import { getArticleDetail } from '@/api/article'
 
 const article = reactive({
@@ -33,8 +31,7 @@ const article = reactive({
 
     article.model = result
 
-    // article.model.publishTime = dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
-    // article.model.createTime = dayjs(article.model.createTime).format('YYYY-MM-DD HH:mm:ss')
+    article.model.publishTime = time.$dayjs(article.model.publishTime).format('YYYY-MM-DD HH:mm:ss')
   }
 })
 
