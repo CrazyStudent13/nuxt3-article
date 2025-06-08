@@ -1,12 +1,11 @@
 // 全局封装一些时间类方法
+// 参考链接：https://blog.csdn.net/Warminlove/article/details/133268060
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn') // 使用本地化语言
-
-// 参考链接：https://blog.csdn.net/Warminlove/article/details/133268060
 
 const timeFromNow = (time: string) => {
   let nowtimes = new Date().getTime()
