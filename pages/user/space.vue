@@ -3,20 +3,20 @@
     <el-card shadow="never" :body-style="{ padding: '20px' }">
       <el-row :gutter="20">
         <el-col :span="3">
-          <el-avatar :size="60" src="https://empty" class="avatar" @error="errorHandler">
-            <img :src="userInfo.avatar" />
-          </el-avatar>
+          <!-- <NuxtImg provider="cloudinary" :src="`http://111.229.29.214:8080/${userStore.avatar}`" width="300" height="169" /> -->
+          <!-- <el-avatar :size="60" :src="`http://111.229.29.214:8080/${userStore.avatar}`" class="avatar" @error="errorHandler"></el-avatar> -->
+          <el-avatar :size="60" :src="userStore.avatar" class="avatar" @error="errorHandler" />
         </el-col>
         <el-col :span="21">
           <el-descriptions :column="3">
             <template #title>
-              <h3>{{ userInfo.name }}</h3>
+              <h3>{{ userStore.name }}</h3>
             </template>
-            <el-descriptions-item label="Uid">{{ userInfo.Uid }}</el-descriptions-item>
-            <el-descriptions-item label="注册邮箱">{{ userInfo.email }}</el-descriptions-item>
-            <el-descriptions-item label="注册时间">{{ userInfo.registerTime }}</el-descriptions-item>
+            <el-descriptions-item label="昵称">{{ userStore.nickName }}</el-descriptions-item>
+            <el-descriptions-item label="注册邮箱">{{ userStore.email }}</el-descriptions-item>
+            <el-descriptions-item label="注册时间">{{ userStore.registerTime }}</el-descriptions-item>
             <el-descriptions-item>
-              {{ userInfo.signature }}
+              {{ userStore.signature }}
             </el-descriptions-item>
           </el-descriptions>
         </el-col>
@@ -36,6 +36,12 @@
 </template>
 
 <script setup lang="ts">
+const runtimeConfig = useRuntimeConfig()
+import useUserStore from '@/stores/user'
+
+const userStore = useUserStore()
+userStore.GetInfo()
+
 const userInfo = {
   name: '叶远川',
   avatar: 'https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png',

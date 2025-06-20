@@ -2,7 +2,7 @@
   <!-- 顶部登录头像 -->
   <NuxtLink v-if="isLoginShow" to="/login" class="enter">登录</NuxtLink>
   <el-dropdown v-else @command="handleCommand">
-    <el-avatar shape="square" :size="30" :fit="'fill'" :src="userInfo.avatar" class="avatar" />
+    <el-avatar shape="square" :size="30" :fit="'fill'" :src="userStore.avatar" class="avatar" />
     <template #dropdown>
       <el-dropdown-menu>
         <el-dropdown-item v-for="(item, index) in actionList" :key="index" :command="item.value">

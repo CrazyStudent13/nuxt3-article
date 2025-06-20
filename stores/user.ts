@@ -19,6 +19,7 @@ const useUserStore = defineStore('user', {
     nickName: '', // 用户昵称
     email: '', // 邮箱
     avatar: '', // 头像
+    signature: '我们暂时还没有开放签名系统，敬请期待！', // 个性签名
     registerTime: '', // 注册时间
     roles: [], // 角色身份
     permissions: [] // 权限
@@ -61,8 +62,10 @@ const useUserStore = defineStore('user', {
               this.name = user.userName
               this.nickName = user.nickName
               this.email = user.email
+              // todo：获取注册时间，时间要用dayjs格式化
               this.registerTime = user.createTime
-              this.avatar = user.avatar
+              this.avatar = `http://111.229.29.214:8080${user.avatar}`
+              console.log(this.avatar, `http://111.229.29.214:8080${user.avatar}`, 'this.avatarhahahhahahh')
               this.roles = roles
               this.permissions = permissions
             }

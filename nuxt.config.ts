@@ -26,12 +26,14 @@ export default defineNuxtConfig({
     '/article/detail': { prerender: true, ssr: true },
     '/article/list': { prerender: true, ssr: true },
     '/article/write': { ssr: false },
+    '/user/space': { ssr: false },
     '/login': { ssr: false }
   },
   runtimeConfig: {
     // public 下的变量可以在客户端和服务端使用
     public: {
-      apiBase: `${import.meta.env.VITE_BASE_API}`
+      apiBase: `http://111.229.29.214:8080`,
+      imgUrl: `http://111.229.29.214:8080`
     }
   },
   vite: {
