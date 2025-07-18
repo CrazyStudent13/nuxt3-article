@@ -1,4 +1,4 @@
-import { encrypt, decrypt } from '@/utils/jsencrypt'
+// import { encrypt, decrypt } from '@/utils/jsencrypt'
 import { isNumeric, isHasChinese, isLegalChars, hasWhiteSpace } from '@/utils/validate'
 import { ElMessage } from 'element-plus'
 import { getCodeImg } from '@/api/login'
@@ -161,7 +161,7 @@ const getUserCookie = async (data: loginForm) => {
   const loginForm = useCookie('loginForm', {
     default: () => ({
       username: data.username,
-      password: decrypt(data.password),
+      // password: decrypt(data.password),
       rememberMe: data.rememberMe
     }),
     watch: false
@@ -177,7 +177,7 @@ const setUserCookie = async (form: loginForm) => {
   const loginForm = useCookie('loginForm', {
     default: () => ({
       username,
-      password: encrypt(password),
+      // password: encrypt(password),
       rememberMe: rememberMe
     }),
     watch: false
@@ -186,7 +186,7 @@ const setUserCookie = async (form: loginForm) => {
   if (rememberMe) {
     loginForm.value = {
       username,
-      password: encrypt(password),
+      // password: encrypt(password),
       rememberMe: rememberMe
     }
   }

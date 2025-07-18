@@ -16,15 +16,17 @@ Object.assign(process.env, envData) // 将环境配置信息，添加到process.
 // 引入删除控制台信息输出
 // vite-plugin-remove-console
 
-https: console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
+console.log(import.meta.env.VITE_BASE_API, '拿到基础链接')
 
 export default defineNuxtConfig({
+  // typescript: {
+  //   typeCheck: true
+  // },
   devtools: { enabled: false },
   // ssr: false, // csr must be false | ssr:ssg npm run generate must be true
   routeRules: {
-    '/': { prerender: true, ssr: true },
-    '/article/detail': { prerender: true, ssr: true },
-    '/article/list': { prerender: true, ssr: true },
+    '/': { prerender: false, ssr: true },
+    '/article/detail': { prerender: false, ssr: true },
     '/article/write': { ssr: false },
     '/user/space': { ssr: false },
     '/login': { ssr: false }

@@ -59,26 +59,26 @@ const panes = [
     label: '文章',
     name: 'article'
   },
-  {
-    key: '2',
-    label: '评论',
-    name: 'comment'
-  },
-  {
-    key: '3',
-    label: '收藏',
-    name: 'favorite'
-  },
+  // {
+  //   key: '2',
+  //   label: '评论',
+  //   name: 'comment'
+  // },
+  // {
+  //   key: '3',
+  //   label: '收藏',
+  //   name: 'favorite'
+  // },
   {
     key: '4',
     label: '点赞',
     name: 'like'
   },
-  {
-    key: '6',
-    label: '关注',
-    name: 'follow'
-  },
+  // {
+  //   key: '6',
+  //   label: '关注',
+  //   name: 'follow'
+  // },
   {
     key: '5',
     label: '通知',
