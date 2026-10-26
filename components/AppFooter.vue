@@ -1,17 +1,25 @@
 <template>
   <footer class="footer">
     <div class="inner">
-      <div class="brand-line">
-        <span class="brand-name">游戏速递</span>
-        <span class="slogan">专注分享游戏资讯，玩家攻略，游戏存档的快乐小站</span>
-      </div>
-      <p class="disclaimer">本站大部分下载资源收集于网络，只做学习和交流使用，版权归原作者所有。</p>
-      <p class="disclaimer">若本站发布的内容侵犯到您的权益，请联系站长，我们将及时下架相关内容。</p>
+      <nav class="links">
+        <NuxtLink to="/about">关于我们</NuxtLink>
+        <NuxtLink to="/column/list">专栏</NuxtLink>
+        <button type="button" @click="openLogin()">登录</button>
+        <button type="button" @click="openRegister()">注册</button>
+      </nav>
+
+      <p class="line">本站大部分下载资源收集于网络，只做学习和交流使用，版权归原作者所有。</p>
+      <p class="line">若本站发布的内容侵犯到您的权益，请联系站长，我们将及时下架相关内容。</p>
+      <p class="line">联系邮箱：contact@example.com</p>
+
+      <p class="copyright">©2026 游戏速递 · ICP备案号待补充</p>
     </div>
   </footer>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { openLogin, openRegister } = useAuthModal()
+</script>
 
 <style lang="less" scoped>
 .footer {
@@ -26,29 +34,43 @@
     text-align: center;
   }
 
-  .brand-line {
+  .links {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin-bottom: 12px;
     flex-wrap: wrap;
+    gap: 8px 28px;
+    margin-bottom: 16px;
 
-    .brand-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--color-text-1);
+    a,
+    button {
+      font-size: 13px;
+      color: var(--color-text-2);
+      transition: color 0.2s ease;
     }
 
-    .slogan {
-      font-size: 12px;
-      color: var(--color-text-3);
+    a:hover,
+    button:hover {
+      color: var(--color-primary);
+    }
+
+    button {
+      border: 0;
+      background-color: transparent;
+      cursor: pointer;
+      padding: 0;
     }
   }
 
-  .disclaimer {
+  .line {
     font-size: 12px;
     line-height: 24px;
+    color: var(--color-text-3);
+  }
+
+  .copyright {
+    margin-top: 10px;
+    font-size: 12px;
     color: var(--color-text-3);
   }
 }

@@ -8,6 +8,10 @@
 
     <AppFooter />
   </div>
+
+  <ClientOnly>
+    <AuthModal />
+  </ClientOnly>
 </template>
 
 <style lang="less" scoped>
