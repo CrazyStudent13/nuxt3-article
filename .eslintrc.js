@@ -12,7 +12,6 @@ module.exports = {
     '@vue/eslint-config-typescript/recommended',
     'plugin:prettier/recommended',
     '@vue/eslint-config-prettier',
-    '@element-plus/eslint-config',
     'plugin:unicorn/recommended',
   ],
   globals: {

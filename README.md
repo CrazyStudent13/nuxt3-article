@@ -1,105 +1,87 @@
 # nuxt3-article
 
-项目基于 nuxt3 开发，主要以展示文章为主。
+基于 Nuxt 4 的内容展示项目（文章 + 专栏，SSR 渲染），当前使用 `pnpm` + `Volta` 管理依赖与运行时版本。
 
-希望能形成标准化的项目结构。
+## Tech Stack
 
-## 目录结构
+- Nuxt 4
+- Vue 3
+- Less（设计变量见 `assets/style/tokens.less`）
+- markdown-it + highlight.js（文章正文渲染）
+- pnpm
+- Volta
 
-```
-📁 .nuxt // Nuxt在开发中使用.nuxt/目录来生成你的Vue应用程序。
-📁 .output // 当构建你的应用程序用于生产时，Nuxt 会创建 .output/ 目录。
-📁 assets // 用于添加所有将由构建工具处理的网站资产,打包后会被处理。
-📁 components // 放置所有 Vue 组件的地方。
-📁 hooks // 将你的Vue组合式函数自动导入到你的应用程序中。
-📁 layouts // Nuxt 提供了一个布局框架，用于将常见的 UI 模式提取为可重用的布局。
-📁 middleware // Nuxt 提供了中间件来在导航到特定路由之前运行代码。
-📁 modules // 在应用程序中自动注册本地模块。
-📁 node_modules // 包管理器会将项目的依赖存储在 node_modules/ 目录中。
-📁 pages // Nuxt 提供了基于文件的路由功能，用于在你的 Web 应用中创建路由。
-📁 plugins // Nuxt拥有一个插件系统，可以在创建Vue应用程序时使用Vue插件和其他功能。
-📁 public // 用于提供网站的静态资源。
-📁 server // 用于在应用程序中注册API和服务器处理程序。
-📁 utils // 在整个应用程序中自动导入你的工具函数。
-📄 .env // 用于指定构建和开发环境变量。
-📄 .gitignore // 指定了Git应该忽略的故意未跟踪的文件。
-📄 .nuxtignore // 允许 Nuxt 在构建阶段忽略项目根目录下的文件。
-📄 app.vue // Nuxt 应用的主要组件，入口文件。
-📄 app.config.ts // 使用App Config文件在应用程序中公开响应式配置。
-📄 nuxt.config.ts // Nuxt可以通过一个单独的nuxt.config文件进行简单配置。
-📄 package.json // 包含了应用程序的所有依赖项和脚本。
-📄 tsconfig.json // Nuxt会根据你在Nuxt项目中使用的别名，以及其他合理的默认值，自动生成一个`.nuxt/tsconfig.json`文件。
+## Version Policy
 
-```
+为了保证团队开发环境一致，项目约定如下：
+
+- 使用 `Volta` 锁定 Node 版本，当前版本见 [package.json](package.json) 中的 `volta.node`
+- 使用 `packageManager` 锁定 `pnpm` 版本
+- 使用 `engines` 约束允许的 `Node` 和 `pnpm` 范围
+- 使用 `.npmrc` 中的 `engine-strict=true` 与 `package-manager-strict=true` 在安装时尽早失败
+
+当前推荐环境：
+
+- Node `20.19.0`
+- pnpm `9.12.3`
 
 ## Setup
 
-Make sure to install dependencies:
+建议优先安装 Volta，然后在项目目录中直接执行：
 
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+如果本机已经安装 Volta，进入项目目录后会自动切换到项目指定的 Node 版本。
 
-Start the development server on `http://localhost:3000`:
+## Environment
+
+项目不把任何服务器地址写进代码，接口地址等敏感配置通过环境变量注入：
+
+| 变量 | 说明 |
+| --- | --- |
+| `NUXT_PUBLIC_API_BASE` | 后端 API 服务器地址（接口路径与文章封面的共同前缀，结尾不带 `/`） |
+
+首次开发前复制环境变量模板并填入真实值：
 
 ```bash
-# npm
-npm run dev
+cp .env.example .env
+```
 
-# pnpm
+`.env` 已被 gitignore，不会进入版本库。生产部署时通过部署平台的同名环境变量注入（Nuxt 运行时配置的 env 映射规则：`NUXT_PUBLIC_API_BASE` → `runtimeConfig.public.apiBase`）。
+
+## Development
+
+启动开发环境：
+
+```bash
 pnpm dev
+```
 
-# yarn
-yarn dev
+类型检查：
 
-# bun
-bun run dev
+```bash
+pnpm typecheck
 ```
 
 ## Production
 
-Build the application for production:
+构建生产包：
 
 ```bash
-# npm
-npm run build
-
-# pnpm
 pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+本地预览生产构建：
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
 pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Team Notes
+
+- 不要使用 `npm install` 或 `yarn install`，统一使用 `pnpm`
+- 不要手动切换到与项目约定不一致的 Node 主版本
+- 升级 `Node`、`pnpm` 或 `Nuxt` 时，同时更新 `volta`、`packageManager`、`engines` 和相关文档
+- 不要把服务器地址、密钥等敏感信息硬编码进源码或提交进版本库，一律走环境变量

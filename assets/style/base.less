@@ -1,6 +1,4 @@
-// 基础样式
-// $bodywidth: 1170px;
-
+// 全局基础样式
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,32 +9,89 @@ html,
 body {
   width: 100%;
   height: 100%;
-  margin: 0;
-  padding: 0;
 }
 
-.main-body {
-  margin: 0;
-  padding: 0;
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--color-text-1);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  // 定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+// 信息流容器：条目列表的统一外层面板（掘金风格）
+.feed-panel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border-light);
+
+  .feed-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-1);
+  }
+
+  .feed-more {
+    font-size: 13px;
+    color: var(--color-text-3);
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.feed-empty {
+  padding: 56px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-3);
+}
+
+// 全局滚动条（挂在 html 上才会生效）
+html {
   ::-webkit-scrollbar {
     width: 9px;
     height: 9px;
   }
-  // 定义滚动条轨道
   ::-webkit-scrollbar-track {
     background-color: transparent;
-    -webkit-border-radius: 2em;
-    -moz-border-radius: 2em;
     border-radius: 2em;
   }
-  // 定义滑块 内阴影+圆角
   ::-webkit-scrollbar-thumb {
     background-color: #cccccc;
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.4) 25%);
-    -webkit-border-radius: 2em;
-    -moz-border-radius: 2em;
     border-radius: 2em;
+    &:hover {
+      background-color: #b8b8b8;
+    }
   }
 }

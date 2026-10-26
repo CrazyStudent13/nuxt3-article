@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: '游戏速递',
+      htmlAttrs: { lang: 'zh-CN' },
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'keywords', content: '单机游戏,游戏资讯,游戏攻略,游戏评测' },
@@ -15,6 +16,16 @@ export default defineNuxtConfig({
       link: []
     }
   },
-  css: ['/assets/style/base.less', 'element-plus/dist/index.css'],
-  modules: ['@element-plus/nuxt']
+  css: ['/assets/style/tokens.less', '/assets/style/base.less'],
+  routeRules: {
+    // 首页即文章列表，旧列表地址重定向过去
+    '/article/list': { redirect: { to: '/', statusCode: 301 } }
+  },
+  runtimeConfig: {
+    public: {
+      // 后端服务器地址：接口路径与封面等静态资源的共同前缀
+      // 通过环境变量 NUXT_PUBLIC_API_BASE 注入（见 .env.example），代码中不保存真实地址
+      apiBase: ''
+    }
+  }
 })

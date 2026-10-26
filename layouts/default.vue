@@ -2,9 +2,9 @@
   <div class="app">
     <AppHeader />
 
-    <div class="main-container">
+    <main class="app-main">
       <slot />
-    </div>
+    </main>
 
     <AppFooter />
   </div>
@@ -12,12 +12,17 @@
 
 <style lang="less" scoped>
 .app {
-  background-color: #f2f3f5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg);
 }
 
-.main-container {
-  max-width: 800px;
-  min-height: 100vh;
-  margin: 20px auto;
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 24px 16px 40px;
 }
 </style>

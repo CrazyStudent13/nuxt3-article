@@ -7,24 +7,27 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "clipboard": "^2.0.11",
     "dayjs": "^1.11.13",
-    "element-plus": "^2.8.8",
     "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
-    "nuxt": "^3.14.159",
-    "vue": "latest",
-    "vue-router": "latest"
+    "nuxt": "^4.4.2",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",
+  "engines": {
+    "node": ">=20.18.1 <21",
+    "pnpm": ">=9.12.3 <10"
+  },
   "devDependencies": {
-    "@element-plus/nuxt": "^1.1.0",
     "less": "^4.2.0"
   },
   "volta": {
-    "node": "20.18.1"
+    "node": "20.19.0"
   }
 }
