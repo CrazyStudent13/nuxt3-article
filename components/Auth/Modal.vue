@@ -15,20 +15,54 @@
           </header>
 
           <form class="panel-body" @submit.prevent="handleSubmit">
-            <input v-model="form.account" class="field" type="text" :placeholder="mode === 'login' ? '用户名/邮箱' : '请输入用户名'" />
-
-            <div class="field-wrap">
-              <input v-model="form.password" class="field" type="password" placeholder="请输入登录密码" />
-              <button v-if="mode === 'login'" class="forgot" type="button" @click="showTip('请联系管理员重置密码')">忘记密码</button>
+            <div class="field-group">
+              <input
+                v-model="form.email"
+                class="field"
+                :class="fieldClass('email')"
+                type="email"
+                placeholder="请输入邮箱"
+                @blur="touchField('email')"
+              />
+              <p v-if="fieldError('email')" class="field-tip">{{ errors.email }}</p>
             </div>
 
-            <input
-              v-if="mode === 'register'"
-              v-model="form.confirm"
-              class="field"
-              type="password"
-              placeholder="请再次输入密码"
-            />
+            <div class="field-group">
+              <div class="field-wrap">
+                <input
+                  v-model="form.password"
+                  class="field"
+                  :class="fieldClass('password')"
+                  type="password"
+                  placeholder="请输入登录密码"
+                  @blur="touchField('password')"
+                />
+                <button v-if="mode === 'login'" class="forgot" type="button" @click="showTip('请联系管理员重置密码')">
+                  忘记密码
+                </button>
+              </div>
+
+              <div v-if="mode === 'register' && form.password" class="strength">
+                <div class="strength-bars">
+                  <span v-for="n in 3" :key="n" class="strength-bar" :class="strengthBarClass(n)" />
+                </div>
+                <span class="strength-label" :class="`strength-${strength}`">{{ strengthLabel }}</span>
+              </div>
+
+              <p v-if="fieldError('password')" class="field-tip">{{ errors.password }}</p>
+            </div>
+
+            <div v-if="mode === 'register'" class="field-group">
+              <input
+                v-model="form.confirm"
+                class="field"
+                :class="fieldClass('confirm')"
+                type="password"
+                placeholder="请再次输入密码"
+                @blur="touchField('confirm')"
+              />
+              <p v-if="fieldError('confirm')" class="field-tip">{{ errors.confirm }}</p>
+            </div>
 
             <p v-if="tip" class="tip" :class="{ 'tip-error': tipIsError }">{{ tip }}</p>
 
@@ -58,11 +92,80 @@ const { isOpen, mode, close } = useAuthModal()
 
 const title = computed(() => (mode.value === 'login' ? '登录游戏速递' : '注册游戏速递'))
 
+type FormField = 'email' | 'password' | 'confirm'
+
 const form = reactive({
-  account: '',
+  email: '',
   password: '',
   confirm: ''
 })
+
+const touched = reactive<Record<FormField, boolean>>({
+  email: false,
+  password: false,
+  confirm: false
+})
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const errors = computed<Record<FormField, string>>(() => ({
+  email: !form.email.trim()
+    ? '请输入邮箱'
+    : EMAIL_RE.test(form.email.trim())
+      ? ''
+      : '邮箱格式不正确',
+  password: !form.password
+    ? '请输入密码'
+    : form.password.length < 6
+      ? '密码长度不能少于 6 位'
+      : '',
+  confirm:
+    mode.value !== 'register'
+      ? ''
+      : !form.confirm
+        ? '请再次输入密码'
+        : form.confirm !== form.password
+          ? '两次输入的密码不一致'
+          : ''
+}))
+
+// 实时校验：字段失焦后开始显示错误，输入过程中错误随修正即时消失
+const touchField = (field: FormField) => {
+  touched[field] = true
+}
+
+const fieldError = (field: FormField) => (touched[field] ? errors.value[field] : '')
+const fieldValid = (field: FormField) => touched[field] && !errors.value[field] && !!form[field]
+const fieldClass = (field: FormField) => ({
+  'field-error': !!fieldError(field),
+  'field-valid': fieldValid(field)
+})
+
+// 密码强度：长度 + 字符种类，1 弱 / 2 中 / 3 强
+const strength = computed(() => {
+  const pwd = form.password
+  if (!pwd) {
+    return 0
+  }
+
+  let score = 0
+  if (pwd.length >= 6) {
+    score++
+  }
+  if (pwd.length >= 10) {
+    score++
+  }
+  if (/[a-zA-Z]/.test(pwd) && /\d/.test(pwd)) {
+    score++
+  }
+  if (/[^a-zA-Z0-9]/.test(pwd)) {
+    score++
+  }
+  return Math.min(score, 3)
+})
+
+const strengthLabel = computed(() => ['太短了', '弱', '中', '强'][strength.value] ?? '')
+const strengthBarClass = (n: number) => ({ on: strength.value >= n, [`lv-${strength.value}`]: strength.value >= n })
 
 const tip = ref('')
 const tipIsError = ref(false)
@@ -73,29 +176,36 @@ const showTip = (message: string, isError = false) => {
   tipIsError.value = isError
 }
 
-const switchMode = () => {
-  mode.value = mode.value === 'login' ? 'register' : 'login'
+const resetForm = () => {
+  form.email = ''
+  form.password = ''
+  form.confirm = ''
+  touched.email = false
+  touched.password = false
+  touched.confirm = false
   showTip('')
 }
 
+const switchMode = () => {
+  mode.value = mode.value === 'login' ? 'register' : 'login'
+  resetForm()
+}
+
 const handleSubmit = () => {
-  if (!form.account.trim()) {
-    showTip(mode.value === 'login' ? '请输入用户名或邮箱' : '请输入用户名', true)
-    return
-  }
+  touched.email = true
+  touched.password = true
+  touched.confirm = true
 
-  if (form.password.length < 6) {
-    showTip('密码长度不能少于 6 位', true)
-    return
-  }
-
-  if (mode.value === 'register' && form.confirm !== form.password) {
-    showTip('两次输入的密码不一致', true)
+  if (errors.value.email || errors.value.password || errors.value.confirm) {
     return
   }
 
   // TODO: 接入后端登录/注册接口（后端验证码已开启，需补充验证码流程与 token 管理）
-  showTip(`${mode.value === 'login' ? '登录' : '注册'}接口待接入，敬请期待`)
+  submitting.value = true
+  setTimeout(() => {
+    submitting.value = false
+    showTip(`${mode.value === 'login' ? '登录' : '注册'}接口待接入，敬请期待`)
+  }, 400)
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
@@ -106,10 +216,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 watch(isOpen, (open) => {
   if (open) {
-    form.account = ''
-    form.password = ''
-    form.confirm = ''
-    showTip('')
+    resetForm()
     window.addEventListener('keydown', handleKeydown)
     document.body.style.overflow = 'hidden'
   } else {
@@ -180,6 +287,12 @@ onBeforeUnmount(() => {
   gap: 14px;
   padding: 8px 24px 24px;
 
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .field-wrap {
     position: relative;
   }
@@ -193,7 +306,9 @@ onBeforeUnmount(() => {
     font-size: 14px;
     color: var(--color-text-1);
     outline: none;
-    transition: border-color 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease;
 
     &::placeholder {
       color: var(--color-text-3);
@@ -202,6 +317,18 @@ onBeforeUnmount(() => {
     &:focus {
       border-color: var(--color-primary);
       background-color: var(--color-surface);
+    }
+
+    // 校验通过：绿色描边
+    &.field-valid,
+    &.field-valid:focus {
+      border-color: #1a7f37;
+    }
+
+    // 校验失败：红色描边
+    &.field-error,
+    &.field-error:focus {
+      border-color: #d1242f;
     }
   }
 
@@ -218,6 +345,59 @@ onBeforeUnmount(() => {
 
     &:hover {
       color: var(--color-primary);
+    }
+  }
+
+  .field-tip {
+    font-size: 12px;
+    line-height: 18px;
+    color: #d1242f;
+  }
+
+  // 密码强度指示
+  .strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+
+    .strength-bars {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+
+      .strength-bar {
+        height: 4px;
+        flex: 1;
+        border-radius: 2px;
+        background-color: var(--color-border);
+        transition: background-color 0.2s ease;
+
+        &.on.lv-1 {
+          background-color: #d1242f;
+        }
+        &.on.lv-2 {
+          background-color: #d29922;
+        }
+        &.on.lv-3 {
+          background-color: #1a7f37;
+        }
+      }
+    }
+
+    .strength-label {
+      font-size: 12px;
+      color: var(--color-text-3);
+
+      &.strength-1 {
+        color: #d1242f;
+      }
+      &.strength-2 {
+        color: #d29922;
+      }
+      &.strength-3 {
+        color: #1a7f37;
+      }
     }
   }
 
