@@ -27,6 +27,11 @@ export const useUser = () => {
     return res
   }
 
+  // 注册：成功后无 data，由调用方引导用户登录；后端 nickName 默认取账号本身
+  const register = async (payload: { username: string; password: string }) => {
+    return await apiFetch('/api/register', { method: 'POST', body: payload })
+  }
+
   // 当前登录用户信息（token 失效时清空登录态）
   const fetchUserInfo = async () => {
     try {
@@ -72,5 +77,5 @@ export const useUser = () => {
     user.value = null
   }
 
-  return { user, isLoggedIn, login, fetchUserInfo, fetchCaptcha, logout }
+  return { user, isLoggedIn, login, register, fetchUserInfo, fetchCaptcha, logout }
 }

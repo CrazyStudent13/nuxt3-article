@@ -2,7 +2,7 @@
   <Teleport to="body">
     <!-- 显式时长：不依赖 transitionend 事件，避免过渡卡在中间态（透明遮罩挡住全页） -->
     <Transition name="auth-modal" :duration="200">
-      <div v-if="isOpen" class="auth-mask" @click.self="close" @keydown.esc="close">
+      <div v-if="isOpen" class="auth-mask" @click.self="handleMaskClick" @keydown.esc="close">
         <div class="auth-panel" role="dialog" aria-modal="true" :aria-label="title">
           <header class="panel-head">
             <h2 class="panel-title">{{ title }}</h2>
@@ -127,7 +127,7 @@
 <script setup lang="ts">
 // 登录/注册弹窗：登录与注册共用一个弹窗，通过 mode 切换
 const { isOpen, mode, close } = useAuthModal()
-const { login, fetchCaptcha } = useUser()
+const { login, register, fetchCaptcha } = useUser()
 
 const title = computed(() => (mode.value === 'login' ? '登录游戏速递' : '注册游戏速递'))
 
@@ -288,9 +288,16 @@ const resetForm = () => {
 const switchMode = () => {
   mode.value = mode.value === 'login' ? 'register' : 'login'
   resetForm()
-  // 切回登录模式时重取验证码状态（注册接口未接入，无验证码场景）
+  // 切回登录模式时重取验证码状态
   if (mode.value === 'login') {
     refreshCaptcha()
+  }
+}
+
+// 点击遮罩关闭：仅登录模式允许；注册填到一半误触丢失内容太伤，点遮罩不关闭
+const handleMaskClick = () => {
+  if (mode.value === 'login') {
+    close()
   }
 }
 
@@ -303,9 +310,22 @@ const handleSubmit = async () => {
     return
   }
 
-  // 注册接口未接入，先保留占位提示
+  // 注册：成功后切回登录模式并带上刚注册的邮箱，引导用户登录
   if (mode.value !== 'login') {
-    showTip('注册接口待接入，敬请期待')
+    submitting.value = true
+    try {
+      const username = form.email.trim()
+      await register({ username, password: form.password })
+      mode.value = 'login'
+      resetForm()
+      form.email = username
+      refreshCaptcha()
+      showTip('注册成功，请登录')
+    } catch (error: any) {
+      showTip(error?.message || '注册失败，请稍后重试', true)
+    } finally {
+      submitting.value = false
+    }
     return
   }
 

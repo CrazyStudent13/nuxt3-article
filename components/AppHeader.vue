@@ -42,6 +42,11 @@
             <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
             <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
             <span class="user-name">{{ user?.nickName || user?.userName }}</span>
+            <!-- 悬停展示完整信息：昵称被截断时能看到全文 -->
+            <span class="user-tip" role="tooltip">
+              <span class="user-tip-name">{{ user?.nickName || user?.userName }}</span>
+              <span v-if="user?.email && user.email !== user.nickName" class="user-tip-email">{{ user.email }}</span>
+            </span>
             <button class="logout-btn" type="button" @click="handleLogout">退出</button>
           </span>
         </template>
@@ -270,6 +275,7 @@ const handleLogout = async () => {
   }
 
   .user-area {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -312,6 +318,43 @@ const handleLogout = async () => {
       &:hover {
         color: var(--color-primary);
       }
+    }
+
+    // 悬停浮层：展示完整昵称与邮箱
+    .user-tip {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-text-1);
+      color: #fff;
+      font-size: 12px;
+      line-height: 18px;
+      white-space: nowrap;
+      box-shadow: var(--shadow-2);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s;
+      pointer-events: none;
+      z-index: 101;
+    }
+
+    &:hover .user-tip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .user-tip-email {
+      color: rgba(255, 255, 255, 0.65);
     }
   }
 }
