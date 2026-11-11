@@ -29,7 +29,9 @@ export default defineNuxtConfig({
     '/article/list': { redirect: { to: '/', statusCode: 301 } },
     // 个人中心 / 设置页依赖客户端 token 与登录态，关闭 SSR
     '/user/space': { ssr: false },
-    '/user/settings': { ssr: false }
+    '/user/settings': { ssr: false },
+    // 写文章：独立编辑器流程，依赖客户端 token
+    '/editor/new': { ssr: false }
   },
   runtimeConfig: {
     public: {

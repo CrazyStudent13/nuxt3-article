@@ -36,6 +36,9 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
+        <!-- 写文章入口：独立全屏编辑器流程，未登录先拉起登录框 -->
+        <button class="write-btn" type="button" @click="goWrite">写文章</button>
+
         <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
         <template v-if="isLoggedIn">
           <span class="user-area">
@@ -95,6 +98,15 @@ const handleSearch = () => {
 const { openLogin, openRegister } = useAuthModal()
 const config = useRuntimeConfig()
 const { user, isLoggedIn, fetchUserInfo, logout } = useUser()
+
+// 写文章：未登录先拉起登录框，登录后进入独立编辑器流程
+const goWrite = () => {
+  if (!getToken()) {
+    openLogin()
+    return
+  }
+  return navigateTo('/editor/new')
+}
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
 const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
@@ -273,6 +285,22 @@ const handleLogout = async () => {
       &:hover {
         background-color: var(--color-primary-light);
       }
+    }
+  }
+
+  .write-btn {
+    padding: 5px 16px;
+    border: 0;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary);
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--color-primary-hover);
     }
   }
 
