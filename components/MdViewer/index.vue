@@ -212,10 +212,10 @@ const resultStr = computed(() => {
     right: 16px;
     top: 0;
     z-index: 99;
-    color: #333;
+    color: var(--color-text-1);
     padding: 4px 8px;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--color-surface);
     border: 0;
     border-radius: 4px;
     font-size: 12px;

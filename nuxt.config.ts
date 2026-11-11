@@ -13,13 +13,23 @@ export default defineNuxtConfig({
         { name: 'keywords', content: '单机游戏,游戏资讯,游戏攻略,游戏评测' },
         { name: 'description', content: '专注分享游戏资讯，玩家攻略，游戏存档的快乐小站，希望为玩家们提供更好的游戏体验。' }
       ],
-      link: []
+      link: [],
+      // 防闪烁：首屏绘制前按 localStorage/系统偏好挂 html.dark（与 useTheme 同步）
+      script: [
+        {
+          innerHTML:
+            "(function(){try{var m=localStorage.getItem('theme')||'light';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var el=document.documentElement;d?el.classList.add('dark'):el.classList.remove('dark')}catch(e){}})()"
+        }
+      ]
     }
   },
   css: ['/assets/style/tokens.less', '/assets/style/base.less'],
   routeRules: {
     // 首页即文章列表，旧列表地址重定向过去
-    '/article/list': { redirect: { to: '/', statusCode: 301 } }
+    '/article/list': { redirect: { to: '/', statusCode: 301 } },
+    // 个人中心 / 设置页依赖客户端 token 与登录态，关闭 SSR
+    '/user/space': { ssr: false },
+    '/user/settings': { ssr: false }
   },
   runtimeConfig: {
     public: {

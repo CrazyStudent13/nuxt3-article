@@ -39,14 +39,16 @@
         <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
         <template v-if="isLoggedIn">
           <span class="user-area">
-            <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
-            <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
-            <span class="user-name">{{ user?.nickName || user?.userName }}</span>
-            <!-- 悬停展示完整信息：昵称被截断时能看到全文 -->
-            <span class="user-tip" role="tooltip">
-              <span class="user-tip-name">{{ user?.nickName || user?.userName }}</span>
-              <span v-if="user?.email && user.email !== user.nickName" class="user-tip-email">{{ user.email }}</span>
-            </span>
+            <NuxtLink to="/user/space" class="user-link" title="进入个人中心">
+              <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
+              <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
+              <span class="user-name">{{ user?.nickName || user?.userName }}</span>
+              <!-- 悬停展示完整信息：昵称被截断时能看到全文 -->
+              <span class="user-tip" role="tooltip">
+                <span class="user-tip-name">{{ user?.nickName || user?.userName }}</span>
+                <span v-if="user?.email && user.email !== user.nickName" class="user-tip-email">{{ user.email }}</span>
+              </span>
+            </NuxtLink>
             <button class="logout-btn" type="button" @click="handleLogout">退出</button>
           </span>
         </template>
@@ -115,7 +117,7 @@ const handleLogout = async () => {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: var(--header-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-light);
@@ -279,6 +281,14 @@ const handleLogout = async () => {
     display: flex;
     align-items: center;
     gap: 8px;
+
+    .user-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+    }
 
     .user-avatar {
       width: 30px;

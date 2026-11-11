@@ -32,11 +32,12 @@ const goHome = () => {
 
 <style lang="less">
 // 错误页在布局之外渲染，自带全局背景
+// 注意：本块会被 Nuxt 入口在所有页面加载，必须走主题变量（硬编码浅色会盖住深色模式）
 html,
 body {
   margin: 0;
   height: 100%;
-  background-color: #f7f8fa;
+  background-color: var(--color-bg);
 }
 </style>
 
@@ -54,7 +55,7 @@ body {
     font-size: 96px;
     font-weight: 700;
     line-height: 1.2;
-    background-image: linear-gradient(135deg, #4f6bff 0%, #7c5cff 100%);
+    background-image: var(--gradient-brand);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -63,13 +64,13 @@ body {
   .title {
     font-size: 22px;
     font-weight: 600;
-    color: #1f2329;
+    color: var(--color-text-1);
     margin: 12px 0 8px;
   }
 
   .desc {
     font-size: 14px;
-    color: #86909c;
+    color: var(--color-text-3);
     margin-bottom: 28px;
   }
 
@@ -77,14 +78,14 @@ body {
     padding: 10px 28px;
     border: 0;
     border-radius: 999px;
-    background-color: #4f6bff;
+    background-color: var(--color-primary);
     color: #fff;
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background-color: #3d57d9;
+      background-color: var(--color-primary-hover);
     }
   }
 }

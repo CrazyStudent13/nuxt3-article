@@ -5,6 +5,7 @@ export interface AuthUser {
   nickName: string
   email: string
   avatar: string
+  sex?: string
   createTime?: string
 }
 
@@ -45,6 +46,7 @@ export const useUser = () => {
             nickName: raw.nickName,
             email: raw.email,
             avatar: raw.avatar,
+            sex: raw.sex,
             createTime: raw.createTime
           }
         : null
@@ -77,5 +79,44 @@ export const useUser = () => {
     user.value = null
   }
 
-  return { user, isLoggedIn, login, register, fetchUserInfo, fetchCaptcha, logout }
+  // 修改个人资料：昵称/邮箱/性别，成功后同步本地 state（头部昵称即时更新）
+  const updateProfile = async (payload: { nickName?: string; email?: string; sex?: string }) => {
+    await apiFetch('/api/system/user/profile', { method: 'PUT', body: payload })
+    if (user.value) {
+      user.value = { ...user.value, ...payload }
+    }
+  }
+
+  // 上传头像：form-data 字段名固定为 avatarfile，返回后端生成的相对路径并同步本地 state
+  const updateAvatar = async (file: File) => {
+    const form = new FormData()
+    form.append('avatarfile', file)
+    const res = await apiFetch<{ imgUrl: string }>('/api/system/user/profile/avatar', {
+      method: 'POST',
+      body: form
+    })
+    const imgUrl = res.data?.imgUrl || ''
+    if (user.value && imgUrl) {
+      user.value = { ...user.value, avatar: imgUrl }
+    }
+    return imgUrl
+  }
+
+  // 修改密码：旧密码 + 新密码（注意：后端旧密码校验存在参数顺序 bug，实际恒通过）
+  const updatePassword = async (payload: { oldPassword: string; newPassword: string }) => {
+    await apiFetch('/api/system/user/profile/updatePwd', { method: 'PUT', body: payload })
+  }
+
+  return {
+    user,
+    isLoggedIn,
+    login,
+    register,
+    fetchUserInfo,
+    fetchCaptcha,
+    logout,
+    updateProfile,
+    updateAvatar,
+    updatePassword
+  }
 }
