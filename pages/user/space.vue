@@ -139,9 +139,7 @@ const goArticle = (item: any) => {
 
 <style lang="less" scoped>
 .space-page {
-  max-width: var(--container-width);
-  margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 4px 0 8px;
   display: flex;
   flex-direction: column;
   gap: 16px;

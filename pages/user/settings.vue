@@ -1,28 +1,27 @@
 <template>
   <div class="settings-page">
-    <div class="page-topbar">
-      <NuxtLink to="/user/space" class="back-link">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-          <path d="M15.54 3.46 7.8 11.2a.6.6 0 0 0 0 .85l7.74 7.74 1.13-1.13-7.31-7.31 7.3-7.31-1.12-1.13z" />
-        </svg>
-        返回个人主页
-      </NuxtLink>
-    </div>
-
-    <div class="settings-layout">
-      <!-- 左侧菜单 -->
-      <aside class="side-menu">
-        <button
-          v-for="item in menus"
-          :key="item.key"
-          class="menu-item"
-          :class="{ active: activeMenu === item.key }"
-          type="button"
-          @click="activeMenu = item.key"
-        >
-          <span class="menu-icon" v-html="item.icon" />
-          <span>{{ item.label }}</span>
-        </button>
+    <div class="settings-card">
+      <!-- 左侧：返回链接 + 菜单（与内容同一块面板） -->
+      <aside class="side-column">
+        <NuxtLink to="/user/space" class="back-link">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+            <path d="M15.54 3.46 7.8 11.2a.6.6 0 0 0 0 .85l7.74 7.74 1.13-1.13-7.31-7.31 7.3-7.31-1.12-1.13z" />
+          </svg>
+          返回个人主页
+        </NuxtLink>
+        <nav class="side-menu">
+          <button
+            v-for="item in menus"
+            :key="item.key"
+            class="menu-item"
+            :class="{ active: activeMenu === item.key }"
+            type="button"
+            @click="activeMenu = item.key"
+          >
+            <span class="menu-icon" v-html="item.icon" />
+            <span>{{ item.label }}</span>
+          </button>
+        </nav>
       </aside>
 
       <!-- 右侧内容 -->
@@ -324,45 +323,47 @@ void registerTime
 
 <style lang="less" scoped>
 .settings-page {
-  max-width: var(--container-width);
-  margin: 0 auto;
-  padding: 0 16px 40px;
+  padding: 0 0 8px;
 }
 
-.page-topbar {
-  margin: 0 -16px 16px;
-  padding: 14px 24px;
+// 整块面板：左侧菜单 + 右侧内容，撑满可用宽度
+.settings-card {
+  display: flex;
+  align-items: stretch;
   background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+// 左侧：返回链接 + 菜单
+.side-column {
+  flex-shrink: 0;
+  width: 200px;
+  padding: 16px 12px;
+  border-right: 1px solid var(--color-border-light);
 
   .back-link {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
-    color: var(--color-primary);
+    margin: 4px 4px 14px;
+    font-size: 13px;
+    color: var(--color-text-2);
     text-decoration: none;
+    transition: color 0.2s ease;
 
     &:hover {
-      opacity: 0.85;
+      color: var(--color-primary);
     }
   }
 }
 
-.settings-layout {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
 // 左侧菜单
 .side-menu {
-  flex-shrink: 0;
-  width: 180px;
-  padding: 12px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 
   .menu-item {
     display: flex;
@@ -370,7 +371,6 @@ void registerTime
     gap: 10px;
     width: 100%;
     padding: 11px 16px;
-    margin-bottom: 4px;
     border: 0;
     border-radius: var(--radius-sm);
     background-color: transparent;
@@ -404,9 +404,6 @@ void registerTime
   flex: 1;
   min-width: 0;
   padding: 24px 28px;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
 
   .panel-title {
     margin: 0 0 20px;
