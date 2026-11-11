@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
-    <Transition name="auth-modal">
+    <!-- 显式时长：不依赖 transitionend 事件，避免过渡卡在中间态（透明遮罩挡住全页） -->
+    <Transition name="auth-modal" :duration="200">
       <div v-if="isOpen" class="auth-mask" @click.self="close" @keydown.esc="close">
         <div class="auth-panel" role="dialog" aria-modal="true" :aria-label="title">
           <header class="panel-head">
@@ -14,15 +15,20 @@
             </button>
           </header>
 
-          <form class="panel-body" @submit.prevent="handleSubmit">
+          <!-- novalidate：关闭浏览器原生校验气泡，统一用表单内的自定义提示 -->
+          <form class="panel-body" novalidate @submit.prevent="handleSubmit">
             <div class="field-group">
               <input
                 v-model="form.email"
                 class="field"
                 :class="fieldClass('email')"
                 type="email"
+                maxlength="50"
                 placeholder="请输入邮箱"
-                @blur="touchField('email')"
+                @input="stripInvalidEmailChars"
+                @compositionend="stripInvalidEmailChars"
+                @keydown="blockSpaceKey"
+                @blur="onBlur('email')"
               />
               <p v-if="fieldError('email')" class="field-tip">{{ errors.email }}</p>
             </div>
@@ -32,10 +38,14 @@
                 <input
                   v-model="form.password"
                   class="field"
-                  :class="fieldClass('password')"
+                  :class="[fieldClass('password'), { 'has-forgot': mode === 'login' }]"
                   type="password"
+                  maxlength="20"
                   placeholder="请输入登录密码"
-                  @blur="touchField('password')"
+                  @input="stripSpaces('password')"
+                  @compositionend="stripSpaces('password')"
+                  @keydown="blockSpaceKey"
+                  @blur="onBlur('password')"
                 />
                 <button v-if="mode === 'login'" class="forgot" type="button" @click="showTip('请联系管理员重置密码')">
                   忘记密码
@@ -52,14 +62,42 @@
               <p v-if="fieldError('password')" class="field-tip">{{ errors.password }}</p>
             </div>
 
+            <!-- 验证码：后端仅在账号连续登录失败达到阈值（3 次）时要求 -->
+            <div v-if="mode === 'login' && captcha.enabled" class="field-group">
+              <div class="captcha-row">
+                <input
+                  v-model="captcha.code"
+                  class="field"
+                  :class="{ 'field-error': captcha.codeTouched && !captcha.code.trim() }"
+                  type="text"
+                  maxlength="5"
+                  placeholder="请输入验证码"
+                  @blur="captcha.codeTouched = true"
+                />
+                <img
+                  v-if="captcha.img"
+                  class="captcha-img"
+                  :src="captcha.img"
+                  alt="验证码"
+                  title="看不清？点击刷新"
+                  @click="refreshCaptcha"
+                />
+              </div>
+              <p v-if="captcha.codeTouched && !captcha.code.trim()" class="field-tip">请输入验证码</p>
+            </div>
+
             <div v-if="mode === 'register'" class="field-group">
               <input
                 v-model="form.confirm"
                 class="field"
                 :class="fieldClass('confirm')"
-                type="password"
-                placeholder="请再次输入密码"
-                @blur="touchField('confirm')"
+                  type="password"
+                  maxlength="20"
+                  placeholder="请再次输入密码"
+                @input="stripSpaces('confirm')"
+                @compositionend="stripSpaces('confirm')"
+                @keydown="blockSpaceKey"
+                @blur="onBlur('confirm')"
               />
               <p v-if="fieldError('confirm')" class="field-tip">{{ errors.confirm }}</p>
             </div>
@@ -89,6 +127,7 @@
 <script setup lang="ts">
 // 登录/注册弹窗：登录与注册共用一个弹窗，通过 mode 切换
 const { isOpen, mode, close } = useAuthModal()
+const { login, fetchCaptcha } = useUser()
 
 const title = computed(() => (mode.value === 'login' ? '登录游戏速递' : '注册游戏速递'))
 
@@ -106,7 +145,8 @@ const touched = reactive<Record<FormField, boolean>>({
   confirm: false
 })
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// 邮箱格式：local 部分仅限常见字符（字母数字与 ._%+-），域名须为「标签.」+ 至少 2 位字母顶级域名
+const EMAIL_RE = /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/
 
 const errors = computed<Record<FormField, string>>(() => ({
   email: !form.email.trim()
@@ -132,6 +172,41 @@ const errors = computed<Record<FormField, string>>(() => ({
 // 实时校验：字段失焦后开始显示错误，输入过程中错误随修正即时消失
 const touchField = (field: FormField) => {
   touched[field] = true
+}
+
+// 输入过滤：邮箱实时剔除空格与特殊字符，只保留合法字符（键入与粘贴均覆盖）
+const stripInvalidEmailChars = () => {
+  const cleaned = form.email.replace(/[^A-Za-z0-9._%+-@]/g, '')
+  if (cleaned !== form.email) {
+    form.email = cleaned
+  }
+}
+
+// 输入过滤：密码不允许包含空格（键入与粘贴均覆盖）
+const stripSpaces = (field: FormField) => {
+  if (/\s/.test(form[field])) {
+    form[field] = form[field].replace(/\s/g, '')
+  }
+}
+
+// 拦截空格键：真人键入的空格直接不让进框（粘贴/输入法提交/自动填充由 input、compositionend、blur 过滤兜底）
+const blockSpaceKey = (event: KeyboardEvent) => {
+  if (event.key === ' ') {
+    event.preventDefault()
+  }
+}
+
+// 失焦时去除首尾空格，覆盖自动填充等绕过实时过滤的场景
+const trimField = (field: FormField) => {
+  if (/^\s|\s$/.test(form[field])) {
+    form[field] = form[field].trim()
+  }
+}
+
+// 失焦：先去首尾空格，再标记已触碰，保证校验基于清理后的值
+const onBlur = (field: FormField) => {
+  trimField(field)
+  touchField(field)
 }
 
 const fieldError = (field: FormField) => (touched[field] ? errors.value[field] : '')
@@ -176,6 +251,29 @@ const showTip = (message: string, isError = false) => {
   tipIsError.value = isError
 }
 
+// 验证码状态：后端仅在账号连续登录失败达到阈值（3 次）时要求
+const captcha = reactive({
+  enabled: false,
+  img: '',
+  uuid: '',
+  code: '',
+  codeTouched: false
+})
+
+const resetCaptcha = () => {
+  captcha.code = ''
+  captcha.codeTouched = false
+}
+
+// 拉取验证码状态：正常账号返回 captchaEnabled=false，输错 3 次后才出图
+const refreshCaptcha = async () => {
+  const info = await fetchCaptcha(form.email.trim())
+  captcha.enabled = !!info.captchaEnabled
+  captcha.img = info.img || ''
+  captcha.uuid = info.uuid || ''
+  resetCaptcha()
+}
+
 const resetForm = () => {
   form.email = ''
   form.password = ''
@@ -183,15 +281,20 @@ const resetForm = () => {
   touched.email = false
   touched.password = false
   touched.confirm = false
+  resetCaptcha()
   showTip('')
 }
 
 const switchMode = () => {
   mode.value = mode.value === 'login' ? 'register' : 'login'
   resetForm()
+  // 切回登录模式时重取验证码状态（注册接口未接入，无验证码场景）
+  if (mode.value === 'login') {
+    refreshCaptcha()
+  }
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   touched.email = true
   touched.password = true
   touched.confirm = true
@@ -200,12 +303,32 @@ const handleSubmit = () => {
     return
   }
 
-  // TODO: 接入后端登录/注册接口（后端验证码已开启，需补充验证码流程与 token 管理）
+  // 注册接口未接入，先保留占位提示
+  if (mode.value !== 'login') {
+    showTip('注册接口待接入，敬请期待')
+    return
+  }
+
+  if (captcha.enabled && !captcha.code.trim()) {
+    captcha.codeTouched = true
+    return
+  }
+
   submitting.value = true
-  setTimeout(() => {
+  try {
+    await login({
+      username: form.email.trim(),
+      password: form.password,
+      ...(captcha.enabled ? { code: captcha.code.trim(), uuid: captcha.uuid } : {})
+    })
+    close()
+  } catch (error: any) {
+    showTip(error?.message || '登录失败，请稍后重试', true)
+    // 登录失败会累计错误次数，重取验证码状态（达到阈值后自动展示）
+    await refreshCaptcha()
+  } finally {
     submitting.value = false
-    showTip(`${mode.value === 'login' ? '登录' : '注册'}接口待接入，敬请期待`)
-  }, 400)
+  }
 }
 
 const handleKeydown = (event: KeyboardEvent) => {
@@ -217,6 +340,10 @@ const handleKeydown = (event: KeyboardEvent) => {
 watch(isOpen, (open) => {
   if (open) {
     resetForm()
+    // 打开弹窗时预取验证码状态（正常账号无验证码）
+    if (mode.value === 'login') {
+      refreshCaptcha()
+    }
     window.addEventListener('keydown', handleKeydown)
     document.body.style.overflow = 'hidden'
   } else {
@@ -330,6 +457,17 @@ onBeforeUnmount(() => {
     &.field-error:focus {
       border-color: #d1242f;
     }
+
+    // 隐藏 Edge/WebView2 原生的密码显隐按钮，避免与右侧悬浮元素重叠
+    &::-ms-reveal,
+    &::-ms-clear {
+      display: none;
+    }
+
+    // 给"忘记密码"按钮预留空间，避免输入内容从其下方穿过
+    &.has-forgot {
+      padding-right: 72px;
+    }
   }
 
   .forgot {
@@ -345,6 +483,24 @@ onBeforeUnmount(() => {
 
     &:hover {
       color: var(--color-primary);
+    }
+  }
+
+  .captcha-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .captcha-img {
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
     }
   }
 
@@ -476,6 +632,11 @@ onBeforeUnmount(() => {
   .auth-panel {
     transition: transform 0.2s ease;
   }
+}
+
+// 离开过渡期间遮罩不再拦截点击：窗口被遮挡等极端情况下过渡延迟完成时，页面仍可正常操作
+.auth-modal-leave-active {
+  pointer-events: none;
 }
 
 .auth-modal-enter-from,

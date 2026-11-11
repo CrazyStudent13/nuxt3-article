@@ -36,8 +36,19 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
-        <button class="auth-btn login" type="button" @click="openLogin()">登录</button>
-        <button class="auth-btn register" type="button" @click="openRegister()">注册</button>
+        <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
+        <template v-if="isLoggedIn">
+          <span class="user-area">
+            <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
+            <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
+            <span class="user-name">{{ user?.nickName || user?.userName }}</span>
+            <button class="logout-btn" type="button" @click="handleLogout">退出</button>
+          </span>
+        </template>
+        <template v-else>
+          <button class="auth-btn login" type="button" @click="openLogin()">登录</button>
+          <button class="auth-btn register" type="button" @click="openRegister()">注册</button>
+        </template>
       </div>
     </div>
   </header>
@@ -75,6 +86,23 @@ const handleSearch = () => {
 }
 
 const { openLogin, openRegister } = useAuthModal()
+const config = useRuntimeConfig()
+const { user, isLoggedIn, fetchUserInfo, logout } = useUser()
+
+// 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
+const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
+const avatarFallback = computed(() => (user.value?.nickName || user.value?.userName || '用户').slice(0, 1))
+
+// 页面刷新后恢复登录态：有 token 但还没有用户信息时静默拉取
+onMounted(() => {
+  if (getToken() && !user.value) {
+    fetchUserInfo().catch(() => {})
+  }
+})
+
+const handleLogout = async () => {
+  await logout()
+}
 </script>
 
 <style lang="less" scoped>
@@ -237,6 +265,52 @@ const { openLogin, openRegister } = useAuthModal()
 
       &:hover {
         background-color: var(--color-primary-light);
+      }
+    }
+  }
+
+  .user-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-full);
+      object-fit: cover;
+      background-color: var(--color-bg);
+
+      &.user-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image: var(--gradient-brand);
+        color: #fff;
+        font-size: 14px;
+      }
+    }
+
+    .user-name {
+      max-width: 96px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      color: var(--color-text-1);
+    }
+
+    .logout-btn {
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+      font-size: 13px;
+      color: var(--color-text-3);
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--color-primary);
       }
     }
   }
