@@ -29,14 +29,7 @@
         <!-- 个人资料 -->
         <template v-if="activeMenu === 'profile'">
           <h1 class="panel-title">个人资料</h1>
-          <div class="panel-body">
-            <button class="avatar-btn" type="button" :disabled="avatarUploading" :title="avatarUploading ? '上传中…' : '点击更换头像'" @click="fileInput?.click()">
-              <img v-if="avatarUrl" class="avatar" :src="avatarUrl" alt="头像" />
-              <span v-else class="avatar avatar-fallback">{{ avatarFallback }}</span>
-              <span class="avatar-mark">{{ avatarUploading ? '上传中' : '更换' }}</span>
-            </button>
-            <input ref="fileInput" class="avatar-input" type="file" accept="image/*" @change="handleAvatarChange" />
-
+          <div class="panel-body profile-layout">
             <form class="settings-form" @submit.prevent="handleSaveProfile">
               <label class="form-row">
                 <span class="form-label">昵称</span>
@@ -59,6 +52,19 @@
                 <button class="btn primary" type="submit" :disabled="saving">{{ saving ? '保存中…' : '保存' }}</button>
               </div>
             </form>
+
+            <!-- 右侧头像（参考掘金：表单在左，头像在右） -->
+            <div class="avatar-side">
+              <button class="avatar-btn" type="button" :disabled="avatarUploading" :title="avatarUploading ? '上传中…' : '点击更换头像'" @click="fileInput?.click()">
+                <img v-if="avatarUrl" class="avatar" :src="avatarUrl" alt="头像" />
+                <span v-else class="avatar avatar-fallback">{{ avatarFallback }}</span>
+                <span class="avatar-mark">{{ avatarUploading ? '上传中' : '更换' }}</span>
+              </button>
+              <input ref="fileInput" class="avatar-input" type="file" accept="image/*" @change="handleAvatarChange" />
+              <span class="avatar-label">上传头像</span>
+              <span class="avatar-hint">格式：支持 JPG、PNG、JPEG</span>
+              <span class="avatar-hint">大小：10M 以内</span>
+            </div>
           </div>
         </template>
 
@@ -432,58 +438,73 @@ void registerTime
   }
 }
 
-// 头像
-.avatar-btn {
-  position: relative;
-  display: block;
-  padding: 0;
-  margin-bottom: 20px;
-  border: 0;
-  background-color: transparent;
-  cursor: pointer;
-  line-height: 0;
+// 个人资料：左表单 + 右头像（参考掘金设置页布局）
+.profile-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
 
-  &:hover .avatar-mark,
-  &:disabled .avatar-mark {
-    opacity: 1;
-  }
-
-  &:disabled {
-    cursor: wait;
+  .settings-form {
+    flex: 1;
+    min-width: 0;
   }
 }
 
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-  background-color: var(--color-bg);
+// 右侧头像
+.avatar-side {
+  flex-shrink: 0;
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  &.avatar-fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-image: var(--gradient-brand);
-    color: #fff;
-    font-size: 24px;
+  .avatar-btn {
+    position: relative;
+    padding: 0;
+    margin-bottom: 12px;
+    border: 0;
+    background-color: transparent;
+    cursor: pointer;
+    line-height: 0;
+
+    &:hover .avatar-mark,
+    &:disabled .avatar-mark {
+      opacity: 1;
+    }
+
+    &:disabled {
+      cursor: wait;
+    }
   }
-}
 
-.avatar-mark {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 3px 0;
-  border-radius: 0 0 var(--radius-full) var(--radius-full);
-  background-color: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-size: 11px;
-  text-align: center;
-  line-height: 16px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    background-color: var(--color-bg);
+
+    &.avatar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: var(--gradient-brand);
+      color: #fff;
+      font-size: 28px;
+    }
+  }
+
+  .avatar-label {
+    font-size: 13px;
+    color: var(--color-text-2);
+    margin-bottom: 6px;
+  }
+
+  .avatar-hint {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-text-3);
+  }
 }
 
 .avatar-input {
@@ -614,6 +635,16 @@ void registerTime
     &:disabled {
       color: var(--color-text-3);
       cursor: not-allowed;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-layout {
+    flex-direction: column-reverse;
+
+    .avatar-side {
+      width: 100%;
     }
   }
 }

@@ -12,7 +12,7 @@
           <h2 class="profile-name">{{ user?.nickName || user?.userName }}</h2>
           <dl class="profile-fields">
             <div class="field-row"><dt>账号</dt><dd>{{ user?.userName }}</dd></div>
-            <div class="field-row"><dt>邮箱</dt><dd>{{ user?.email || '未设置' }}</dd></div>
+            <div class="field-row"><dt>昵称</dt><dd>{{ user?.nickName || '未设置' }}</dd></div>
             <div class="field-row"><dt>性别</dt><dd>{{ sexLabel }}</dd></div>
             <div class="field-row"><dt>注册时间</dt><dd>{{ registerTime }}</dd></div>
             <div class="field-row"><dt>个性签名</dt><dd>{{ signature }}</dd></div>
