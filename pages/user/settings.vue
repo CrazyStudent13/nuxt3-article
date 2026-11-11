@@ -55,13 +55,12 @@
 
             <!-- 右侧头像（参考掘金：表单在左，头像在右） -->
             <div class="avatar-side">
-              <button class="avatar-btn" type="button" :disabled="avatarUploading" :title="avatarUploading ? '上传中…' : '点击更换头像'" @click="fileInput?.click()">
+              <button class="avatar-btn" type="button" :disabled="avatarUploading" :title="avatarUploading ? '上传中…' : '点击上传头像'" @click="fileInput?.click()">
                 <img v-if="avatarUrl" class="avatar" :src="avatarUrl" alt="头像" />
                 <span v-else class="avatar avatar-fallback">{{ avatarFallback }}</span>
-                <span class="avatar-mark">{{ avatarUploading ? '上传中' : '更换' }}</span>
               </button>
               <input ref="fileInput" class="avatar-input" type="file" accept="image/*" @change="handleAvatarChange" />
-              <span class="avatar-label">上传头像</span>
+              <span class="avatar-label">{{ avatarUploading ? '上传中…' : '上传头像' }}</span>
               <span class="avatar-hint">格式：支持 JPG、PNG、JPEG</span>
               <span class="avatar-hint">大小：10M 以内</span>
             </div>
@@ -459,18 +458,12 @@ void registerTime
   align-items: center;
 
   .avatar-btn {
-    position: relative;
     padding: 0;
     margin-bottom: 12px;
     border: 0;
     background-color: transparent;
     cursor: pointer;
     line-height: 0;
-
-    &:hover .avatar-mark,
-    &:disabled .avatar-mark {
-      opacity: 1;
-    }
 
     &:disabled {
       cursor: wait;
