@@ -39,10 +39,11 @@
           </div>
         </article>
 
-        <!-- 右侧信息栏：作者卡 + 目录（吸顶跟随，窄屏隐藏） -->
-        <aside v-if="hasToc || article.userInfo?.userId" class="toc-aside">
+        <!-- 右侧信息栏：作者卡 + 目录 + 相关推荐（吸顶跟随，窄屏隐藏） -->
+        <aside v-if="hasToc || article.userInfo?.userId || article.subjectId" class="toc-aside">
           <ArticleAuthorCard v-if="article.userInfo?.userId" :author="article.userInfo" />
           <ArticleToc v-if="hasToc" :content="article.content" />
+          <ArticleRelatedCard :subject-id="article.subjectId" :exclude-id="article.id" />
         </aside>
       </div>
     </template>
