@@ -36,9 +36,10 @@
           </div>
         </article>
 
-        <!-- 右侧目录：文章有标题大纲时才出现 -->
-        <aside v-if="hasToc" class="toc-aside">
-          <ArticleToc :content="article.content" />
+        <!-- 右侧信息栏：作者卡 + 目录（吸顶跟随，窄屏隐藏） -->
+        <aside v-if="hasToc || article.userInfo?.userId" class="toc-aside">
+          <ArticleAuthorCard v-if="article.userInfo?.userId" :author="article.userInfo" />
+          <ArticleToc v-if="hasToc" :content="article.content" />
         </aside>
       </div>
     </template>
@@ -62,6 +63,7 @@ type ArticleDetail = {
   author?: string
   content?: string
   userInfo?: {
+    userId?: number
     nickName?: string
     avatar?: string
   }
@@ -168,12 +170,15 @@ useSeoMeta({
   }
 }
 
-// 右侧目录：吸顶跟随，窄屏隐藏
+// 右侧信息栏：作者卡 + 目录，吸顶跟随，窄屏隐藏
 .toc-aside {
   position: sticky;
   top: 76px;
   flex-shrink: 0;
   width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .title {
