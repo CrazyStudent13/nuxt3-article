@@ -3,8 +3,8 @@
   <div class="site-info">
     <nav class="links">
       <NuxtLink to="/about">关于我们</NuxtLink>
-      <NuxtLink to="/agreement">用户协议</NuxtLink>
-      <NuxtLink to="/privacy">隐私政策</NuxtLink>
+      <a href="/agreement.html" target="_blank" rel="noopener">用户协议</a>
+      <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a>
       <a href="javascript:void(0)" @click.prevent>友情链接</a>
     </nav>
 

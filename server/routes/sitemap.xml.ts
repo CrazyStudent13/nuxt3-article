@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
     { loc: `${origin}/` },
     { loc: `${origin}/column/list` },
     { loc: `${origin}/about` },
-    { loc: `${origin}/agreement` },
-    { loc: `${origin}/privacy` }
+    { loc: `${origin}/agreement.html` },
+    { loc: `${origin}/privacy.html` }
   ]
 
   try {

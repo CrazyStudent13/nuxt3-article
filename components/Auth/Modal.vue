@@ -112,8 +112,8 @@
           <footer class="panel-foot">
             <span class="agreement">
               {{ mode === 'login' ? '登录' : '注册' }}即表示同意
-              <NuxtLink to="/agreement" target="_blank">用户协议</NuxtLink> 和
-              <NuxtLink to="/privacy" target="_blank">隐私政策</NuxtLink>
+              <a href="/agreement.html" target="_blank" rel="noopener">用户协议</a> 和
+              <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a>
             </span>
             <button class="switch-btn" type="button" @click="switchMode">
               {{ mode === 'login' ? '注册' : '登录' }}
