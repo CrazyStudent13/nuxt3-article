@@ -7,26 +7,28 @@
         <article class="panel">
           <h1 class="title">{{ article.title || '无标题' }}</h1>
 
-          <!-- 作者栏：头像 + 昵称 + 时间/阅读量 + 专栏入口 -->
-          <div class="author-bar">
-            <span class="avatar">
-              <img v-if="avatarUrl" :src="avatarUrl" :alt="authorName" />
-              <span v-else class="avatar-fallback">{{ authorName.slice(0, 1) }}</span>
-            </span>
-            <span class="author-info">
-              <span class="name">{{ authorName }}</span>
-              <span class="sub">
-                <span v-if="publishLabel">发布于 {{ publishLabel }}</span>
-                <span v-if="readLabel">{{ readLabel }} 阅读</span>
-              </span>
+          <!-- 元信息行：作者 时间 阅读 专栏，编辑入口靠右（仅作者本人可见），掘金式单行 -->
+          <div class="meta-line">
+            <span class="meta-author">{{ authorName }}</span>
+            <span v-if="publishLabel" class="meta-item">{{ publishLabel }}</span>
+            <span v-if="readLabel" class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {{ readLabel }} 阅读
             </span>
             <NuxtLink
               v-if="subject.title && article.subjectId"
-              class="subject-badge"
+              class="meta-subject"
               :to="{ path: '/column/detail', query: { id: String(article.subjectId) } }"
             >
-              《{{ subject.title }}》
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+              {{ subject.title }}
             </NuxtLink>
+            <button v-if="canEdit" class="edit-btn" type="button" @click="goEdit">编辑</button>
           </div>
 
           <img v-if="coverUrl" class="cover" :src="coverUrl" :alt="article.title" />
@@ -53,6 +55,7 @@
 import dayjs from 'dayjs'
 
 type ArticleDetail = {
+  id?: number | string
   title?: string
   desc?: string
   subjectId?: number | string
@@ -119,11 +122,24 @@ const { data: subjectRes } = await useFetch<{ data?: SubjectDetail }>(
 const subject = computed(() => subjectRes.value?.data || {})
 
 const authorName = computed(() => article.value.userInfo?.nickName || article.value.author || '佚名')
-const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, article.value.userInfo?.avatar))
 const coverUrl = computed(() => toCoverUrl(config.public.apiBase, article.value.cover))
 // publishTime 常为 null，回退 createTime
 const publishLabel = computed(() => article.value.publishTime || article.value.createTime)
 const readLabel = computed(() => (typeof article.value.readNum === 'number' ? String(article.value.readNum) : ''))
+
+// 编辑入口：仅当前登录用户是文章作者时可见
+const { user, fetchUserInfo } = useUser()
+const canEdit = computed(
+  () => !!user.value?.userId && !!article.value.userInfo?.userId && user.value.userId === article.value.userInfo.userId
+)
+const goEdit = () => navigateTo({ path: '/editor/new', query: { id: String(article.value.id || '') } })
+
+// 登录态恢复（编辑按钮依赖 user.userId 比对）
+onMounted(() => {
+  if (getToken() && !user.value) {
+    fetchUserInfo().catch(() => {})
+  }
+})
 
 // 右侧目录开关：文章带标题大纲才展示
 const hasToc = computed(() => extractMarkdownHeadings(article.value.content).length > 0)
@@ -189,75 +205,54 @@ useSeoMeta({
   margin-bottom: 16px;
 }
 
-.author-bar {
+// 掘金式元信息行：纯文本+小图标，头像与统计归右侧作者卡
+.meta-line {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   padding-bottom: 18px;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--color-border-light);
+  font-size: 13px;
+  color: var(--color-text-2);
 
-  .avatar {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .avatar-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: #fff;
-      background-image: var(--gradient-brand);
-    }
+  .meta-author {
+    font-weight: 600;
+    color: var(--color-text-1);
   }
 
-  .author-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    .name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--color-text-1);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .sub {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 12px;
-      font-size: 12px;
-      color: var(--color-text-3);
-    }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-text-3);
   }
 
-  .subject-badge {
-    flex-shrink: 0;
-    max-width: 160px;
+  .meta-subject {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 4px 12px;
-    border-radius: var(--radius-sm);
-    background-color: var(--color-primary-light);
-    font-size: 12px;
+    color: var(--color-text-3);
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  .edit-btn {
+    margin-left: auto;
+    padding: 2px 4px;
+    border: 0;
+    background-color: transparent;
+    font-size: 13px;
     color: var(--color-primary);
+    cursor: pointer;
     transition: opacity 0.2s ease;
 
     &:hover {
@@ -289,7 +284,7 @@ useSeoMeta({
     font-size: 22px;
   }
 
-  .subject-badge {
+  .meta-line .meta-subject {
     display: none;
   }
 }
