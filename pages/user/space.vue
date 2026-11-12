@@ -47,8 +47,15 @@
             {{ t.label }}
           </button>
         </div>
-        <!-- 文章 tab 的搜索与时间排序：并入 tab 行右侧（掘金式） -->
+        <!-- 文章 tab 的搜索与时间排序：并入 tab 行右侧（时间切换在左、搜索在右） -->
         <div class="tab-tools">
+          <button class="time-toggle" type="button" @click="toggleTimeOrder">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flip: timeOrder === 'asc' }" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <polyline points="19 12 12 19 5 12" />
+            </svg>
+            {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
+          </button>
           <input
             v-model="keyword"
             class="article-search"
@@ -57,13 +64,6 @@
             maxlength="64"
             @input="onKeywordInput"
           />
-          <button class="time-toggle" type="button" @click="toggleTimeOrder">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flip: timeOrder === 'asc' }" aria-hidden="true">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <polyline points="19 12 12 19 5 12" />
-            </svg>
-            {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
-          </button>
         </div>
       </div>
 
@@ -481,7 +481,7 @@ const goColumn = (item: any) => {
         width: 180px;
         padding: 6px 12px;
         border: 1px solid var(--color-border-light);
-        border-radius: var(--radius-full);
+        border-radius: var(--radius-sm);
         background-color: var(--color-bg);
         font-size: 13px;
         color: var(--color-text-1);
