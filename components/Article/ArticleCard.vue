@@ -1,5 +1,5 @@
 <template>
-  <article class="article-item">
+  <article class="article-item" :title="title">
     <div class="body">
       <h3 class="title">{{ title }}</h3>
       <p v-if="remark" class="remark">{{ remark }}</p>
