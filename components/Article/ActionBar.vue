@@ -3,7 +3,7 @@
   <div class="action-bar">
     <!-- 点赞：占位 -->
     <button class="action-btn" type="button" title="点赞" @click="showTip('点赞功能即将上线')">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
       </svg>
       <span v-if="likeNum > 0" class="action-badge">{{ likeNum }}</span>
@@ -11,7 +11,7 @@
 
     <!-- 评论：占位 -->
     <button class="action-btn" type="button" title="评论" @click="showTip('评论功能即将上线')">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
       </svg>
       <span v-if="commentNum > 0" class="action-badge">{{ commentNum }}</span>
@@ -19,14 +19,14 @@
 
     <!-- 收藏：占位 -->
     <button class="action-btn" type="button" title="收藏" @click="showTip('收藏功能即将上线')">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
     </button>
 
     <!-- 分享：复制文章链接 -->
     <button class="action-btn" type="button" title="分享" @click="shareLink">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
         <polyline points="16 6 12 2 8 6" />
         <line x1="12" y1="2" x2="12" y2="15" />
@@ -35,7 +35,7 @@
 
     <!-- 举报：占位 -->
     <button class="action-btn" type="button" title="举报" @click="showTip('举报功能即将上线')">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
         <line x1="12" y1="9" x2="12" y2="13" />
         <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -44,7 +44,7 @@
 
     <!-- 回顶部：滚动超过一屏才出现 -->
     <button v-show="showTop" class="action-btn top-btn" type="button" title="回顶部" @click="backTop">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="12" y1="19" x2="12" y2="5" />
         <polyline points="5 12 12 5 19 12" />
       </svg>
@@ -132,19 +132,19 @@ onBeforeUnmount(() => {
 // 固定定位挂在正文列左侧空白区，不占布局宽度；视口不够宽时整体隐藏
 .action-bar {
   position: fixed;
-  left: calc(50% - 590px);
+  left: calc(50% - 596px);
   top: 50%;
   transform: translateY(-50%);
   z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
 
   .action-btn {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -165,10 +165,10 @@ onBeforeUnmount(() => {
 
     .action-badge {
       position: absolute;
-      top: -6px;
-      right: -6px;
-      min-width: 18px;
-      height: 18px;
+      top: -7px;
+      right: -7px;
+      min-width: 19px;
+      height: 19px;
       padding: 0 4px;
       display: flex;
       align-items: center;
@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
   }
 
   .top-btn {
-    margin-top: 4px;
+    margin-top: 6px;
   }
 
   .action-tip {
