@@ -22,7 +22,7 @@
 
       <span class="save-hint">{{ saveHint }}</span>
 
-      <div class="draft-wrap">
+      <div v-if="!editId" class="draft-wrap">
         <button class="draft-btn" type="button" @click="draftOpen = !draftOpen">
           草稿箱<span v-if="myDrafts.length" class="draft-count">{{ myDrafts.length }}</span>
         </button>
@@ -48,7 +48,7 @@
         </div>
       </div>
 
-      <button class="publish-btn" type="button" @click="openPublish">发布</button>
+      <button class="publish-btn" type="button" @click="openPublish">{{ editId ? '保存' : '发布' }}</button>
     </header>
     <p v-if="topTip" class="top-tip">{{ topTip }}</p>
 
@@ -129,7 +129,7 @@
     <footer class="editor-status">
       <span>字数 {{ charCount }}</span>
       <span>行数 {{ lineCount }}</span>
-      <span class="status-hint">文章将自动保存至草稿箱</span>
+      <span v-if="!editId" class="status-hint">文章将自动保存至草稿箱</span>
     </footer>
 
     <!-- 发布弹窗 -->
@@ -137,7 +137,7 @@
       <div v-if="publishOpen" class="publish-overlay" @click.self="publishOpen = false">
         <div class="publish-modal">
           <div class="modal-head">
-            <h2>发布文章</h2>
+            <h2>{{ editId ? '编辑文章' : '发布文章' }}</h2>
             <button class="modal-close" type="button" @click="publishOpen = false">×</button>
           </div>
 
@@ -187,7 +187,7 @@
           <div class="modal-actions">
             <button class="btn ghost" type="button" @click="publishOpen = false">取消</button>
             <button class="btn primary" type="button" :disabled="publishing" @click="confirmPublish">
-              {{ publishing ? '发布中…' : '确认发布' }}
+              {{ publishing ? (editId ? '保存中…' : '发布中…') : editId ? '保存修改' : '确认发布' }}
             </button>
           </div>
         </div>
@@ -205,8 +205,12 @@ definePageMeta({
 })
 
 const config = useRuntimeConfig()
+const route = useRoute()
 const { user, fetchUserInfo } = useUser()
 const { openLogin } = useAuthModal()
+
+// 编辑模式：带 ?id= 时载入已有文章，发布改为保存修改（后端 PUT /api/post/article 只允许改自己的文章）
+const editId = ref('')
 
 // ---------- 登录守卫 ----------
 onMounted(() => {
@@ -217,8 +221,34 @@ onMounted(() => {
   if (!user.value) {
     fetchUserInfo().catch(() => {})
   }
-  loadDrafts()
+  if (route.query.id) {
+    editId.value = String(route.query.id)
+    loadArticle(editId.value)
+  } else {
+    loadDrafts()
+  }
 })
+
+// 编辑模式预填：guest detail 只放行已发布文章，草稿走本地草稿箱
+const loadArticle = async (id: string) => {
+  try {
+    const res = await $fetch<any>(`${config.public.apiBase}/api/post/article/guest/detail`, {
+      query: { id }
+    })
+    if (res.code !== 200 || !res.data) {
+      throw new Error(res.msg || '文章不存在或已下架')
+    }
+    const model = res.data
+    title.value = model.title || ''
+    content.value = model.content || ''
+    publishForm.subjectId = model.subjectId ? String(model.subjectId) : ''
+    publishForm.cover = model.cover || ''
+    publishForm.desc = model.desc || ''
+  } catch (error: any) {
+    setTopTip(error?.message || '文章加载失败')
+    return navigateTo('/')
+  }
+}
 
 // ---------- 编辑内容 ----------
 const title = ref('')
@@ -480,7 +510,8 @@ const persistDrafts = () => {
 }
 
 const saveCurrentDraft = () => {
-  if (!title.value.trim() && !content.value.trim()) {
+  // 编辑已有文章不写本地草稿，避免和线上内容混淆
+  if (editId.value || (!title.value.trim() && !content.value.trim())) {
     return
   }
   const userId = user.value?.userId
@@ -594,8 +625,11 @@ const openPublish = () => {
     return
   }
   publishTip.value = ''
-  publishForm.subjectId = ''
-  publishForm.desc = autoDesc()
+  // 编辑模式保留已预填的专栏/封面/简介，仅新建时重置
+  if (!editId.value) {
+    publishForm.subjectId = ''
+    publishForm.desc = autoDesc()
+  }
   publishOpen.value = true
   fetchSubjects()
 }
@@ -634,22 +668,27 @@ const confirmPublish = async () => {
   }
   publishing.value = true
   publishTip.value = ''
+  const body: Record<string, any> = {
+    title: title.value.trim(),
+    subjectId: Number(publishForm.subjectId),
+    desc: publishForm.desc.trim() || undefined,
+    content: content.value,
+    cover: publishForm.cover || undefined,
+    source: '0',
+    publishStatus: '2'
+  }
+  if (editId.value) {
+    // 更新：PUT 幂等携带 id，publishTime 不传则保留原发布时间
+    body.id = Number(editId.value)
+  } else {
+    body.publishTime = dayjs().format('YYYY-MM-DD HH:mm:ss')
+  }
   try {
-    // 直接以已发布状态创建（后端 create 透传 publishStatus，一步到位）
     const res = await apiFetch<{ id: number }>('/api/post/article', {
-      method: 'POST',
-      body: {
-        title: title.value.trim(),
-        subjectId: Number(publishForm.subjectId),
-        desc: publishForm.desc.trim() || undefined,
-        content: content.value,
-        cover: publishForm.cover || undefined,
-        source: '0',
-        publishStatus: '2',
-        publishTime: dayjs().format('YYYY-MM-DD HH:mm:ss')
-      }
+      method: editId.value ? 'PUT' : 'POST',
+      body
     })
-    const newId = res.data?.id
+    const newId = editId.value ? editId.value : res.data?.id
     // 发布成功后清掉对应本地草稿
     if (currentDraftId.value) {
       drafts.value = drafts.value.filter((d) => d.id !== currentDraftId.value)
@@ -658,7 +697,7 @@ const confirmPublish = async () => {
     publishOpen.value = false
     return navigateTo({ path: '/article/detail', query: { id: String(newId) } })
   } catch (error: any) {
-    publishTip.value = error?.message || '发布失败，请稍后重试'
+    publishTip.value = error?.message || '保存失败，请稍后重试'
   } finally {
     publishing.value = false
   }
