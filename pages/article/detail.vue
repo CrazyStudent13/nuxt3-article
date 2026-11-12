@@ -53,7 +53,7 @@
       </div>
     </template>
     <div v-else class="panel panel-empty">
-      <p class="feed-empty">文章不存在或已下架</p>
+      <CommonEmptyState>文章不存在或已下架</CommonEmptyState>
     </div>
   </div>
 </template>
@@ -116,7 +116,9 @@ const article = computed(() => {
     title: model.title || '',
     content: model.content || '',
     publishTime: formatDateTime(model.publishTime),
-    createTime: formatDateTime(model.createTime)
+    createTime: formatDateTime(model.createTime),
+    // ISO 时间留给结构化数据与 og 元信息用
+    isoTime: (model.publishTime || model.createTime) || undefined
   }
 })
 
@@ -175,8 +177,33 @@ const hasToc = computed(() => extractMarkdownHeadings(article.value.content).len
 useSeoMeta({
   title: () => (article.value.title ? `${article.value.title} - 游戏速递` : '文章详情 - 游戏速递'),
   ogTitle: () => article.value.title || '文章详情',
+  ogType: 'article',
+  articlePublishedTime: () => (article.value.isoTime as string | undefined) || undefined,
   description: () => article.value.desc || article.value.title || '游戏速递的文章详情页。',
   ogImage: () => coverUrl.value || undefined
+})
+
+// 结构化数据：搜索引擎富摘要
+useHead(() => {
+  if (!article.value.id) {
+    return {}
+  }
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.value.title,
+    description: article.value.desc || article.value.title,
+    image: coverUrl.value || undefined,
+    datePublished: article.value.isoTime,
+    dateModified: article.value.createTime || undefined,
+    author: {
+      '@type': 'Person',
+      name: authorName.value
+    }
+  }
+  return {
+    script: [{ type: 'application/ld+json', innerHTML: JSON.stringify(data) }]
+  }
 })
 </script>
 

@@ -35,9 +35,9 @@
             @click="handleRowClick(item)"
           />
         </template>
-        <p v-else class="feed-empty">
+        <CommonEmptyState v-else>
           {{ searchTitle ? `未找到与“${searchTitle}”相关的文章` : '暂无文章，敬请期待' }}
-        </p>
+        </CommonEmptyState>
 
         <!-- 无限滚动：哨兵进入视口自动追加；出错时显示手动重试 -->
         <div v-show="articles.length" ref="sentinelRef" class="feed-sentinel" />
@@ -50,7 +50,7 @@
       </template>
 
       <!-- 关注：关注体系上线前的占位 -->
-      <p v-else class="feed-empty">关注功能即将上线，敬请期待</p>
+      <CommonEmptyState v-else>关注功能即将上线，敬请期待</CommonEmptyState>
     </div>
 
     <!-- 右侧信息栏：页脚信息块（掘金式） -->

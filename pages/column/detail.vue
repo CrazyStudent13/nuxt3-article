@@ -26,15 +26,15 @@
         <h2 class="feed-title">专栏文章</h2>
       </div>
 
-      <template v-if="articles.length">
-        <article-card
-          v-for="item in articles"
-          :key="item.id || item.title"
-          :card-info="item"
-          @click="handleRowClick(item)"
-        />
-      </template>
-      <p v-else class="feed-empty">该专栏下还没有文章</p>
+        <template v-if="articles.length">
+          <article-card
+            v-for="item in articles"
+            :key="item.id || item.title"
+            :card-info="item"
+            @click="handleRowClick(item)"
+          />
+        </template>
+        <CommonEmptyState v-else>该专栏下还没有文章</CommonEmptyState>
 
       <div v-if="articles.length && !finished" class="feed-loadmore">
         <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">

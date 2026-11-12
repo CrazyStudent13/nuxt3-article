@@ -14,7 +14,7 @@
       />
     </div>
     <div v-else class="feed-panel">
-      <p class="feed-empty">暂无专栏，敬请期待</p>
+      <CommonEmptyState>暂无专栏，敬请期待</CommonEmptyState>
     </div>
   </div>
 </template>
