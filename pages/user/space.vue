@@ -10,6 +10,13 @@
 
         <div class="profile-info">
           <h2 class="profile-name">{{ profileName }}</h2>
+          <!-- 公开统计：自己/他人同一套展示 -->
+          <div class="profile-stats">
+            <span class="stat"><b>{{ spaceStats.total }}</b> 文章</span>
+            <span class="stat"><b>{{ spaceStats.reads }}</b> 阅读</span>
+            <span class="stat"><b>{{ spaceStats.likes }}</b> 获赞</span>
+          </div>
+          <!-- 仅自己可见的账号信息 -->
           <dl v-if="isSelf" class="profile-fields">
             <div class="field-row"><dt>账号</dt><dd>{{ user?.userName }}</dd></div>
             <div class="field-row"><dt>昵称</dt><dd>{{ user?.nickName || '未设置' }}</dd></div>
@@ -17,12 +24,6 @@
             <div class="field-row"><dt>注册时间</dt><dd>{{ registerTime }}</dd></div>
             <div class="field-row"><dt>个性签名</dt><dd>{{ signature }}</dd></div>
           </dl>
-          <!-- 他人空间：昵称 + 公开统计（guest 接口仅有昵称/头像/文章数据） -->
-          <div v-else class="profile-stats">
-            <span class="stat"><b>{{ spaceStats.total }}</b> 文章</span>
-            <span class="stat"><b>{{ spaceStats.reads }}</b> 阅读</span>
-            <span class="stat"><b>{{ spaceStats.likes }}</b> 获赞</span>
-          </div>
         </div>
 
         <div v-if="isSelf" class="profile-actions">
@@ -31,23 +32,23 @@
       </div>
     </div>
 
-    <!-- 内容卡：文章列表（他人空间只有文章，点赞/通知仅在本人空间出现） -->
+    <!-- 内容卡：文章 / 专栏 tab 统一，点赞/通知仅本人空间占位 -->
     <div class="feed-panel content-panel">
-      <div v-if="isSelf" class="tab-bar">
+      <div class="tab-bar">
         <button
           v-for="t in tabs"
           :key="t.key"
           class="tab-item"
           :class="{ active: activeTab === t.key }"
           type="button"
-          @click="activeTab = t.key"
+          @click="switchTab(t.key)"
         >
           {{ t.label }}
         </button>
       </div>
 
-      <template v-if="isSelf ? activeTab === 'article' : true">
-        <!-- 排序：最新 / 热门（掘金式胶囊切换，排序走后端参数） -->
+      <!-- 文章 tab：排序胶囊 + 列表 -->
+      <template v-if="activeTab === 'article'">
         <div class="sort-bar">
           <button
             v-for="s in sortOptions"
@@ -71,6 +72,20 @@
         </template>
         <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : isSelf ? '还没有发布过文章' : 'TA 还没有发布过文章' }}</p>
       </template>
+
+      <!-- 专栏 tab：复用 ColumnCard 网格 -->
+      <template v-else-if="activeTab === 'subject'">
+        <div v-if="subjects.length" class="column-grid">
+          <column-card
+            v-for="item in subjects"
+            :key="item.id || item.title"
+            :column-info="item"
+            @click="goColumn(item)"
+          />
+        </div>
+        <p v-else class="feed-empty">{{ subjectsLoading ? '加载中…' : isSelf ? '还没有创建专栏' : 'TA 还没有创建专栏' }}</p>
+      </template>
+
       <p v-else class="feed-empty">该功能暂未开放，敬请期待</p>
     </div>
   </div>
@@ -158,12 +173,14 @@ const goSettings = () => {
   return navigateTo('/user/settings')
 }
 
-// ---------- 文章列表（本人/他人共用，排序走后端参数） ----------
-const tabs = [
-  { key: 'article', label: '我的文章' },
-  { key: 'like', label: '点赞' },
-  { key: 'notice', label: '通知' }
-]
+// ---------- 内容 tab：文章/专栏统一，点赞/通知仅本人占位 ----------
+const tabs = computed(() => {
+  const base = [
+    { key: 'article', label: '文章' },
+    { key: 'subject', label: '专栏' }
+  ]
+  return isSelf.value ? [...base, { key: 'like', label: '点赞' }, { key: 'notice', label: '通知' }] : base
+})
 const activeTab = ref('article')
 const articles = ref<any[]>([])
 const articlesLoading = ref(true)
@@ -192,22 +209,56 @@ const loadMyArticles = async () => {
     })
     const list = res.data?.list || []
     articles.value = list
-    // 他人空间：从文章携带的 userInfo 取头像昵称，从列表算公开统计
+    // 公开统计（自己/他人同一套）+ 他人资料从文章携带的 userInfo 取
     if (!isSelf.value) {
       const info = list[0]?.userInfo
       if (info?.nickName || info?.avatar) {
         spaceProfile.value = { nickName: info.nickName, avatar: info.avatar }
       }
-      spaceStats.value = {
-        total: res.data?.total || 0,
-        reads: list.reduce((sum, item) => sum + (item.readNum || 0), 0),
-        likes: list.reduce((sum, item) => sum + (item.likeNum || 0), 0)
-      }
+    }
+    spaceStats.value = {
+      total: res.data?.total || 0,
+      reads: list.reduce((sum, item) => sum + (item.readNum || 0), 0),
+      likes: list.reduce((sum, item) => sum + (item.likeNum || 0), 0)
     }
   } catch {
     articles.value = []
   } finally {
     articlesLoading.value = false
+  }
+}
+
+// ---------- 专栏 tab：guest subject list 原生支持 userId 过滤，首次进入 tab 才拉取 ----------
+const subjects = ref<any[]>([])
+const subjectsLoading = ref(false)
+const subjectsLoaded = ref(false)
+
+const loadMySubjects = async () => {
+  const userId = targetUserId.value
+  if (!userId) {
+    return
+  }
+  subjectsLoading.value = true
+  try {
+    const res = await apiFetch<{ list?: any[]; total?: number }>('/api/post/subject/guest/list', {
+      query: { userId, pageNum: 1, pageSize: 50 }
+    })
+    subjects.value = res.data?.list || []
+  } catch {
+    subjects.value = []
+  } finally {
+    subjectsLoading.value = false
+    subjectsLoaded.value = true
+  }
+}
+
+const switchTab = (key: string) => {
+  if (activeTab.value === key) {
+    return
+  }
+  activeTab.value = key
+  if (key === 'subject' && !subjectsLoaded.value) {
+    loadMySubjects()
   }
 }
 
@@ -222,6 +273,13 @@ const switchSort = (key: string) => {
 const goArticle = (item: any) => {
   return navigateTo({
     path: '/article/detail',
+    query: { id: item.id }
+  })
+}
+
+const goColumn = (item: any) => {
+  return navigateTo({
+    path: '/column/detail',
     query: { id: item.id }
   })
 }
@@ -374,6 +432,14 @@ const goArticle = (item: any) => {
       font-weight: 500;
     }
   }
+}
+
+// 专栏网格（与专栏列表页一致的两列布局）
+.column-grid {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 // 内容卡
