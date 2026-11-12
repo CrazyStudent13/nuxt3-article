@@ -27,7 +27,12 @@
               </svg>
               {{ subject.title }}
             </NuxtLink>
-            <button v-if="canEdit" class="edit-btn" type="button" @click="goEdit">编辑</button>
+            <span v-if="canEdit" class="meta-actions">
+              <button class="edit-btn" type="button" @click="goEdit">编辑</button>
+              <button class="del-btn" type="button" :disabled="deleting" @click="removeArticle">
+                {{ deleting ? '删除中…' : '删除' }}
+              </button>
+            </span>
           </div>
 
           <img v-if="coverUrl" class="cover" :src="coverUrl" :alt="article.title" />
@@ -127,12 +132,29 @@ const coverUrl = computed(() => toCoverUrl(config.public.apiBase, article.value.
 const publishLabel = computed(() => article.value.publishTime || article.value.createTime)
 const readLabel = computed(() => (typeof article.value.readNum === 'number' ? String(article.value.readNum) : ''))
 
-// 编辑入口：仅当前登录用户是文章作者时可见
+// 编辑/删除入口：仅当前登录用户是文章作者时可见
 const { user, fetchUserInfo } = useUser()
 const canEdit = computed(
   () => !!user.value?.userId && !!article.value.userInfo?.userId && user.value.userId === article.value.userInfo.userId
 )
 const goEdit = () => navigateTo({ path: '/editor/new', query: { id: String(article.value.id || '') } })
+
+// 删除后回首页（需 post:article:remove 权限，失败透传后端 msg）
+const deleting = ref(false)
+const removeArticle = async () => {
+  if (!window.confirm(`确定删除「${article.value.title || '无标题'}」吗？删除后不可恢复。`)) {
+    return
+  }
+  deleting.value = true
+  try {
+    await apiFetch(`/api/post/article/${article.value.id}`, { method: 'DELETE' })
+    return navigateTo('/')
+  } catch (error: any) {
+    window.alert(error?.message || '删除失败，请稍后重试')
+  } finally {
+    deleting.value = false
+  }
+}
 
 // 登录态恢复（编辑按钮依赖 user.userId 比对）
 onMounted(() => {
@@ -233,18 +255,37 @@ useSeoMeta({
     }
   }
 
-  .edit-btn {
+  .meta-actions {
     margin-left: auto;
-    padding: 2px 4px;
-    border: 0;
-    background-color: transparent;
-    font-size: 13px;
-    color: var(--color-primary);
-    cursor: pointer;
-    transition: opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
-    &:hover {
-      opacity: 0.8;
+    .edit-btn,
+    .del-btn {
+      padding: 2px 4px;
+      border: 0;
+      background-color: transparent;
+      font-size: 13px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+
+      &:hover:not(:disabled) {
+        opacity: 0.75;
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .edit-btn {
+      color: var(--color-primary);
+    }
+
+    .del-btn {
+      color: #d1242f;
     }
   }
 }
