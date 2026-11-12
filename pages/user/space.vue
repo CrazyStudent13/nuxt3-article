@@ -1,6 +1,6 @@
 <template>
   <div class="space-page">
-    <!-- 资料卡：纯展示，编辑入口在设置页 -->
+    <!-- 资料卡：自己的空间展示完整字段，他人空间只展示公开信息 -->
     <div class="feed-panel profile-panel">
       <div class="profile-head">
         <span class="avatar-static">
@@ -9,25 +9,31 @@
         </span>
 
         <div class="profile-info">
-          <h2 class="profile-name">{{ user?.nickName || user?.userName }}</h2>
-          <dl class="profile-fields">
+          <h2 class="profile-name">{{ profileName }}</h2>
+          <dl v-if="isSelf" class="profile-fields">
             <div class="field-row"><dt>账号</dt><dd>{{ user?.userName }}</dd></div>
             <div class="field-row"><dt>昵称</dt><dd>{{ user?.nickName || '未设置' }}</dd></div>
             <div class="field-row"><dt>性别</dt><dd>{{ sexLabel }}</dd></div>
             <div class="field-row"><dt>注册时间</dt><dd>{{ registerTime }}</dd></div>
             <div class="field-row"><dt>个性签名</dt><dd>{{ signature }}</dd></div>
           </dl>
+          <!-- 他人空间：昵称 + 公开统计（guest 接口仅有昵称/头像/文章数据） -->
+          <div v-else class="profile-stats">
+            <span class="stat"><b>{{ spaceStats.total }}</b> 文章</span>
+            <span class="stat"><b>{{ spaceStats.reads }}</b> 阅读</span>
+            <span class="stat"><b>{{ spaceStats.likes }}</b> 获赞</span>
+          </div>
         </div>
 
-        <div class="profile-actions">
+        <div v-if="isSelf" class="profile-actions">
           <button class="btn ghost" type="button" @click="goSettings">编辑资料</button>
         </div>
       </div>
     </div>
 
-    <!-- 内容卡：我的文章等 -->
+    <!-- 内容卡：文章列表（他人空间只有文章，点赞/通知仅在本人空间出现） -->
     <div class="feed-panel content-panel">
-      <div class="tab-bar">
+      <div v-if="isSelf" class="tab-bar">
         <button
           v-for="t in tabs"
           :key="t.key"
@@ -40,7 +46,7 @@
         </button>
       </div>
 
-      <template v-if="activeTab === 'article'">
+      <template v-if="isSelf ? activeTab === 'article' : true">
         <!-- 排序：最新 / 热门（掘金式胶囊切换，排序走后端参数） -->
         <div class="sort-bar">
           <button
@@ -63,7 +69,7 @@
             @click="goArticle(item)"
           />
         </template>
-        <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : '还没有发布过文章' }}</p>
+        <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : isSelf ? '还没有发布过文章' : 'TA 还没有发布过文章' }}</p>
       </template>
       <p v-else class="feed-empty">该功能暂未开放，敬请期待</p>
     </div>
@@ -74,30 +80,67 @@
 import dayjs from 'dayjs'
 
 const config = useRuntimeConfig()
+const route = useRoute()
 const { user, fetchUserInfo } = useUser()
 const { openLogin } = useAuthModal()
 
 const signature = '我们暂时还没有开放签名系统，敬请期待！'
 
-// ---------- 页面守卫：未登录弹登录框回首页；token 有效但 state 为空则恢复 ----------
-onMounted(async () => {
+// ---------- 空间归属：带 ?id= 看他人空间（guest 公开数据），否则是自己的 ----------
+const targetUserId = computed(() => {
+  const raw = Number(route.query.id)
+  if (Number.isFinite(raw) && raw > 0) {
+    return raw
+  }
+  return user.value?.userId ?? null
+})
+const isSelf = computed(() => !!user.value?.userId && user.value.userId === targetUserId.value)
+
+// 他人资料来自文章列表携带的 userInfo（后端仅公开昵称与头像）
+const spaceProfile = ref<{ nickName?: string; avatar?: string }>({})
+const spaceStats = ref({ total: 0, reads: 0, likes: 0 })
+
+// ---------- 页面初始化：自己的空间要求登录，他人空间公开可看 ----------
+const initSpace = () => {
+  loadMyArticles()
+}
+
+onMounted(() => {
+  if (route.query.id && !isSelf.value) {
+    initSpace()
+    return
+  }
   if (!getToken()) {
     openLogin()
     return navigateTo('/')
   }
   if (!user.value) {
-    try {
-      await fetchUserInfo()
-    } catch {
-      return navigateTo('/')
-    }
+    fetchUserInfo()
+      .then(initSpace)
+      .catch(() => {
+        navigateTo('/')
+      })
+  } else {
+    initSpace()
   }
-  loadMyArticles()
+})
+
+// SPA 内切换不同用户空间时重载
+watch(targetUserId, (val, old) => {
+  if (val !== old && val) {
+    initSpace()
+  }
 })
 
 // ---------- 资料展示 ----------
-const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
-const avatarFallback = computed(() => (user.value?.nickName || user.value?.userName || '用户').slice(0, 1))
+const profileName = computed(() =>
+  isSelf.value ? user.value?.nickName || user.value?.userName || '用户' : spaceProfile.value.nickName || `用户 ${targetUserId.value}`
+)
+const avatarUrl = computed(() => {
+  const raw = isSelf.value ? user.value?.avatar : spaceProfile.value.avatar
+  return toCoverUrl(config.public.apiBase, raw)
+})
+const avatarFallback = computed(() => profileName.value.slice(0, 1))
 const sexLabel = computed(() => {
   const map: Record<string, string> = { '0': '男', '1': '女' }
   return map[user.value?.sex ?? ''] || '保密'
@@ -115,7 +158,7 @@ const goSettings = () => {
   return navigateTo('/user/settings')
 }
 
-// ---------- 我的文章 ----------
+// ---------- 文章列表（本人/他人共用，排序走后端参数） ----------
 const tabs = [
   { key: 'article', label: '我的文章' },
   { key: 'like', label: '点赞' },
@@ -123,25 +166,16 @@ const tabs = [
 ]
 const activeTab = ref('article')
 const articles = ref<any[]>([])
+const articlesLoading = ref(true)
 
-const goArticle = (item: any) => {
-  return navigateTo({
-    path: '/article/detail',
-    query: { id: item.id }
-  })
-}
-
-// ---------- 我的文章：排序（最新/热门走后端白名单排序参数）+ 列表 ----------
-// 编辑/删除入口在文章详情页 meta 行（仅作者可见），卡片保持纯浏览
 const sortOptions = [
   { key: 'new', label: '最新', orderByColumn: 'createTime', isAsc: 'descending' },
   { key: 'hot', label: '热门', orderByColumn: 'readNum', isAsc: 'descending' }
 ]
 const activeSort = ref('new')
-const articlesLoading = ref(true)
 
 const loadMyArticles = async () => {
-  const userId = user.value?.userId
+  const userId = targetUserId.value
   if (!userId) {
     return
   }
@@ -156,7 +190,20 @@ const loadMyArticles = async () => {
         ...(opt ? { orderByColumn: opt.orderByColumn, isAsc: opt.isAsc } : {})
       }
     })
-    articles.value = res.data?.list || []
+    const list = res.data?.list || []
+    articles.value = list
+    // 他人空间：从文章携带的 userInfo 取头像昵称，从列表算公开统计
+    if (!isSelf.value) {
+      const info = list[0]?.userInfo
+      if (info?.nickName || info?.avatar) {
+        spaceProfile.value = { nickName: info.nickName, avatar: info.avatar }
+      }
+      spaceStats.value = {
+        total: res.data?.total || 0,
+        reads: list.reduce((sum, item) => sum + (item.readNum || 0), 0),
+        likes: list.reduce((sum, item) => sum + (item.likeNum || 0), 0)
+      }
+    }
   } catch {
     articles.value = []
   } finally {
@@ -170,6 +217,13 @@ const switchSort = (key: string) => {
   }
   activeSort.value = key
   loadMyArticles()
+}
+
+const goArticle = (item: any) => {
+  return navigateTo({
+    path: '/article/detail',
+    query: { id: item.id }
+  })
 }
 </script>
 
@@ -252,6 +306,19 @@ const switchSort = (key: string) => {
           text-overflow: ellipsis;
           white-space: nowrap;
         }
+      }
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--color-text-2);
+
+      .stat b {
+        font-size: 16px;
+        color: var(--color-text-1);
+        margin-right: 4px;
       }
     }
   }

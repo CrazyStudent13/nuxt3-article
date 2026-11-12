@@ -2,11 +2,17 @@
 <template>
   <div class="author-card">
     <div class="author-head">
-      <span class="avatar">
-        <img v-if="avatarUrl" :src="avatarUrl" :alt="authorName" />
-        <span v-else class="avatar-fallback">{{ authorName.slice(0, 1) }}</span>
-      </span>
-      <span class="name">{{ authorName }}</span>
+      <NuxtLink
+        class="author-link"
+        :title="`查看 ${authorName} 的空间`"
+        :to="{ path: '/user/space', query: { id: String(props.author.userId || '') } }"
+      >
+        <span class="avatar">
+          <img v-if="avatarUrl" :src="avatarUrl" :alt="authorName" />
+          <span v-else class="avatar-fallback">{{ authorName.slice(0, 1) }}</span>
+        </span>
+        <span class="name">{{ authorName }}</span>
+      </NuxtLink>
     </div>
 
     <div class="author-stats">
@@ -73,9 +79,13 @@ const stats = computed(() => {
 }
 
 .author-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  .author-link {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
   .avatar {
     flex-shrink: 0;
@@ -103,7 +113,6 @@ const stats = computed(() => {
   }
 
   .name {
-    flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -111,6 +120,11 @@ const stats = computed(() => {
     font-size: 15px;
     font-weight: 600;
     color: var(--color-text-1);
+    transition: color 0.2s ease;
+  }
+
+  .author-link:hover .name {
+    color: var(--color-primary);
   }
 }
 
