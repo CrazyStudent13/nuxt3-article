@@ -3,7 +3,6 @@
   <div class="site-info">
     <nav class="links">
       <NuxtLink to="/about">关于我们</NuxtLink>
-      <NuxtLink to="/column/list">专栏</NuxtLink>
       <a href="javascript:void(0)" @click.prevent>用户协议</a>
       <a href="javascript:void(0)" @click.prevent>隐私政策</a>
       <a href="javascript:void(0)" @click.prevent>友情链接</a>
