@@ -2,6 +2,11 @@
   <div class="detail">
     <template v-if="article.title || article.content">
       <div class="detail-layout">
+        <!-- 左侧悬浮工具栏：点赞/评论/收藏占位，分享/回顶部可用 -->
+        <div class="action-rail">
+          <ArticleActionBar :like-num="likeCount" :comment-num="commentCount" />
+        </div>
+
         <article class="panel">
           <h1 class="title">{{ article.title || '无标题' }}</h1>
 
@@ -66,6 +71,8 @@ type ArticleDetail = {
   subjectId?: number | string
   cover?: string
   readNum?: number
+  likeNum?: number
+  commentNum?: number
   publishTime?: string | null
   createTime?: string
   author?: string
@@ -131,6 +138,8 @@ const coverUrl = computed(() => toCoverUrl(config.public.apiBase, article.value.
 // publishTime 常为 null，回退 createTime
 const publishLabel = computed(() => article.value.publishTime || article.value.createTime)
 const readLabel = computed(() => (typeof article.value.readNum === 'number' ? String(article.value.readNum) : ''))
+const likeCount = computed(() => (typeof article.value.likeNum === 'number' ? article.value.likeNum : 0))
+const commentCount = computed(() => (typeof article.value.commentNum === 'number' ? article.value.commentNum : 0))
 
 // 编辑/删除入口：仅当前登录用户是文章作者时可见
 const { user, fetchUserInfo } = useUser()
@@ -179,7 +188,15 @@ useSeoMeta({
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
+}
+
+// 左侧工具栏轨道：吸顶跟随，窄屏隐藏
+.action-rail {
+  position: sticky;
+  top: 120px;
+  flex-shrink: 0;
+  width: 44px;
 }
 
 .panel {
@@ -299,7 +316,8 @@ useSeoMeta({
 }
 
 @media (max-width: 1000px) {
-  .toc-aside {
+  .toc-aside,
+  .action-rail {
     display: none;
   }
 }
