@@ -47,18 +47,23 @@
         </button>
       </div>
 
-      <!-- 文章 tab：排序胶囊 + 列表 -->
+      <!-- 文章 tab：标题搜索 + 时间正/倒序切换 -->
       <template v-if="activeTab === 'article'">
-        <div class="sort-bar">
-          <button
-            v-for="s in sortOptions"
-            :key="s.key"
-            class="sort-pill"
-            :class="{ active: activeSort === s.key }"
-            type="button"
-            @click="switchSort(s.key)"
-          >
-            {{ s.label }}
+        <div class="list-toolbar">
+          <input
+            v-model="keyword"
+            class="article-search"
+            type="search"
+            placeholder="搜索文章标题"
+            maxlength="64"
+            @input="onKeywordInput"
+          />
+          <button class="time-toggle" type="button" @click="toggleTimeOrder">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flip: timeOrder === 'asc' }" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <polyline points="19 12 12 19 5 12" />
+            </svg>
+            {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
           </button>
         </div>
 
@@ -70,7 +75,17 @@
             @click="goArticle(item)"
           />
         </template>
-        <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : isSelf ? '还没有发布过文章' : 'TA 还没有发布过文章' }}</p>
+        <p v-else class="feed-empty">
+          {{
+            articlesLoading
+              ? '加载中…'
+              : keyword
+                ? `未找到与“${keyword}”相关的文章`
+                : isSelf
+                  ? '还没有发布过文章'
+                  : 'TA 还没有发布过文章'
+          }}
+        </p>
       </template>
 
       <!-- 专栏 tab：复用 ColumnCard 行列表 -->
@@ -117,6 +132,8 @@ const spaceStats = ref({ total: 0, reads: 0, likes: 0 })
 
 // ---------- 页面初始化：自己的空间要求登录，他人空间公开可看 ----------
 const initSpace = () => {
+  // 切换空间时清掉搜索词，避免上一位的过滤条件带到下一位
+  keyword.value = ''
   loadMyArticles()
 }
 
@@ -185,18 +202,16 @@ const activeTab = ref('article')
 const articles = ref<any[]>([])
 const articlesLoading = ref(true)
 
-const sortOptions = [
-  { key: 'new', label: '最新', orderByColumn: 'createTime', isAsc: 'descending' },
-  { key: 'hot', label: '热门', orderByColumn: 'readNum', isAsc: 'descending' }
-]
-const activeSort = ref('new')
+// ---------- 文章列表：标题搜索（后端 LIKE）+ 时间正/倒序（后端排序参数），输入 400ms 防抖 ----------
+const keyword = ref('')
+const timeOrder = ref<'desc' | 'asc'>('desc')
+let keywordTimer: ReturnType<typeof setTimeout> | null = null
 
 const loadMyArticles = async () => {
   const userId = targetUserId.value
   if (!userId) {
     return
   }
-  const opt = sortOptions.find((s) => s.key === activeSort.value)
   articlesLoading.value = true
   try {
     const res = await apiFetch<{ list?: any[]; total?: number }>('/api/post/article/guest/list', {
@@ -204,7 +219,9 @@ const loadMyArticles = async () => {
         userId,
         pageNum: 1,
         pageSize: 50,
-        ...(opt ? { orderByColumn: opt.orderByColumn, isAsc: opt.isAsc } : {})
+        orderByColumn: 'createTime',
+        isAsc: timeOrder.value === 'desc' ? 'descending' : 'ascending',
+        ...(keyword.value.trim() ? { title: keyword.value.trim() } : {})
       }
     })
     const list = res.data?.list || []
@@ -226,6 +243,18 @@ const loadMyArticles = async () => {
   } finally {
     articlesLoading.value = false
   }
+}
+
+const onKeywordInput = () => {
+  if (keywordTimer) {
+    clearTimeout(keywordTimer)
+  }
+  keywordTimer = setTimeout(() => loadMyArticles(), 400)
+}
+
+const toggleTimeOrder = () => {
+  timeOrder.value = timeOrder.value === 'desc' ? 'asc' : 'desc'
+  loadMyArticles()
 }
 
 // ---------- 专栏 tab：guest subject list 原生支持 userId 过滤，首次进入 tab 才拉取 ----------
@@ -260,14 +289,6 @@ const switchTab = (key: string) => {
   if (key === 'subject' && !subjectsLoaded.value) {
     loadMySubjects()
   }
-}
-
-const switchSort = (key: string) => {
-  if (activeSort.value === key) {
-    return
-  }
-  activeSort.value = key
-  loadMyArticles()
 }
 
 const goArticle = (item: any) => {
@@ -404,32 +425,60 @@ const goColumn = (item: any) => {
   }
 }
 
-// 排序胶囊（掘金式：最新 / 热门）
-.sort-bar {
+// 文章列表工具条：标题搜索 + 时间正/倒序切换
+.list-toolbar {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   padding: 12px 20px 0;
 
-  .sort-pill {
-    padding: 4px 14px;
-    border: 0;
+  .article-search {
+    flex: 0 1 280px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-border-light);
     border-radius: var(--radius-full);
     background-color: var(--color-bg);
+    font-size: 13px;
+    color: var(--color-text-1);
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    &::placeholder {
+      color: var(--color-text-3);
+    }
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+
+  .time-toggle {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
     font-size: 13px;
     color: var(--color-text-2);
     cursor: pointer;
     transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
+      color 0.2s ease,
+      border-color 0.2s ease;
 
     &:hover {
-      color: var(--color-text-1);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
     }
 
-    &.active {
-      background-color: var(--color-primary-light);
-      color: var(--color-primary);
-      font-weight: 500;
+    svg {
+      transition: transform 0.2s ease;
+
+      &.flip {
+        transform: rotate(180deg);
+      }
     }
   }
 }
