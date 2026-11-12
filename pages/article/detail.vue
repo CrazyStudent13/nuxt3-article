@@ -21,6 +21,7 @@
             <NuxtLink
               v-if="subject.title && article.subjectId"
               class="meta-subject"
+              target="_blank"
               :to="{ path: '/column/detail', query: { id: String(article.subjectId) } }"
             >
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -89,7 +90,7 @@ const formatDateTime = (value?: string | null) => {
   return formatted === 'Invalid Date' ? '' : formatted
 }
 
-const { data } = await useFetch<{ data?: ArticleDetail }>(
+const { data } = await useFetch<{ data?: ArticleDetail | null }>(
   `${config.public.apiBase}/api/post/article/guest/detail`,
   {
     query: {
@@ -112,7 +113,7 @@ const article = computed(() => {
 })
 
 // 专栏信息：文章带 subjectId 时取标题做入口徽标（拿不到标题则不展示）
-const { data: subjectRes } = await useFetch<{ data?: SubjectDetail }>(
+const { data: subjectRes } = await useFetch<{ data?: SubjectDetail | null }>(
   `${config.public.apiBase}/api/post/subject/guest/detail`,
   {
     query: computed(() => ({ id: String(article.value.subjectId || '') })),
