@@ -6,6 +6,7 @@
       v-for="item in related"
       :key="item.id"
       class="related-item"
+      :title="item.title"
       :to="{ path: '/article/detail', query: { id: String(item.id) } }"
     >
       <span class="item-title">{{ item.title || '无标题' }}</span>
