@@ -21,11 +21,6 @@
     :deep(.site-info .links) {
       justify-content: center;
     }
-
-    :deep(.site-info .filing) {
-      margin-top: 14px;
-      padding-top: 14px;
-    }
   }
 }
 </style>

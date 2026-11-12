@@ -14,8 +14,7 @@
     <p class="line">本站大部分下载资源收集于网络，只做学习和交流使用，版权归原作者所有。</p>
     <p class="line">若本站发布的内容侵犯到您的权益，请联系站长，我们将及时下架相关内容。</p>
 
-    <p class="line filing">ICP 备案号待补充</p>
-    <p class="copyright">©2026 游戏速递</p>
+    <p class="copyright">©2026 游戏速递 · 境外服务器部署</p>
   </div>
 </template>
 
@@ -55,14 +54,10 @@
     }
   }
 
-  .filing {
+  .copyright {
     margin-top: 12px;
     padding-top: 12px;
     border-top: 1px solid var(--color-border-light);
-  }
-
-  .copyright {
-    margin-top: 2px;
   }
 }
 </style>
