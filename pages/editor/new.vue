@@ -153,8 +153,17 @@
                   </svg>
                   {{ coverUploading ? '上传中…' : '上传封面' }}
                 </span>
+                <!-- 悬浮移除：已选封面时 hover 显现，点击不触发更换 -->
+                <span
+                  v-if="publishForm.cover && !coverUploading"
+                  class="cover-remove"
+                  role="button"
+                  tabindex="-1"
+                  @click.stop="publishForm.cover = ''"
+                >
+                  移除
+                </span>
               </button>
-              <button v-if="publishForm.cover" class="cover-remove" type="button" @click="publishForm.cover = ''">移除</button>
               <input ref="coverInput" class="img-input" type="file" accept="image/*" @change="handleCoverChange" />
             </span>
           </label>
@@ -982,10 +991,11 @@ const confirmPublish = async () => {
     margin: 0 6px;
     background-color: var(--color-border-light);
   }
+}
 
-  .img-input {
-    display: none;
-  }
+// 隐藏原生文件选择框（工具栏图片按钮与发布弹窗封面上传共用）
+.img-input {
+  display: none;
 }
 
 // ---------- 编辑区 ----------
@@ -1110,8 +1120,8 @@ const confirmPublish = async () => {
     }
 
     .cover-box {
-      width: 160px;
-      height: 90px;
+      width: 240px;
+      height: 135px;
       padding: 0;
       border: 1px dashed var(--color-border);
       border-radius: var(--radius-sm);
@@ -1119,6 +1129,7 @@ const confirmPublish = async () => {
       cursor: pointer;
       overflow: hidden;
       transition: border-color 0.2s ease;
+      position: relative;
 
       &:hover:not(:disabled) {
         border-color: var(--color-primary);
@@ -1143,19 +1154,32 @@ const confirmPublish = async () => {
         font-size: 12px;
         color: var(--color-text-3);
       }
+
+      // 已选封面时的悬浮操作层：点击任意处可更换
+      .cover-remove {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        padding: 3px 10px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background-color: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        opacity: 0;
+        transition:
+          opacity 0.2s ease,
+          background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(209, 36, 47, 0.8);
+        }
+      }
     }
 
-    .cover-remove {
-      padding: 0;
-      border: 0;
-      background-color: transparent;
-      font-size: 12px;
-      color: var(--color-text-3);
-      cursor: pointer;
-
-      &:hover {
-        color: #d1242f;
-      }
+    &:hover .cover-remove {
+      opacity: 1;
     }
 
     .form-input {
