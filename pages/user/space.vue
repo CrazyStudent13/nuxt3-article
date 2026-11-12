@@ -10,13 +10,13 @@
 
         <div class="profile-info">
           <h2 class="profile-name">{{ profileName }}</h2>
-          <!-- 公开统计：自己/他人同一套展示 -->
-          <div class="profile-stats">
+          <!-- 他人空间：公开统计（自己/他人同一套展示） -->
+          <div v-if="!isSelf" class="profile-stats">
             <span class="stat"><b>{{ spaceStats.total }}</b> 文章</span>
             <span class="stat"><b>{{ spaceStats.reads }}</b> 阅读</span>
             <span class="stat"><b>{{ spaceStats.likes }}</b> 获赞</span>
           </div>
-          <!-- 仅自己可见的账号信息 -->
+          <!-- 仅自己可见的账号信息；自己的文章数据未来走专门的个人数据入口 -->
           <dl v-if="isSelf" class="profile-fields">
             <div class="field-row"><dt>账号</dt><dd>{{ user?.userName }}</dd></div>
             <div class="field-row"><dt>昵称</dt><dd>{{ user?.nickName || '未设置' }}</dd></div>
