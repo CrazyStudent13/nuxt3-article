@@ -35,6 +35,13 @@
         />
       </template>
       <p v-else class="feed-empty">该专栏下还没有文章</p>
+
+      <div v-if="articles.length && !finished" class="feed-loadmore">
+        <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">
+          {{ loading ? '加载中…' : loadError ? '加载失败，点击重试' : '加载更多' }}
+        </button>
+      </div>
+      <p v-else-if="articles.length && finished && loadedMore" class="feed-end">已经到底了</p>
     </section>
   </div>
 </template>
@@ -99,17 +106,20 @@ const coverUrl = computed(() => toCoverUrl(config.public.apiBase, subject.value.
 const { data: articleRes } = await useFetch<{ data?: { list?: ArticleListItem[]; total?: number } }>(
   `${config.public.apiBase}/api/post/article/guest/list`,
   {
-    query: {
-      subjectId,
+    query: computed(() => ({
+      subjectId: subjectId.value,
       pageNum: 1,
       pageSize: 10
-    },
+    })),
     default: () => ({ data: { list: [] } })
   }
 )
 
-const articles = computed(() => articleRes.value?.data?.list || [])
-const total = computed(() => articleRes.value?.data?.total || articles.value.length)
+// 筛选条件只含 subjectId，pageNum/pageSize 由 useArticleFeed 统一管理
+const { articles, total, loading, loadError, finished, loadedMore, loadMore } = useArticleFeed(
+  articleRes,
+  computed(() => ({ subjectId: subjectId.value }))
+)
 
 const handleRowClick = (item: ArticleListItem) => {
   return navigateTo({

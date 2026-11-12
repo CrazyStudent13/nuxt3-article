@@ -20,6 +20,13 @@
     <p v-else class="feed-empty">
       {{ searchTitle ? `未找到与“${searchTitle}”相关的文章` : '暂无文章，敬请期待' }}
     </p>
+
+    <div v-if="articles.length && !finished" class="feed-loadmore">
+      <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">
+        {{ loading ? '加载中…' : loadError ? '加载失败，点击重试' : '加载更多' }}
+      </button>
+    </div>
+    <p v-else-if="articles.length && finished && loadedMore" class="feed-end">已经到底了</p>
   </div>
 </template>
 
@@ -62,8 +69,10 @@ const { data } = await useFetch<{ data?: { list?: ArticleListItem[]; total?: num
   }
 )
 
-const articles = computed(() => data.value?.data?.list || [])
-const articleTotal = computed(() => data.value?.data?.total || articles.value.length)
+const { articles, total: articleTotal, loading, loadError, finished, loadedMore, loadMore } = useArticleFeed(
+  data,
+  queryParams
+)
 
 const handleRowClick = (item: ArticleListItem) => {
   return navigateTo({
