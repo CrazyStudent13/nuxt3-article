@@ -2,34 +2,55 @@
   <div class="home-layout">
     <div class="feed-panel">
       <div class="feed-header">
-        <h1 class="feed-title">
-          <template v-if="searchTitle">搜索“{{ searchTitle }}”</template>
-          <template v-else>最新文章</template>
-        </h1>
+        <!-- 掘金式 feed tabs：推荐待文章量大后再加，关注待关注体系上线 -->
+        <div class="feed-tabs">
+          <button
+            class="feed-tab"
+            :class="{ active: feedTab === 'new' }"
+            type="button"
+            @click="feedTab = 'new'"
+          >
+            最新
+          </button>
+          <button
+            class="feed-tab"
+            :class="{ active: feedTab === 'follow' }"
+            type="button"
+            @click="feedTab = 'follow'"
+          >
+            关注
+          </button>
+        </div>
         <NuxtLink v-if="searchTitle" to="/" class="feed-more">清除搜索</NuxtLink>
-        <span v-else-if="articleTotal" class="feed-more">共 {{ articleTotal }} 篇</span>
+        <span v-else-if="feedTab === 'new' && articleTotal" class="feed-more">共 {{ articleTotal }} 篇</span>
       </div>
 
-      <template v-if="articles.length">
-        <article-card
-          v-for="item in articles"
-          :key="item.id || item.title"
-          :card-info="item"
-          @click="handleRowClick(item)"
-        />
+      <!-- 最新：信息流 + 无限滚动 -->
+      <template v-if="feedTab === 'new'">
+        <template v-if="articles.length">
+          <article-card
+            v-for="item in articles"
+            :key="item.id || item.title"
+            :card-info="item"
+            @click="handleRowClick(item)"
+          />
+        </template>
+        <p v-else class="feed-empty">
+          {{ searchTitle ? `未找到与“${searchTitle}”相关的文章` : '暂无文章，敬请期待' }}
+        </p>
+
+        <!-- 无限滚动：哨兵进入视口自动追加；出错时显示手动重试 -->
+        <div v-show="articles.length" ref="sentinelRef" class="feed-sentinel" />
+        <div v-if="loadError" class="feed-loadmore">
+          <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">
+            {{ loading ? '加载中…' : '加载失败，点击重试' }}
+          </button>
+        </div>
+        <p v-if="articles.length && finished && loadedMore" class="feed-end">已经到底了</p>
       </template>
-      <p v-else class="feed-empty">
-        {{ searchTitle ? `未找到与“${searchTitle}”相关的文章` : '暂无文章，敬请期待' }}
-      </p>
 
-      <!-- 无限滚动：哨兵进入视口自动追加；出错时显示手动重试 -->
-      <div ref="sentinelRef" class="feed-sentinel" />
-      <div v-if="loadError" class="feed-loadmore">
-        <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">
-          {{ loading ? '加载中…' : '加载失败，点击重试' }}
-        </button>
-      </div>
-      <p v-if="articles.length && finished && loadedMore" class="feed-end">已经到底了</p>
+      <!-- 关注：关注体系上线前的占位 -->
+      <p v-else class="feed-empty">关注功能即将上线，敬请期待</p>
     </div>
 
     <!-- 右侧信息栏：页脚信息块（掘金式） -->
@@ -66,9 +87,15 @@ useSeoMeta({
   ogDescription: '专注分享游戏资讯，玩家攻略，游戏存档的快乐小站'
 })
 
+// feed tab：最新（默认，createTime 倒序）/ 关注（占位，待关注体系上线）
+const feedTab = ref<'new' | 'follow'>('new')
+
 const queryParams = computed(() => ({
   pageNum: 1,
   pageSize: 10,
+  // 最新按创建时间倒序（publishTime 多为 null 会沉底，不用后端默认排序）
+  orderByColumn: 'createTime',
+  isAsc: 'descending',
   ...(searchTitle.value ? { title: searchTitle.value } : {})
 }))
 
@@ -90,7 +117,8 @@ const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
 const maybeLoadMore = () => {
-  if (loading.value || finished.value || loadError.value) {
+  // 仅在「最新」tab 下自动加载
+  if (feedTab.value !== 'new' || loading.value || finished.value || loadError.value) {
     return
   }
   const el = sentinelRef.value
@@ -138,6 +166,42 @@ const handleRowClick = (item: ArticleListItem) => {
   .feed-panel {
     flex: 1;
     min-width: 0;
+  }
+}
+
+// feed tabs（掘金式：文字 tab + 下划线激活态）
+.feed-header {
+  .feed-tabs {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .feed-tab {
+    padding: 0 2px 4px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background-color: transparent;
+    font-size: 14px;
+    color: var(--color-text-2);
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      color: var(--color-text-1);
+    }
+
+    &.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      font-weight: 500;
+    }
+  }
+
+  .feed-more {
+    margin-left: auto;
   }
 }
 
