@@ -254,9 +254,16 @@ const handleAvatarChange = async (event: Event) => {
   if (file.size > 10 * 1024 * 1024) {
     return setProfileTip('图片不能超过 10MB', true)
   }
+  // 先裁剪成方形再上传；取消裁剪则静默结束
+  let cropped: File
+  try {
+    cropped = await cropImage(file, { title: '裁剪头像', aspectRatio: 1 })
+  } catch {
+    return
+  }
   avatarUploading.value = true
   try {
-    await updateAvatar(file)
+    await updateAvatar(cropped)
     setProfileTip('头像已更新')
   } catch (error: any) {
     setProfileTip(error?.message || '头像上传失败', true)

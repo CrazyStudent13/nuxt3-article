@@ -441,7 +441,9 @@ const insertImage = (file: File) => {
   const start = el.selectionStart
   const end = el.selectionEnd
   imgUploading.value = true
-  return uploadImage(file, 'article/content')
+  // 先弹裁剪框（自由比例），取消则静默放弃插入
+  return cropImage(file, { title: '裁剪图片' })
+    .then((cropped) => uploadImage(cropped, 'article/content'))
     .then((url) => {
       if (!url) {
         setTopTip('图片上传失败')
@@ -452,7 +454,9 @@ const insertImage = (file: File) => {
       replaceRange(start, end, `![${file.name}](${abs})`)
     })
     .catch((error: any) => {
-      setTopTip(error?.message || '图片上传失败')
+      if (error?.message !== 'cancel') {
+        setTopTip(error?.message || '图片上传失败')
+      }
     })
     .finally(() => {
       imgUploading.value = false
@@ -650,9 +654,16 @@ const handleCoverChange = async (event: Event) => {
     publishTip.value = '图片不能超过 10MB'
     return
   }
+  // 封面按 16:9 裁剪后再上传，取消则静默结束
+  let cropped: File
+  try {
+    cropped = await cropImage(file, { title: '裁剪封面', aspectRatio: 16 / 9 })
+  } catch {
+    return
+  }
   coverUploading.value = true
   try {
-    const url = await uploadImage(file, 'article/cover')
+    const url = await uploadImage(cropped, 'article/cover')
     publishForm.cover = url
     publishTip.value = ''
   } catch (error: any) {
