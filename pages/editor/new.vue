@@ -212,20 +212,36 @@ const { openLogin } = useAuthModal()
 // 编辑模式：带 ?id= 时载入已有文章，发布改为保存修改（后端 PUT /api/post/article 只允许改自己的文章）
 const editId = ref('')
 
-// ---------- 登录守卫 ----------
-onMounted(() => {
-  if (!getToken()) {
-    openLogin()
-    return navigateTo('/')
-  }
-  if (!user.value) {
-    fetchUserInfo().catch(() => {})
-  }
+// ---------- 登录守卫：未登录弹框留在本页，登录成功后自动初始化（掘金式原地继续写） ----------
+const initEditor = () => {
   if (route.query.id) {
     editId.value = String(route.query.id)
     loadArticle(editId.value)
   } else {
     loadDrafts()
+  }
+}
+
+onMounted(() => {
+  if (!getToken()) {
+    openLogin()
+    return
+  }
+  if (!user.value) {
+    fetchUserInfo()
+      .then(initEditor)
+      .catch(() => {
+        navigateTo('/')
+      })
+  } else {
+    initEditor()
+  }
+})
+
+// 弹窗登录成功 → user state 填充 → 触发初始化
+watch(user, (val, old) => {
+  if (val && !old) {
+    initEditor()
   }
 })
 

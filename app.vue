@@ -2,6 +2,9 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
-  <!-- 全局图片裁剪弹窗：布局无关（编辑器页也需要裁剪封面/正文图） -->
+  <!-- 全局弹窗：挂布局之外，编辑器等独立布局也能用 -->
+  <ClientOnly>
+    <AuthModal />
+  </ClientOnly>
   <CommonImageCropModal />
 </template>
