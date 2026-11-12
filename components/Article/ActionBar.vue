@@ -129,12 +129,17 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="less" scoped>
+// 固定定位挂在正文列左侧空白区，不占布局宽度；视口不够宽时整体隐藏
 .action-bar {
+  position: fixed;
+  left: calc(50% - 590px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  position: relative;
 
   .action-btn {
     position: relative;
@@ -193,6 +198,12 @@ onBeforeUnmount(() => {
     color: #fff;
     white-space: nowrap;
     z-index: 10;
+  }
+}
+
+@media (max-width: 1200px) {
+  .action-bar {
+    display: none;
   }
 }
 </style>

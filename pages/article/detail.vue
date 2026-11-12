@@ -1,12 +1,9 @@
 <template>
   <div class="detail">
+    <!-- 左侧悬浮工具栏：fixed 挂视口，不占布局宽度 -->
+    <ArticleActionBar :like-num="likeCount" :comment-num="commentCount" />
     <template v-if="article.title || article.content">
       <div class="detail-layout">
-        <!-- 左侧悬浮工具栏：点赞/评论/收藏占位，分享/回顶部可用 -->
-        <div class="action-rail">
-          <ArticleActionBar :like-num="likeCount" :comment-num="commentCount" />
-        </div>
-
         <article class="panel">
           <h1 class="title">{{ article.title || '无标题' }}</h1>
 
@@ -188,15 +185,7 @@ useSeoMeta({
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 20px;
-}
-
-// 左侧工具栏轨道：吸顶跟随，窄屏隐藏
-.action-rail {
-  position: sticky;
-  top: 120px;
-  flex-shrink: 0;
-  width: 44px;
+  gap: 24px;
 }
 
 .panel {
@@ -316,8 +305,7 @@ useSeoMeta({
 }
 
 @media (max-width: 1000px) {
-  .toc-aside,
-  .action-rail {
+  .toc-aside {
     display: none;
   }
 }
