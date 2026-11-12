@@ -1,7 +1,5 @@
 <template>
   <div class="detail">
-    <NuxtLink to="/" class="back">← 返回文章列表</NuxtLink>
-
     <template v-if="article.title || article.content">
       <div class="detail-layout">
         <article class="panel">
@@ -155,18 +153,6 @@ useSeoMeta({
 </script>
 
 <style lang="less" scoped>
-.back {
-  display: inline-block;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--color-text-3);
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: var(--color-primary);
-  }
-}
-
 .detail-layout {
   display: flex;
   align-items: flex-start;
