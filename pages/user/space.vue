@@ -47,23 +47,25 @@
             {{ t.label }}
           </button>
         </div>
-        <!-- 文章 tab 的搜索与时间排序：并入 tab 行右侧（时间切换在左、搜索在右） -->
+        <!-- 文章 tab 的搜索与时间排序：排序内嵌搜索框前置位 -->
         <div class="tab-tools">
-          <button class="time-toggle" type="button" @click="toggleTimeOrder">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flip: timeOrder === 'asc' }" aria-hidden="true">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <polyline points="19 12 12 19 5 12" />
-            </svg>
-            {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
-          </button>
-          <input
-            v-model="keyword"
-            class="article-search"
-            type="search"
-            placeholder="搜索文章标题"
-            maxlength="64"
-            @input="onKeywordInput"
-          />
+          <div class="article-search">
+            <button class="time-toggle" type="button" @click="toggleTimeOrder">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flip: timeOrder === 'asc' }" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <polyline points="19 12 12 19 5 12" />
+              </svg>
+              {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
+            </button>
+            <input
+              v-model="keyword"
+              class="search-input"
+              type="search"
+              placeholder="搜索文章标题"
+              maxlength="64"
+              @input="onKeywordInput"
+            />
+          </div>
         </div>
       </div>
 
@@ -470,51 +472,42 @@ const goColumn = (item: any) => {
       }
     }
 
-    // 文章 tab 的搜索与时间排序（贴齐 tab 行右侧）
+    // 文章 tab 的搜索组：时间排序内嵌为前置按钮
     .tab-tools {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 10px;
+    }
 
-      .article-search {
-        width: 180px;
-        padding: 6px 12px;
-        border: 1px solid var(--color-border-light);
-        border-radius: var(--radius-sm);
-        background-color: var(--color-bg);
-        font-size: 13px;
-        color: var(--color-text-1);
-        outline: none;
-        transition: border-color 0.2s ease;
+    .article-search {
+      display: flex;
+      align-items: center;
+      width: 240px;
+      border: 1px solid var(--color-border-light);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-bg);
+      transition: border-color 0.2s ease;
 
-        &::placeholder {
-          color: var(--color-text-3);
-        }
-
-        &:focus {
-          border-color: var(--color-primary);
-        }
+      &:focus-within {
+        border-color: var(--color-primary);
       }
 
       .time-toggle {
+        flex-shrink: 0;
         display: flex;
         align-items: center;
-        gap: 5px;
-        padding: 6px 12px;
-        border: 1px solid var(--color-border-light);
-        border-radius: var(--radius-sm);
-        background-color: var(--color-surface);
+        gap: 4px;
+        padding: 6px 10px;
+        border: 0;
+        border-right: 1px solid var(--color-border-light);
+        background-color: transparent;
         font-size: 13px;
         color: var(--color-text-2);
         cursor: pointer;
-        transition:
-          color 0.2s ease,
-          border-color 0.2s ease;
+        transition: color 0.2s ease;
 
         &:hover {
           color: var(--color-primary);
-          border-color: var(--color-primary);
         }
 
         svg {
@@ -523,6 +516,21 @@ const goColumn = (item: any) => {
           &.flip {
             transform: rotate(180deg);
           }
+        }
+      }
+
+      .search-input {
+        flex: 1;
+        min-width: 0;
+        padding: 6px 10px;
+        border: 0;
+        background-color: transparent;
+        font-size: 13px;
+        color: var(--color-text-1);
+        outline: none;
+
+        &::placeholder {
+          color: var(--color-text-3);
         }
       }
     }
