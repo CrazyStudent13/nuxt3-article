@@ -95,7 +95,8 @@ const reset = () => cropper?.reset()
 
 const handleCancel = () => cancelCrop()
 
-// 裁剪结果导出为 Blob（尺寸上限 1600，格式跟随源文件），交回给调用方上传
+// 裁剪结果导出为 Blob（尺寸上限 1600）：统一编码 WebP 质量 0.9（近无损、体积小），
+// 浏览器不支持时 toBlob 自动回落 PNG，confirmCrop 会按实际类型命名
 const handleConfirm = () => {
   if (!cropper || confirming.value) {
     return
@@ -117,8 +118,8 @@ const handleConfirm = () => {
         confirmCrop(blob)
       }
     },
-    state.value.type || 'image/png',
-    0.92
+    'image/webp',
+    0.9
   )
 }
 
