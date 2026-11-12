@@ -35,21 +35,20 @@
     <!-- 内容卡：文章 / 专栏 tab 统一，点赞/通知仅本人空间占位 -->
     <div class="feed-panel content-panel">
       <div class="tab-bar">
-        <button
-          v-for="t in tabs"
-          :key="t.key"
-          class="tab-item"
-          :class="{ active: activeTab === t.key }"
-          type="button"
-          @click="switchTab(t.key)"
-        >
-          {{ t.label }}
-        </button>
-      </div>
-
-      <!-- 文章 tab：标题搜索 + 时间正/倒序切换 -->
-      <template v-if="activeTab === 'article'">
-        <div class="list-toolbar">
+        <div class="tab-items">
+          <button
+            v-for="t in tabs"
+            :key="t.key"
+            class="tab-item"
+            :class="{ active: activeTab === t.key }"
+            type="button"
+            @click="switchTab(t.key)"
+          >
+            {{ t.label }}
+          </button>
+        </div>
+        <!-- 文章 tab 的搜索与时间排序：并入 tab 行右侧（掘金式） -->
+        <div class="tab-tools">
           <input
             v-model="keyword"
             class="article-search"
@@ -66,7 +65,10 @@
             {{ timeOrder === 'desc' ? '时间倒序' : '时间正序' }}
           </button>
         </div>
+      </div>
 
+      <!-- 文章 tab -->
+      <template v-if="activeTab === 'article'">
         <template v-if="articles.length">
           <article-card
             v-for="item in articles"
@@ -75,17 +77,13 @@
             @click="goArticle(item)"
           />
         </template>
-        <p v-else class="feed-empty">
-          {{
-            articlesLoading
-              ? '加载中…'
-              : keyword
-                ? `未找到与“${keyword}”相关的文章`
-                : isSelf
-                  ? '还没有发布过文章'
-                  : 'TA 还没有发布过文章'
-          }}
-        </p>
+        <CommonEmptyState v-else-if="articlesLoading" text="加载中…" />
+        <CommonEmptyState v-else-if="keyword">
+          未找到与“{{ keyword }}”相关的文章
+        </CommonEmptyState>
+        <CommonEmptyState v-else>
+          {{ isSelf ? '还没有发布过文章' : 'TA 还没有发布过文章' }}
+        </CommonEmptyState>
       </template>
 
       <!-- 专栏 tab：复用 ColumnCard 行列表 -->
@@ -98,10 +96,14 @@
             @click="goColumn(item)"
           />
         </div>
-        <p v-else class="feed-empty">{{ subjectsLoading ? '加载中…' : isSelf ? '还没有创建专栏' : 'TA 还没有创建专栏' }}</p>
+        <CommonEmptyState v-else-if="subjectsLoading" text="加载中…" />
+        <CommonEmptyState v-else>
+          {{ isSelf ? '还没有创建专栏' : 'TA 还没有创建专栏' }}
+        </CommonEmptyState>
       </template>
 
-      <p v-else class="feed-empty">该功能暂未开放，敬请期待</p>
+      <!-- 点赞/通知：仅本人空间占位 -->
+      <CommonEmptyState v-else>该功能暂未开放，敬请期待</CommonEmptyState>
     </div>
   </div>
 </template>
@@ -425,64 +427,6 @@ const goColumn = (item: any) => {
   }
 }
 
-// 文章列表工具条：标题搜索 + 时间正/倒序切换
-.list-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px 0;
-
-  .article-search {
-    flex: 0 1 280px;
-    padding: 6px 12px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-full);
-    background-color: var(--color-bg);
-    font-size: 13px;
-    color: var(--color-text-1);
-    outline: none;
-    transition: border-color 0.2s ease;
-
-    &::placeholder {
-      color: var(--color-text-3);
-    }
-
-    &:focus {
-      border-color: var(--color-primary);
-    }
-  }
-
-  .time-toggle {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-sm);
-    background-color: var(--color-surface);
-    font-size: 13px;
-    color: var(--color-text-2);
-    cursor: pointer;
-    transition:
-      color 0.2s ease,
-      border-color 0.2s ease;
-
-    &:hover {
-      color: var(--color-primary);
-      border-color: var(--color-primary);
-    }
-
-    svg {
-      transition: transform 0.2s ease;
-
-      &.flip {
-        transform: rotate(180deg);
-      }
-    }
-  }
-}
-
 // 专栏行列表容器（ColumnCard 自带行分隔线）
 .column-list {
   overflow: hidden;
@@ -494,9 +438,14 @@ const goColumn = (item: any) => {
 
   .tab-bar {
     display: flex;
-    gap: 4px;
-    padding: 8px 20px 0;
+    align-items: center;
+    padding: 8px 20px;
     border-bottom: 1px solid var(--color-border-light);
+
+    .tab-items {
+      display: flex;
+      gap: 4px;
+    }
 
     .tab-item {
       padding: 10px 16px;
@@ -519,6 +468,69 @@ const goColumn = (item: any) => {
         border-bottom-color: var(--color-primary);
         font-weight: 500;
       }
+    }
+
+    // 文章 tab 的搜索与时间排序（贴齐 tab 行右侧）
+    .tab-tools {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .article-search {
+        width: 180px;
+        padding: 6px 12px;
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-full);
+        background-color: var(--color-bg);
+        font-size: 13px;
+        color: var(--color-text-1);
+        outline: none;
+        transition: border-color 0.2s ease;
+
+        &::placeholder {
+          color: var(--color-text-3);
+        }
+
+        &:focus {
+          border-color: var(--color-primary);
+        }
+      }
+
+      .time-toggle {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-sm);
+        background-color: var(--color-surface);
+        font-size: 13px;
+        color: var(--color-text-2);
+        cursor: pointer;
+        transition:
+          color 0.2s ease,
+          border-color 0.2s ease;
+
+        &:hover {
+          color: var(--color-primary);
+          border-color: var(--color-primary);
+        }
+
+        svg {
+          transition: transform 0.2s ease;
+
+          &.flip {
+            transform: rotate(180deg);
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .tab-bar .tab-tools .article-search {
+      width: 140px;
     }
   }
 
