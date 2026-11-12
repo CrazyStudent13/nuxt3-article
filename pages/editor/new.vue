@@ -322,7 +322,8 @@ const cycleHeading = () => {
   const lineStart = el.value.lastIndexOf('\n', el.selectionStart - 1) + 1
   const currentLine = el.value.slice(lineStart, el.selectionEnd)
   const level = currentLine.match(/^(#{1,3})\s/)
-  const next = level ? (level[1].length >= 3 ? '' : '#'.repeat(level[1].length + 1) + ' ') : '# '
+  const levelMark = level?.[1]
+  const next = levelMark ? (levelMark.length >= 3 ? '' : '#'.repeat(levelMark.length + 1) + ' ') : '# '
   transformLines((line) => next + line.replace(/^#{1,3}\s/, ''))
 }
 

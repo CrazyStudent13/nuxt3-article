@@ -48,14 +48,11 @@ const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, props.author.
 
 // 统计数据来自 guest 文章列表按 userId 过滤：total 即文章数，readNum/likeNum 求和即累计阅读/获赞
 // 站内规模小 pageSize 100 够用；父组件保证仅在有 userId 时渲染本卡片
-const { data } = await useFetch<{ data?: { list?: Array<{ readNum?: number; likeNum?: number }>; total?: number } }>(
-  `${config.public.apiBase}/api/post/article/guest/list`,
-  {
-    query: computed(() => ({ userId: props.author.userId, pageNum: 1, pageSize: 100 })),
-    immediate: !!props.author.userId,
-    default: () => ({ data: null })
-  }
-)
+const { data } = await useFetch<{ data?: { list?: Array<{ readNum?: number; likeNum?: number }>; total?: number } | null }>(`${config.public.apiBase}/api/post/article/guest/list`, {
+  query: computed(() => ({ userId: props.author.userId, pageNum: 1, pageSize: 100 })),
+  immediate: !!props.author.userId,
+  default: () => ({ data: null })
+})
 
 const stats = computed(() => {
   const list = data.value?.data?.list || []

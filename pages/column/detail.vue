@@ -75,7 +75,7 @@ const route = useRoute()
 const config = useRuntimeConfig()
 const subjectId = computed(() => (route.query.id as string) || '')
 
-const { data: subjectRes } = await useFetch<{ data?: SubjectDetail }>(
+const { data: subjectRes } = await useFetch<{ data?: SubjectDetail | null }>(
   `${config.public.apiBase}/api/post/subject/guest/detail`,
   {
     query: {
