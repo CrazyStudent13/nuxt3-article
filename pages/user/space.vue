@@ -441,7 +441,7 @@ const goColumn = (item: any) => {
   .tab-bar {
     display: flex;
     align-items: center;
-    padding: 8px 20px;
+    padding: 8px 20px 0;
     border-bottom: 1px solid var(--color-border-light);
 
     .tab-items {
@@ -450,16 +450,14 @@ const goColumn = (item: any) => {
     }
 
     .tab-item {
-      padding: 10px 16px;
+      position: relative;
+      padding: 10px 16px 12px;
       border: 0;
       background-color: transparent;
       font-size: 14px;
       color: var(--color-text-2);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition:
-        color 0.2s ease,
-        border-color 0.2s ease;
+      transition: color 0.2s ease;
 
       &:hover {
         color: var(--color-text-1);
@@ -467,8 +465,25 @@ const goColumn = (item: any) => {
 
       &.active {
         color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
         font-weight: 500;
+      }
+
+      // 短圆条下划线：底部越界 2px，正好压在 tab 行边框上
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -2px;
+        transform: translateX(-50%);
+        width: 26px;
+        height: 3px;
+        border-radius: 2px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+      }
+
+      &.active::after {
+        background-color: var(--color-primary);
       }
     }
 

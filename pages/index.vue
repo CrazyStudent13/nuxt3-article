@@ -169,8 +169,10 @@ const handleRowClick = (item: ArticleListItem) => {
   }
 }
 
-// feed tabs（掘金式：文字 tab + 下划线激活态）
+// feed tabs（掘金式：文字 tab + 短圆条下划线，骑在头部边框线上）
 .feed-header {
+  padding-bottom: 0;
+
   .feed-tabs {
     display: flex;
     align-items: center;
@@ -178,16 +180,14 @@ const handleRowClick = (item: ArticleListItem) => {
   }
 
   .feed-tab {
-    padding: 0 2px 4px;
+    position: relative;
+    padding: 0 2px 12px;
     border: 0;
-    border-bottom: 2px solid transparent;
     background-color: transparent;
     font-size: 14px;
     color: var(--color-text-2);
     cursor: pointer;
-    transition:
-      color 0.2s ease,
-      border-color 0.2s ease;
+    transition: color 0.2s ease;
 
     &:hover {
       color: var(--color-text-1);
@@ -195,13 +195,31 @@ const handleRowClick = (item: ArticleListItem) => {
 
     &.active {
       color: var(--color-primary);
-      border-bottom-color: var(--color-primary);
       font-weight: 500;
+    }
+
+    // 短圆条下划线：底部越界 2px，正好压在头部边框上
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -2px;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 3px;
+      border-radius: 2px;
+      background-color: transparent;
+      transition: background-color 0.2s ease;
+    }
+
+    &.active::after {
+      background-color: var(--color-primary);
     }
   }
 
   .feed-more {
     margin-left: auto;
+    padding-bottom: 12px;
   }
 }
 
