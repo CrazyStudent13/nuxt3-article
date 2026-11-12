@@ -41,17 +41,27 @@
       </div>
 
       <template v-if="activeTab === 'article'">
+        <!-- 排序：最新 / 热门（掘金式胶囊切换，排序走后端参数） -->
+        <div class="sort-bar">
+          <button
+            v-for="s in sortOptions"
+            :key="s.key"
+            class="sort-pill"
+            :class="{ active: activeSort === s.key }"
+            type="button"
+            @click="switchSort(s.key)"
+          >
+            {{ s.label }}
+          </button>
+        </div>
+
         <template v-if="articles.length">
-          <div v-for="item in articles" :key="item.id || item.title" class="my-article-row">
-            <article-card :card-info="item" @click="goArticle(item)" />
-            <!-- 管理动作：悬浮显现，点击不触发卡片跳转 -->
-            <div class="row-actions">
-              <button class="row-btn" type="button" @click.stop="editArticle(item)">编辑</button>
-              <button class="row-btn danger" type="button" :disabled="deletingId === item.id" @click.stop="removeArticle(item)">
-                {{ deletingId === item.id ? '删除中…' : '删除' }}
-              </button>
-            </div>
-          </div>
+          <article-card
+            v-for="item in articles"
+            :key="item.id || item.title"
+            :card-info="item"
+            @click="goArticle(item)"
+          />
         </template>
         <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : '还没有发布过文章' }}</p>
       </template>
@@ -113,6 +123,21 @@ const tabs = [
 ]
 const activeTab = ref('article')
 const articles = ref<any[]>([])
+
+const goArticle = (item: any) => {
+  return navigateTo({
+    path: '/article/detail',
+    query: { id: item.id }
+  })
+}
+
+// ---------- 我的文章：排序（最新/热门走后端白名单排序参数）+ 列表 ----------
+// 编辑/删除入口在文章详情页 meta 行（仅作者可见），卡片保持纯浏览
+const sortOptions = [
+  { key: 'new', label: '最新', orderByColumn: 'createTime', isAsc: 'descending' },
+  { key: 'hot', label: '热门', orderByColumn: 'readNum', isAsc: 'descending' }
+]
+const activeSort = ref('new')
 const articlesLoading = ref(true)
 
 const loadMyArticles = async () => {
@@ -120,10 +145,16 @@ const loadMyArticles = async () => {
   if (!userId) {
     return
   }
+  const opt = sortOptions.find((s) => s.key === activeSort.value)
   articlesLoading.value = true
   try {
     const res = await apiFetch<{ list?: any[]; total?: number }>('/api/post/article/guest/list', {
-      query: { userId, pageNum: 1, pageSize: 10 }
+      query: {
+        userId,
+        pageNum: 1,
+        pageSize: 50,
+        ...(opt ? { orderByColumn: opt.orderByColumn, isAsc: opt.isAsc } : {})
+      }
     })
     articles.value = res.data?.list || []
   } catch {
@@ -133,33 +164,12 @@ const loadMyArticles = async () => {
   }
 }
 
-const goArticle = (item: any) => {
-  return navigateTo({
-    path: '/article/detail',
-    query: { id: item.id }
-  })
-}
-
-// ---------- 我的文章管理：编辑进编辑器，删除调后端（需 post:article:remove 权限） ----------
-const deletingId = ref<number | string | null>(null)
-
-const editArticle = (item: any) => {
-  return navigateTo({ path: '/editor/new', query: { id: String(item.id) } })
-}
-
-const removeArticle = async (item: any) => {
-  if (!window.confirm(`确定删除「${item.title || '无标题'}」吗？删除后不可恢复。`)) {
+const switchSort = (key: string) => {
+  if (activeSort.value === key) {
     return
   }
-  deletingId.value = item.id
-  try {
-    await apiFetch(`/api/post/article/${item.id}`, { method: 'DELETE' })
-    articles.value = articles.value.filter((a) => a.id !== item.id)
-  } catch (error: any) {
-    window.alert(error?.message || '删除失败，请稍后重试')
-  } finally {
-    deletingId.value = null
-  }
+  activeSort.value = key
+  loadMyArticles()
 }
 </script>
 
@@ -269,53 +279,32 @@ const removeArticle = async (item: any) => {
   }
 }
 
-// 我的文章行：卡片 + 悬浮管理动作
-.my-article-row {
-  position: relative;
+// 排序胶囊（掘金式：最新 / 热门）
+.sort-bar {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px 0;
 
-  &:hover .row-actions {
-    opacity: 1;
-  }
+  .sort-pill {
+    padding: 4px 14px;
+    border: 0;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg);
+    font-size: 13px;
+    color: var(--color-text-2);
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
 
-  .row-actions {
-    position: absolute;
-    top: 10px;
-    right: 16px;
-    z-index: 2;
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    &:hover {
+      color: var(--color-text-1);
+    }
 
-    .row-btn {
-      padding: 3px 10px;
-      border: 0;
-      border-radius: var(--radius-sm);
-      background-color: var(--color-surface);
-      box-shadow: var(--shadow-1, 0 0 0 1px var(--color-border-light));
-      font-size: 12px;
+    &.active {
+      background-color: var(--color-primary-light);
       color: var(--color-primary);
-      cursor: pointer;
-      transition:
-        opacity 0.2s ease,
-        background-color 0.2s ease;
-
-      &:hover {
-        background-color: var(--color-primary-light);
-      }
-
-      &.danger {
-        color: #d1242f;
-
-        &:hover {
-          background-color: rgba(209, 36, 47, 0.08);
-        }
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-      }
+      font-weight: 500;
     }
   }
 }
