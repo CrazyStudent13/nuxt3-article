@@ -42,12 +42,16 @@
 
       <template v-if="activeTab === 'article'">
         <template v-if="articles.length">
-          <article-card
-            v-for="item in articles"
-            :key="item.id || item.title"
-            :card-info="item"
-            @click="goArticle(item)"
-          />
+          <div v-for="item in articles" :key="item.id || item.title" class="my-article-row">
+            <article-card :card-info="item" @click="goArticle(item)" />
+            <!-- 管理动作：悬浮显现，点击不触发卡片跳转 -->
+            <div class="row-actions">
+              <button class="row-btn" type="button" @click.stop="editArticle(item)">编辑</button>
+              <button class="row-btn danger" type="button" :disabled="deletingId === item.id" @click.stop="removeArticle(item)">
+                {{ deletingId === item.id ? '删除中…' : '删除' }}
+              </button>
+            </div>
+          </div>
         </template>
         <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : '还没有发布过文章' }}</p>
       </template>
@@ -134,6 +138,28 @@ const goArticle = (item: any) => {
     path: '/article/detail',
     query: { id: item.id }
   })
+}
+
+// ---------- 我的文章管理：编辑进编辑器，删除调后端（需 post:article:remove 权限） ----------
+const deletingId = ref<number | string | null>(null)
+
+const editArticle = (item: any) => {
+  return navigateTo({ path: '/editor/new', query: { id: String(item.id) } })
+}
+
+const removeArticle = async (item: any) => {
+  if (!window.confirm(`确定删除「${item.title || '无标题'}」吗？删除后不可恢复。`)) {
+    return
+  }
+  deletingId.value = item.id
+  try {
+    await apiFetch(`/api/post/article/${item.id}`, { method: 'DELETE' })
+    articles.value = articles.value.filter((a) => a.id !== item.id)
+  } catch (error: any) {
+    window.alert(error?.message || '删除失败，请稍后重试')
+  } finally {
+    deletingId.value = null
+  }
 }
 </script>
 
@@ -238,6 +264,57 @@ const goArticle = (item: any) => {
       &:hover {
         border-color: var(--color-primary);
         color: var(--color-primary);
+      }
+    }
+  }
+}
+
+// 我的文章行：卡片 + 悬浮管理动作
+.my-article-row {
+  position: relative;
+
+  &:hover .row-actions {
+    opacity: 1;
+  }
+
+  .row-actions {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    .row-btn {
+      padding: 3px 10px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-surface);
+      box-shadow: var(--shadow-1, 0 0 0 1px var(--color-border-light));
+      font-size: 12px;
+      color: var(--color-primary);
+      cursor: pointer;
+      transition:
+        opacity 0.2s ease,
+        background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-primary-light);
+      }
+
+      &.danger {
+        color: #d1242f;
+
+        &:hover {
+          background-color: rgba(209, 36, 47, 0.08);
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
       }
     }
   }
