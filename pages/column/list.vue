@@ -5,7 +5,7 @@
       <span v-if="columns.length" class="page-count">共 {{ columns.length }} 个</span>
     </div>
 
-    <div v-if="columns.length" class="column-grid">
+    <div v-if="columns.length" class="feed-panel column-list">
       <column-card
         v-for="item in columns"
         :key="item.id || item.title"
@@ -80,15 +80,14 @@ const handleRowClick = (item: ColumnListItem) => {
   }
 }
 
-.column-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+// 行列表容器（ColumnCard 自带行分隔线）
+.column-list {
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {
-  .column-grid {
-    grid-template-columns: 1fr;
+  .page-head {
+    margin-bottom: 12px;
   }
 }
 </style>

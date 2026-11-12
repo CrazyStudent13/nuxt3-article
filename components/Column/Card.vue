@@ -13,10 +13,19 @@
       <h3 class="title">{{ title }}</h3>
       <p v-if="desc" class="desc">{{ desc }}</p>
       <div class="meta">
-        <span v-if="articleNum">{{ articleNum }} 篇文章</span>
         <span v-if="createTime">{{ createTime }}</span>
+        <span v-if="articleNum">文章数 {{ articleNum }}</span>
       </div>
     </div>
+
+    <!-- 订阅占位：后端暂无订阅能力 -->
+    <button class="subscribe-btn" type="button" :disabled="!!subTip" @click.stop="handleSubscribe">
+      <svg v-if="!subTip" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      {{ subTip || '订阅' }}
+    </button>
   </article>
 </template>
 
@@ -57,27 +66,44 @@ const createTime = computed(() => {
     return ''
   }
 
-  const formatted = dayjs(value).format('YYYY-MM-DD')
+  const formatted = dayjs(value).format('YYYY-MM-DD HH:mm')
   return formatted === 'Invalid Date' ? '' : formatted
+})
+
+// 订阅占位反馈：按钮文字短暂切换，2 秒还原
+const subTip = ref('')
+let subTimer: ReturnType<typeof setTimeout> | null = null
+const handleSubscribe = () => {
+  subTip.value = '即将上线'
+  if (subTimer) {
+    clearTimeout(subTimer)
+  }
+  subTimer = setTimeout(() => (subTip.value = ''), 2000)
+}
+
+onBeforeUnmount(() => {
+  if (subTimer) {
+    clearTimeout(subTimer)
+  }
 })
 </script>
 
 <style lang="less" scoped>
+// 掘金式横向行：封面左 + 信息右 + 订阅按钮，行间分隔线
 .column-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+  transition: background-color 0.2s ease;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-light);
+  }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-2);
-    border-color: transparent;
+    background-color: var(--color-bg);
 
     .title {
       color: var(--color-primary);
@@ -85,7 +111,11 @@ const createTime = computed(() => {
   }
 
   .cover {
-    height: 130px;
+    flex-shrink: 0;
+    width: 160px;
+    height: 100px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
     background-color: var(--color-bg);
 
     img {
@@ -106,12 +136,13 @@ const createTime = computed(() => {
   }
 
   .body {
-    padding: 14px 16px 16px;
+    flex: 1;
+    min-width: 0;
 
     .title {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 600;
-      line-height: 22px;
+      line-height: 24px;
       color: var(--color-text-1);
       transition: color 0.2s ease;
       overflow: hidden;
@@ -121,23 +152,57 @@ const createTime = computed(() => {
 
     .desc {
       margin-top: 6px;
-      font-size: 13px;
-      line-height: 20px;
+      font-size: 14px;
+      line-height: 22px;
       color: var(--color-text-2);
       overflow: hidden;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      min-height: 40px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .meta {
       margin-top: 10px;
       display: flex;
       flex-wrap: wrap;
-      gap: 4px 16px;
-      font-size: 12px;
+      gap: 4px 12px;
+      font-size: 13px;
       color: var(--color-text-3);
+    }
+  }
+
+  .subscribe-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 16px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-primary);
+    font-size: 13px;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover:not(:disabled) {
+      opacity: 0.85;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .column-card {
+    .cover {
+      width: 120px;
+      height: 76px;
+    }
+
+    .subscribe-btn {
+      display: none;
     }
   }
 }

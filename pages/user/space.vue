@@ -73,9 +73,9 @@
         <p v-else class="feed-empty">{{ articlesLoading ? '加载中…' : isSelf ? '还没有发布过文章' : 'TA 还没有发布过文章' }}</p>
       </template>
 
-      <!-- 专栏 tab：复用 ColumnCard 网格 -->
+      <!-- 专栏 tab：复用 ColumnCard 行列表 -->
       <template v-else-if="activeTab === 'subject'">
-        <div v-if="subjects.length" class="column-grid">
+        <div v-if="subjects.length" class="column-list">
           <column-card
             v-for="item in subjects"
             :key="item.id || item.title"
@@ -434,12 +434,9 @@ const goColumn = (item: any) => {
   }
 }
 
-// 专栏网格（与专栏列表页一致的两列布局）
-.column-grid {
-  padding: 16px 20px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+// 专栏行列表容器（ColumnCard 自带行分隔线）
+.column-list {
+  overflow: hidden;
 }
 
 // 内容卡
