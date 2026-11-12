@@ -6,9 +6,14 @@
       <slot />
     </main>
 
-    <AppFooter />
+    <!-- 首页的页脚信息在右侧边栏展示（掘金式），其余页面保留底部页脚 -->
+    <AppFooter v-if="route.path !== '/'" />
   </div>
 </template>
+
+<script setup lang="ts">
+const route = useRoute()
+</script>
 
 <style lang="less" scoped>
 .app {
