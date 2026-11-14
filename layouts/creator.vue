@@ -228,7 +228,7 @@ const avatarFallback = computed(() => (user.value?.nickName || user.value?.userN
 
 .side-panel {
   flex-shrink: 0;
-  width: 240px;
+  width: 200px;
   position: sticky;
   top: 76px;
   padding: 20px 14px;
