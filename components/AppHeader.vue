@@ -37,15 +37,15 @@
         </form>
 
         <!-- 创作者中心入口：仿掘金——悬停展开面板，点击新窗口进创作者中心（保留主站浏览状态） -->
-        <div class="creator-entry">
+        <div class="creator-entry" @mouseenter="openPanel" @mouseleave="closePanelSoon">
           <NuxtLink to="/creator" class="creator-btn" target="_blank">
             创作者中心
-            <svg class="arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="arrow" :class="{ open: creatorOpen }" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </NuxtLink>
 
-          <div class="creator-panel">
+          <div class="creator-panel" :class="{ open: creatorOpen }">
             <div class="entry-grid">
               <button v-for="entry in creatorEntries" :key="entry.key" class="entry-item" type="button" @click="handleEntry(entry)">
                 <span class="entry-icon" :class="`icon-${entry.key}`" v-html="entry.icon" />
@@ -142,6 +142,27 @@ const entryRoute = (entry: CreatorEntry) => {
 
 const handleEntry = (entry: CreatorEntry) => {
   return navigateTo(entryRoute(entry))
+}
+
+// 面板显隐：悬停打开，离开后延迟 250ms 关闭——鼠标穿过按钮与面板的空隙、或短暂划出都不会立刻消失
+const creatorOpen = ref(false)
+let closeTimer: ReturnType<typeof setTimeout> | null = null
+
+const openPanel = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
+  creatorOpen.value = true
+}
+
+const closePanelSoon = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+  }
+  closeTimer = setTimeout(() => {
+    creatorOpen.value = false
+  }, 250)
 }
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
@@ -325,20 +346,9 @@ const handleLogout = async () => {
   }
 
   // 创作者中心入口：主色按钮 + 悬停下拉面板（参考掘金：悬停出面板，点击进页面）
+  // 显隐由 JS（mouseenter/mouseleave + 关闭延迟）驱动 .open 类，配透明桥解决按钮与面板间空隙的 hover 断链
   .creator-entry {
     position: relative;
-
-    // 悬停整块（按钮+面板）时：箭头翻转 + 面板显现（面板常驻 DOM，user-tip 同款过渡手法）
-    &:hover .arrow {
-      transform: rotate(180deg);
-    }
-
-    &:hover .creator-panel {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
 
     .creator-btn {
       display: flex;
@@ -360,6 +370,10 @@ const handleLogout = async () => {
 
       .arrow {
         transition: transform 0.2s ease;
+
+        &.open {
+          transform: rotate(180deg);
+        }
       }
     }
 
@@ -381,6 +395,23 @@ const handleLogout = async () => {
         transform 0.15s ease,
         visibility 0.15s;
       pointer-events: none;
+
+      // 透明桥：盖住按钮与面板之间的空隙，鼠标划过不脱离悬停链
+      &::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 0;
+        right: 0;
+        height: 12px;
+      }
+
+      &.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
 
       // 入口网格：图标方块 + 文字竖排（未来加项自动横排延伸）
       .entry-grid {
