@@ -1,14 +1,9 @@
-<!-- 创作者中心首页（占位）：欢迎语 + 快捷入口 + 数据总览待开发提示 -->
+<!-- 创作者中心首页（占位）：时段问候语 + 数据总览待开发提示 -->
 <template>
   <div class="creator-home">
     <div class="welcome-panel">
-      <h1 class="welcome-title">Hi，{{ displayName }}</h1>
+      <h1 class="welcome-title">{{ greeting }}，{{ displayName }}</h1>
       <p class="welcome-desc">这里是你的创作工作台，写点什么分享给玩家吧。</p>
-      <div class="quick-actions">
-        <button class="qa-btn primary" type="button" @click="goWrite">写文章</button>
-        <NuxtLink to="/creator/article" class="qa-btn ghost">文章管理</NuxtLink>
-        <NuxtLink to="/creator/column" class="qa-btn ghost">专栏管理</NuxtLink>
-      </div>
     </div>
 
     <div class="todo-panel">
@@ -19,6 +14,8 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
+
 definePageMeta({
   layout: 'creator'
 })
@@ -27,9 +24,23 @@ const { user } = useUser()
 
 const displayName = computed(() => user.value?.nickName || user.value?.userName || '创作者')
 
-const goWrite = () => {
-  return navigateTo('/editor/new')
-}
+// 时段问候：凌晨/上午/中午/下午/晚上，按用户本地时间
+const greeting = computed(() => {
+  const hour = dayjs().hour()
+  if (hour < 5) {
+    return '夜深了'
+  }
+  if (hour < 11) {
+    return '上午好'
+  }
+  if (hour < 14) {
+    return '中午好'
+  }
+  if (hour < 18) {
+    return '下午好'
+  }
+  return '晚上好'
+})
 </script>
 
 <style lang="less" scoped>
@@ -53,50 +64,9 @@ const goWrite = () => {
   }
 
   .welcome-desc {
-    margin: 0 0 20px;
+    margin: 0;
     font-size: 14px;
     color: var(--color-text-2);
-  }
-
-  .quick-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .qa-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 22px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease,
-      color 0.2s ease;
-
-    &.primary {
-      border: 0;
-      background-color: var(--color-primary);
-      color: #fff;
-
-      &:hover {
-        background-color: var(--color-primary-hover);
-      }
-    }
-
-    &.ghost {
-      border: 1px solid var(--color-border);
-      background-color: transparent;
-      color: var(--color-text-2);
-
-      &:hover {
-        border-color: var(--color-primary);
-        color: var(--color-primary);
-      }
-    }
   }
 }
 
