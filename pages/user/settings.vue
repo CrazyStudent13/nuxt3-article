@@ -204,6 +204,7 @@ const setProfileTip = (message: string, isError = false) => {
 }
 
 // 表单初值：进入页面与用户信息变化后都同步一次
+// 注册约定 userName=邮箱且后端 email 列可能为空，回填时用邮箱格式的账号兜底
 watch(
   user,
   (val) => {
@@ -211,7 +212,7 @@ watch(
       return
     }
     editForm.nickName = val.nickName || ''
-    editForm.email = val.email || ''
+    editForm.email = val.email || (EMAIL_RE.test(val.userName || '') ? val.userName : '')
     editForm.sex = val.sex || ''
     editingReady.value = true
   },
