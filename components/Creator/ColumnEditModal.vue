@@ -52,6 +52,8 @@
             <input ref="coverInput" class="img-input" type="file" accept="image/*" @change="handleCoverChange" />
           </span>
         </label>
+        <!-- 上传前提示限制，超限时顶部 toast 提醒 -->
+        <p class="upload-hint">封面支持 JPG、PNG，不超过 5M</p>
 
         <p v-if="tip" class="form-tip tip-error">{{ tip }}</p>
 
@@ -125,8 +127,8 @@ const handleCoverChange = async (event: Event) => {
     tip.value = '请选择图片文件'
     return
   }
-  if (file.size > 10 * 1024 * 1024) {
-    tip.value = '图片不能超过 10MB'
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片不能超过 5MB')
     return
   }
   coverUploading.value = true
@@ -431,7 +433,14 @@ const confirmSubmit = async () => {
   }
 }
 
-.img-input {
-  display: none;
-}
+  .img-input {
+    display: none;
+  }
+
+  // 封面上传限制的前置提示：与输入区左缘对齐
+  .upload-hint {
+    margin: -6px 0 14px 60px;
+    font-size: 12px;
+    color: var(--color-text-3);
+  }
 </style>

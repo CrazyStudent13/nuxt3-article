@@ -167,6 +167,8 @@
               <input ref="coverInput" class="img-input" type="file" accept="image/*" @change="handleCoverChange" />
             </span>
           </label>
+          <!-- 上传前提示限制，超限时顶部 toast 提醒 -->
+          <p class="upload-hint">封面支持 JPG、PNG，不超过 5M</p>
 
           <label class="modal-row">
             <span class="row-label">专栏</span>
@@ -463,8 +465,8 @@ const insertImage = (file: File) => {
     setTopTip('请选择图片文件')
     return Promise.resolve()
   }
-  if (file.size > 10 * 1024 * 1024) {
-    setTopTip('图片不能超过 10MB')
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片不能超过 5MB')
     return Promise.resolve()
   }
   const start = el.selectionStart
@@ -679,8 +681,8 @@ const handleCoverChange = async (event: Event) => {
     publishTip.value = '请选择图片文件'
     return
   }
-  if (file.size > 10 * 1024 * 1024) {
-    publishTip.value = '图片不能超过 10MB'
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片不能超过 5MB')
     return
   }
   // 封面按 16:9 裁剪后再上传，取消则静默结束
@@ -1121,6 +1123,13 @@ const confirmPublish = async () => {
         align-items: center;
         gap: 8px;
       }
+    }
+
+    // 封面上传限制的前置提示：与输入区左缘对齐
+    .upload-hint {
+      margin: -6px 0 14px 60px;
+      font-size: 12px;
+      color: var(--color-text-3);
     }
 
     .cover-box {
