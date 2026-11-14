@@ -1,3 +1,4 @@
+<!-- 全站吸顶导航：品牌+栏目导航+文章搜索（回车跳首页带 title 参数）；创作者中心入口悬停展开面板（250ms 延迟关闭防误消）、点击新窗口进 /creator；已登录头像+退出，未登录登录/注册按钮 -->
 <template>
   <header class="header">
     <div class="inner">

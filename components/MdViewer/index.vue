@@ -1,3 +1,4 @@
+<!-- Markdown 渲染器（文章详情/编辑器预览共用）：markdown-it+highlight.js（高亮/行号/语言名），代码块右上角复制按钮（成功后 1.5s 显示"已复制"）；入参兼容引号包裹内容与字面 \n -->
 <template>
   <div class="markdown-body">
     <div v-html="resultStr"></div>

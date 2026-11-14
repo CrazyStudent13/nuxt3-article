@@ -1,3 +1,4 @@
+<!-- 信息流文章条目卡（首页/专栏详情/个人空间共用）：文字为主+右侧缩略图（无封面不渲染）；字段名做后端多命名兼容（remark/desc/content、read/readNum、publishTime/date/createTime） -->
 <template>
   <article class="article-item" :title="title">
     <div class="body">

@@ -1,3 +1,4 @@
+<!-- 关于页（占位）："页面建设中"卡片+返回首页按钮 -->
 <template>
   <div class="stub">
     <div class="panel">

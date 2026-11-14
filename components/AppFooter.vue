@@ -1,3 +1,4 @@
+<!-- 全站底部页脚：复用 FooterInfo 居中展示站点信息；首页不渲染（default 布局控制，站点信息改走首页右侧边栏） -->
 <template>
   <footer class="footer">
     <div class="inner">

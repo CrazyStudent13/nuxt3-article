@@ -1,3 +1,4 @@
+<!-- 全局错误页（布局之外渲染）：404 显示"页面走丢了"，其余显示"出错了"；返回首页用 clearError；自带 html/body 背景，必须走主题变量以免盖住深色模式 -->
 <template>
   <div class="error-page">
     <p class="code">{{ statusCode }}</p>

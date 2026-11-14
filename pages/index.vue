@@ -1,3 +1,4 @@
+<!-- 首页（即文章列表）：掘金式信息流——最新 tab（createTime 倒序）无限滚动，?title= 标题搜索；关注 tab 占位（关注体系未上线）；右侧站点信息栏（窄屏隐藏，页脚信息由此承担） -->
 <template>
   <div class="home-layout">
     <div class="feed-panel">
