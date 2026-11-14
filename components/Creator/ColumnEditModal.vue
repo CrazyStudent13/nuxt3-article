@@ -11,20 +11,26 @@
         <label class="modal-row">
           <span class="row-label">标题</span>
           <span class="row-field">
-            <input v-model="form.title" class="form-input" type="text" maxlength="64" placeholder="请输入专栏标题" />
+            <span class="field-wrap">
+              <input v-model="form.title" class="form-input" type="text" maxlength="20" placeholder="请输入专栏标题（20 字以内）" />
+              <span class="char-count" :class="{ over: form.title.length >= 20 }">{{ form.title.length }}/20</span>
+            </span>
           </span>
         </label>
 
         <label class="modal-row">
           <span class="row-label">简介</span>
           <span class="row-field">
-            <textarea
-              v-model="form.desc"
-              class="form-input form-textarea"
-              rows="4"
-              maxlength="255"
-              placeholder="介绍一下这个专栏的内容，留空则不填"
-            />
+            <span class="field-wrap">
+              <textarea
+                v-model="form.desc"
+                class="form-input form-textarea"
+                rows="4"
+                maxlength="300"
+                placeholder="介绍一下这个专栏的内容，留空则不填"
+              />
+              <span class="char-count" :class="{ over: form.desc.length >= 300 }">{{ form.desc.length }}/300</span>
+            </span>
           </span>
         </label>
 
@@ -144,6 +150,15 @@ const confirmSubmit = async () => {
     tip.value = '请输入专栏标题'
     return
   }
+  // maxlength 只对真实键入生效，程序化赋值可绕过，提交前再校验一次
+  if (title.length > 20) {
+    tip.value = '标题不能超过 20 字'
+    return
+  }
+  if (form.desc.length > 300) {
+    tip.value = '简介不能超过 300 字'
+    return
+  }
   submitting.value = true
   tip.value = ''
   try {
@@ -236,6 +251,47 @@ const confirmSubmit = async () => {
       display: flex;
       align-items: center;
       gap: 8px;
+    }
+
+    // 字段容器：承载右下/右侧的字数计数
+    .field-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+
+      // 给字数计数留出空间
+      .form-input {
+        flex: 1;
+        width: 100%;
+        padding-right: 52px;
+      }
+
+      .form-textarea {
+        padding-bottom: 26px;
+      }
+    }
+
+    .char-count {
+      position: absolute;
+      right: 10px;
+      bottom: 6px;
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--color-text-3);
+      pointer-events: none;
+
+      // 标题单行输入框：计数垂直居中
+      .modal-row:first-of-type & {
+        top: 50%;
+        bottom: auto;
+        transform: translateY(-50%);
+      }
+
+      // 接近/达到上限时变红提醒
+      &.over {
+        color: #d1242f;
+      }
     }
   }
 
