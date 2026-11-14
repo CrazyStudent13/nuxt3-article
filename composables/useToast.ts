@@ -1,7 +1,7 @@
 // 全局轻提示：showToast(message, type, duration) 顶部居中出现，2 秒自动消失（替代原生 alert）
-// 分类型展示（Element message 同款语义）：error 红 / warning 橙 / success 绿 / info 灰
+// 分类型展示（完全复刻 Element message 视觉）：error 红 / warning 橙 / success 绿 / primary 蓝 / info 灰
 // 配合 app.vue 的 CommonToast 使用；后一条消息覆盖前一条
-export type ToastType = 'info' | 'success' | 'warning' | 'error'
+export type ToastType = 'info' | 'success' | 'warning' | 'error' | 'primary'
 
 interface ToastState {
   open: boolean
