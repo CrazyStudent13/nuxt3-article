@@ -128,7 +128,7 @@ const timeText = computed(() => {
   .status-badge {
     flex-shrink: 0;
     padding: 1px 8px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 12px;
     line-height: 18px;
 

@@ -17,7 +17,6 @@
         </div>
 
         <div class="right">
-          <NuxtLink to="/" class="back-site">回到站点</NuxtLink>
           <NuxtLink v-if="user" to="/user/space" class="user-link" title="进入个人中心">
             <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
             <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
@@ -179,16 +178,6 @@ const avatarFallback = computed(() => (user.value?.nickName || user.value?.userN
     display: flex;
     align-items: center;
     gap: 14px;
-  }
-
-  .back-site {
-    font-size: 13px;
-    color: var(--color-text-2);
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: var(--color-primary);
-    }
   }
 
   .user-link {

@@ -52,7 +52,7 @@ useSeoMeta({
   .back-btn {
     display: inline-block;
     padding: 8px 24px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     background-color: var(--color-primary);
     color: #fff;
     font-size: 14px;

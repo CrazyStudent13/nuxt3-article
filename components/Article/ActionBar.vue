@@ -149,7 +149,7 @@ onBeforeUnmount(() => {
     align-items: center;
     justify-content: center;
     border: 0;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     background-color: var(--color-surface);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     color: var(--color-text-2);
@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: var(--radius-full);
+      border-radius: var(--radius-sm);
       background-color: var(--color-bg);
       border: 1px solid var(--color-border-light);
       font-size: 11px;

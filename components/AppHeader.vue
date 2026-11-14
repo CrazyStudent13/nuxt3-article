@@ -223,7 +223,7 @@ const handleLogout = async () => {
   .nav-link {
     display: inline-block;
     padding: 6px 14px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 14px;
     color: var(--color-text-2);
     transition:
@@ -254,7 +254,7 @@ const handleLogout = async () => {
     gap: 6px;
     width: 180px;
     padding: 4px 8px 4px 12px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     background-color: var(--color-bg);
     border: 1px solid transparent;
     color: var(--color-text-3);
@@ -297,7 +297,7 @@ const handleLogout = async () => {
 
   .auth-btn {
     padding: 5px 16px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 13px;
     white-space: nowrap;
     transition:
@@ -346,7 +346,7 @@ const handleLogout = async () => {
       gap: 6px;
       padding: 5px 16px;
       border: 0;
-      border-radius: var(--radius-full);
+      border-radius: var(--radius-sm);
       background-color: var(--color-primary);
       font-size: 13px;
       color: #fff;
