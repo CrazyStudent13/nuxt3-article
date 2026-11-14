@@ -26,10 +26,10 @@
                 v-model="form.desc"
                 class="form-input form-textarea"
                 rows="4"
-                maxlength="300"
+                maxlength="250"
                 placeholder="介绍一下这个专栏的内容，留空则不填"
               />
-              <span class="char-count" :class="{ over: form.desc.length >= 300 }">{{ form.desc.length }}/300</span>
+              <span class="char-count" :class="{ over: form.desc.length >= 250 }">{{ form.desc.length }}/250</span>
             </span>
           </span>
         </label>
@@ -155,8 +155,9 @@ const confirmSubmit = async () => {
     tip.value = '标题不能超过 20 字'
     return
   }
-  if (form.desc.length > 300) {
-    tip.value = '简介不能超过 300 字'
+  // 后端 post_subject.desc 列为 varchar(255)，简介限制在 250 字留出余量；maxlength 拦不住程序化赋值，提交前再校验
+  if (form.desc.length > 250) {
+    tip.value = '简介不能超过 250 字'
     return
   }
   submitting.value = true
