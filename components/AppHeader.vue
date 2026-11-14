@@ -36,14 +36,14 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
-        <!-- 创作者中心入口：仿掘金——悬停展开面板，点击直接进创作者中心（面板入口未来扩展往 creatorEntries 加项） -->
+        <!-- 创作者中心入口：仿掘金——悬停展开面板，点击新窗口进创作者中心（保留主站浏览状态） -->
         <div class="creator-entry">
-          <button class="creator-btn" type="button" @click="goCreator">
+          <NuxtLink to="/creator" class="creator-btn" target="_blank">
             创作者中心
             <svg class="arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
-          </button>
+          </NuxtLink>
 
           <div class="creator-panel">
             <div class="entry-grid">
@@ -142,11 +142,6 @@ const entryRoute = (entry: CreatorEntry) => {
 
 const handleEntry = (entry: CreatorEntry) => {
   return navigateTo(entryRoute(entry))
-}
-
-// 点击按钮本体：直接进创作者中心（登录拦截由 /creator 页面守卫负责）
-const goCreator = () => {
-  return navigateTo('/creator')
 }
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
