@@ -46,10 +46,12 @@
               <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
               <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
               <span class="user-name">{{ user?.nickName || user?.userName }}</span>
-              <!-- 悬停展示完整信息：昵称被截断时能看到全文 -->
+              <!-- 悬停展示完整信息：昵称被截断时能看到全文，并提供创作者中心入口 -->
               <span class="user-tip" role="tooltip">
                 <span class="user-tip-name">{{ user?.nickName || user?.userName }}</span>
                 <span v-if="user?.email && user.email !== user.nickName" class="user-tip-email">{{ user.email }}</span>
+                <span class="user-tip-divider" />
+                <span class="user-tip-entry" @click.prevent.stop="goCreator">创作者中心</span>
               </span>
             </NuxtLink>
             <button class="logout-btn" type="button" @click="handleLogout">退出</button>
@@ -111,6 +113,11 @@ const goWrite = () => {
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
 const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
 const avatarFallback = computed(() => (user.value?.nickName || user.value?.userName || '用户').slice(0, 1))
+
+// 创作者中心入口：prevent 阻止外层个人中心链接的默认跳转
+const goCreator = () => {
+  return navigateTo('/creator')
+}
 
 // 页面刷新后恢复登录态：有 token 但还没有用户信息时静默拉取
 onMounted(() => {
@@ -393,6 +400,21 @@ const handleLogout = async () => {
 
     .user-tip-email {
       color: rgba(255, 255, 255, 0.65);
+    }
+
+    .user-tip-divider {
+      height: 1px;
+      margin: 4px 0;
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .user-tip-entry {
+      cursor: pointer;
+      transition: color 0.15s ease;
+
+      &:hover {
+        color: var(--color-primary-light);
+      }
     }
   }
 }
