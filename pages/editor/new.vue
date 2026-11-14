@@ -228,6 +228,10 @@ const initEditor = () => {
     loadArticle(editId.value)
   } else {
     loadDrafts()
+    // 头部创作者中心「草稿箱」入口直达：带 ?drafts=1 时载入后自动展开面板
+    if (route.query.drafts) {
+      draftOpen.value = true
+    }
   }
 }
 

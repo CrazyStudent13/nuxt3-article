@@ -36,8 +36,24 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
-        <!-- 写文章入口：独立全屏编辑器流程，未登录先拉起登录框 -->
-        <button class="write-btn" type="button" @click="goWrite">写文章</button>
+        <!-- 创作者中心入口：下拉面板聚合创作入口（写文章/草稿箱，未来扩展往 creatorEntries 加项） -->
+        <div ref="creatorRef" class="creator-entry">
+          <button class="creator-btn" type="button" @click="creatorOpen = !creatorOpen">
+            创作者中心
+            <svg class="arrow" :class="{ open: creatorOpen }" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          <div v-if="creatorOpen" class="creator-panel">
+            <div class="entry-grid">
+              <button v-for="entry in creatorEntries" :key="entry.key" class="entry-item" type="button" @click="handleEntry(entry)">
+                <span class="entry-icon" :class="`icon-${entry.key}`" v-html="entry.icon" />
+                <span class="entry-label">{{ entry.label }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
         <template v-if="isLoggedIn">
@@ -46,12 +62,10 @@
               <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
               <span v-else class="user-avatar user-avatar-fallback">{{ avatarFallback }}</span>
               <span class="user-name">{{ user?.nickName || user?.userName }}</span>
-              <!-- 悬停展示完整信息：昵称被截断时能看到全文，并提供创作者中心入口 -->
+              <!-- 悬停展示完整信息：昵称被截断时能看到全文 -->
               <span class="user-tip" role="tooltip">
                 <span class="user-tip-name">{{ user?.nickName || user?.userName }}</span>
                 <span v-if="user?.email && user.email !== user.nickName" class="user-tip-email">{{ user.email }}</span>
-                <span class="user-tip-divider" />
-                <span class="user-tip-entry" @click.prevent.stop="goCreator">创作者中心</span>
               </span>
             </NuxtLink>
             <button class="logout-btn" type="button" @click="handleLogout">退出</button>
@@ -101,14 +115,56 @@ const { openLogin, openRegister } = useAuthModal()
 const config = useRuntimeConfig()
 const { user, isLoggedIn, fetchUserInfo, logout } = useUser()
 
-// 写文章：未登录先拉起登录框，登录后进入独立编辑器流程
-const goWrite = () => {
+// ---------- 创作者中心下拉面板 ----------
+const creatorOpen = ref(false)
+const creatorRef = ref<HTMLElement | null>(null)
+
+// 创作入口清单：未来扩展（沸点/笔记等）往数组加项即可
+const creatorEntries = [
+  {
+    key: 'write',
+    label: '写文章',
+    icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>'
+  },
+  {
+    key: 'drafts',
+    label: '草稿箱',
+    icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
+  }
+] as const
+
+type CreatorEntry = (typeof creatorEntries)[number]
+
+// 入口 → 跳转目标（草稿箱带 ?drafts=1，编辑器载入后自动展开草稿箱面板）
+const entryRoute = (entry: CreatorEntry) => {
+  if (entry.key === 'drafts') {
+    return '/editor/new?drafts=1'
+  }
+  return '/editor/new'
+}
+
+const handleEntry = (entry: CreatorEntry) => {
+  creatorOpen.value = false
+  // 未登录先拉起登录框（与原写文章入口一致）
   if (!getToken()) {
     openLogin()
     return
   }
-  return navigateTo('/editor/new')
+  return navigateTo(entryRoute(entry))
 }
+
+// 点击面板外关闭（编辑器草稿箱同款监听模式）
+const onDocClick = (event: MouseEvent) => {
+  if (creatorOpen.value && creatorRef.value && !creatorRef.value.contains(event.target as Node)) {
+    creatorOpen.value = false
+  }
+}
+onMounted(() => {
+  document.addEventListener('click', onDocClick)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocClick)
+})
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
 const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
@@ -295,7 +351,15 @@ const handleLogout = async () => {
     }
   }
 
-  .write-btn {
+  // 创作者中心入口：主色按钮 + 下拉面板（参考掘金）
+  .creator-entry {
+    position: relative;
+  }
+
+  .creator-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 5px 16px;
     border: 0;
     border-radius: var(--radius-full);
@@ -308,6 +372,83 @@ const handleLogout = async () => {
 
     &:hover {
       background-color: var(--color-primary-hover);
+    }
+
+    .arrow {
+      transition: transform 0.2s ease;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .creator-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    padding: 24px 20px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-2);
+    z-index: 101;
+
+    // 入口网格：图标方块 + 文字竖排（未来加项自动横排延伸）
+    .entry-grid {
+      display: flex;
+      gap: 24px;
+    }
+
+    .entry-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background-color: transparent;
+      cursor: pointer;
+
+      .entry-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.2s ease,
+          filter 0.2s ease;
+
+        // 写文章：品牌蓝实底白图标；草稿箱：绿色浅底描边图标
+        &.icon-write {
+          background-color: var(--color-primary);
+          color: #fff;
+        }
+
+        &.icon-drafts {
+          background-color: rgba(63, 176, 96, 0.12);
+          color: #3fb060;
+        }
+      }
+
+      .entry-label {
+        font-size: 12px;
+        color: var(--color-text-2);
+        transition: color 0.2s ease;
+      }
+
+      &:hover {
+        .entry-icon {
+          transform: translateY(-2px);
+          filter: brightness(1.05);
+        }
+
+        .entry-label {
+          color: var(--color-text-1);
+        }
+      }
     }
   }
 
@@ -400,21 +541,6 @@ const handleLogout = async () => {
 
     .user-tip-email {
       color: rgba(255, 255, 255, 0.65);
-    }
-
-    .user-tip-divider {
-      height: 1px;
-      margin: 4px 0;
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .user-tip-entry {
-      cursor: pointer;
-      transition: color 0.15s ease;
-
-      &:hover {
-        color: var(--color-primary-light);
-      }
     }
   }
 }
