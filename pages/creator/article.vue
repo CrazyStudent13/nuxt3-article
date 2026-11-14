@@ -36,31 +36,27 @@
           @remove="removeRow(row)"
         />
       </div>
-      <CommonEmptyState v-else-if="!loading">{{ emptyText }}</CommonEmptyState>
+      <CommonEmptyState v-else>{{ loading ? '加载中…' : emptyText }}</CommonEmptyState>
 
-      <div v-if="rows.length && !finished" class="feed-loadmore">
-        <button class="loadmore-btn" type="button" :disabled="loading" @click="loadMore">
-          {{ loading ? '加载中…' : '加载更多' }}
-        </button>
-      </div>
-      <div v-else-if="rows.length && finished" class="feed-end">已经到底了</div>
+      <CommonPagination v-if="rows.length" v-model:page="pageNum" :total="total" :page-size="PAGE_SIZE" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import dayjs from 'dayjs'
-
 definePageMeta({
   layout: 'creator'
 })
 
-// 管理端列表返回的实体字段（publishStatus：0 草稿 / 1 待发布 / 2 已发布 / 3 已下架）
+// 管理端列表返回的实体字段（publishStatus：0 草稿 / 1 待发布 / 2 已发布 / 3 已下架；
+// auditStatus：0 未提交 / 1 审核中 / 2 审核通过 / 3 审核拒绝）
 type ArticleRowData = {
   id: number
   title?: string
   subjectId?: number
   publishStatus?: string
+  auditStatus?: string
+  auditRemark?: string
   readNum?: number
   likeNum?: number
   commentNum?: number
@@ -71,11 +67,15 @@ type ArticleRowData = {
 const { user, isLoggedIn } = useUser()
 
 const PAGE_SIZE = 20
+// 审核中 tab 的合并查询拉取上限：后端 auditStatus 仅支持单值，两个状态各拉一次在前端合并分页
+const AUDIT_FETCH_SIZE = 100
 
-// 状态 tab：草稿/待发布当前发文链路不会产生，不放假 tab
+// 状态 tab：待发布当前发文链路不会产生，不放假 tab
 const tabs = [
   { key: 'all', label: '全部' },
   { key: '2', label: '已发布' },
+  { key: '0', label: '草稿箱' },
+  { key: 'auditing', label: '审核中' },
   { key: '3', label: '已下架' }
 ] as const
 type TabKey = (typeof tabs)[number]['key']
@@ -88,37 +88,60 @@ const total = ref(0)
 const pageNum = ref(1)
 const loading = ref(false)
 const loadError = ref('')
-const finished = computed(() => rows.value.length >= total.value)
 
-// 拉取当前用户的文章列表（前端固定带 userId，只管自己的内容）
-const loadList = async (reset = true) => {
+// 组装基础查询条件（userId 固定只查自己的文章）
+const buildQuery = (overrides: Record<string, any>) => {
+  return {
+    userId: user.value?.userId,
+    pageNum: pageNum.value,
+    pageSize: PAGE_SIZE,
+    orderByColumn: 'createTime',
+    isAsc: 'descending',
+    ...(searchKeyword.value ? { title: searchKeyword.value } : {}),
+    ...overrides
+  }
+}
+
+// 拉取当前页数据：审核中 tab 合并「审核中 + 审核失败」两个状态后前端分页，其余按 publishStatus 直查
+const loadList = async () => {
   if (!user.value) {
     return
   }
   loading.value = true
-  if (reset) {
-    loadError.value = ''
-  }
   try {
-    const res = await apiFetch<{ list?: ArticleRowData[]; total?: number }>('/api/post/article/list', {
-      query: {
+    if (activeTab.value === 'auditing') {
+      const base = {
         userId: user.value.userId,
-        pageNum: pageNum.value,
-        pageSize: PAGE_SIZE,
+        pageNum: 1,
+        pageSize: AUDIT_FETCH_SIZE,
         orderByColumn: 'createTime',
         isAsc: 'descending',
-        ...(searchKeyword.value ? { title: searchKeyword.value } : {}),
-        ...(activeTab.value !== 'all' ? { publishStatus: activeTab.value } : {})
+        ...(searchKeyword.value ? { title: searchKeyword.value } : {})
       }
-    })
-    const list = res.data?.list || []
-    rows.value = reset ? list : rows.value.concat(list)
-    total.value = res.data?.total ?? rows.value.length
+      const [auditing, rejected] = await Promise.all([
+        apiFetch<{ list?: ArticleRowData[]; total?: number }>('/api/post/article/list', {
+          query: { ...base, auditStatus: '1' }
+        }),
+        apiFetch<{ list?: ArticleRowData[]; total?: number }>('/api/post/article/list', {
+          query: { ...base, auditStatus: '3' }
+        })
+      ])
+      const merged = [...(auditing.data?.list || []), ...(rejected.data?.list || [])].sort((a, b) =>
+        (b.createTime || '').localeCompare(a.createTime || '')
+      )
+      total.value = merged.length
+      rows.value = merged.slice((pageNum.value - 1) * PAGE_SIZE, pageNum.value * PAGE_SIZE)
+    } else {
+      const res = await apiFetch<{ list?: ArticleRowData[]; total?: number }>('/api/post/article/list', {
+        query: buildQuery(activeTab.value === 'all' ? {} : { publishStatus: activeTab.value })
+      })
+      rows.value = res.data?.list || []
+      total.value = res.data?.total ?? rows.value.length
+    }
   } catch (error: any) {
     loadError.value = error?.message || '加载失败，请稍后重试'
-    if (!reset) {
-      showToast(loadError.value)
-    }
+    rows.value = []
+    showToast(loadError.value)
   } finally {
     loading.value = false
   }
@@ -130,7 +153,8 @@ const switchTab = (key: TabKey) => {
   }
   activeTab.value = key
   pageNum.value = 1
-  return loadList(true)
+  rows.value = []
+  return loadList()
 }
 
 // 标题搜索：输入防抖 400ms 后真正生效
@@ -140,19 +164,24 @@ watch(keyword, (value) => {
     clearTimeout(searchTimer)
   }
   searchTimer = setTimeout(() => {
-    searchKeyword.value = value.trim()
+    const next = value.trim()
+    if (next === searchKeyword.value) {
+      return
+    }
+    searchKeyword.value = next
   }, 400)
 })
 
 watch(searchKeyword, () => {
   pageNum.value = 1
-  return loadList(true)
+  rows.value = []
+  return loadList()
 })
 
-const loadMore = () => {
-  pageNum.value += 1
-  return loadList(false)
-}
+// 分页翻页
+watch(pageNum, () => {
+  return loadList()
+})
 
 // 专栏名映射：一次拉全量自己的专栏，行卡按 subjectId 查名（查不到则不展示，孤儿引用兜底）
 const subjectMap = ref<Record<number, string>>({})
@@ -179,7 +208,7 @@ watch(
   isLoggedIn,
   (val) => {
     if (val) {
-      loadList(true)
+      loadList()
       loadSubjects()
     }
   },
@@ -193,16 +222,22 @@ const emptyText = computed(() => {
   if (searchKeyword.value) {
     return `没有找到标题包含「${searchKeyword.value}」的文章`
   }
-  if (activeTab.value === '3') {
-    return '还没有已下架的文章'
-  }
   if (activeTab.value === '2') {
     return '还没有已发布的文章，去写一篇吧'
+  }
+  if (activeTab.value === '0') {
+    return '草稿箱是空的，写文章时的内容会自动保存在这里'
+  }
+  if (activeTab.value === 'auditing') {
+    return '没有审核中的文章'
+  }
+  if (activeTab.value === '3') {
+    return '还没有已下架的文章'
   }
   return '还没有文章，去写一篇吧'
 })
 
-// 编辑：进编辑器载入（guest 详情只开放已发布文章，故编辑入口只对已发布展示）
+// 编辑：进编辑器载入（guest 详情只开放已发布文章，编辑入口由行卡控制）
 const goEdit = (row: ArticleRowData) => {
   return navigateTo({ path: '/editor/new', query: { id: String(row.id) } })
 }
@@ -215,16 +250,13 @@ const togglePublish = async (row: ArticleRowData) => {
       method: 'PUT',
       body: { id: row.id, title: row.title, subjectId: row.subjectId, publishStatus: target }
     })
-    row.publishStatus = target
-    if (target === '2' && !row.publishTime) {
-      row.publishTime = dayjs().format('YYYY-MM-DD HH:mm:ss')
-    }
+    return loadList()
   } catch (error: any) {
     showToast(error?.message || '操作失败，请稍后重试')
   }
 }
 
-// 删除：软删除，确认弹窗后从列表移除
+// 删除：软删除，确认弹窗后刷新当前页
 const removeRow = async (row: ArticleRowData) => {
   const ok = await confirmAction({
     title: '删除文章',
@@ -237,8 +269,7 @@ const removeRow = async (row: ArticleRowData) => {
   }
   try {
     await apiFetch(`/api/post/article/${row.id}`, { method: 'DELETE' })
-    rows.value = rows.value.filter((item) => item.id !== row.id)
-    total.value = Math.max(0, total.value - 1)
+    return loadList()
   } catch (error: any) {
     showToast(error?.message || '删除失败，请稍后重试')
   }
