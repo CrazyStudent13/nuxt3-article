@@ -12,7 +12,7 @@
             type="button"
             @click="switchTab(tab.key)"
           >
-            {{ tab.label }}
+            {{ tab.label }}{{ countText(tab.key) }}
           </button>
         </div>
         <div class="tab-tools">
@@ -70,12 +70,12 @@ const PAGE_SIZE = 20
 // 审核中 tab 的合并查询拉取上限：后端 auditStatus 仅支持单值，两个状态各拉一次在前端合并分页
 const AUDIT_FETCH_SIZE = 100
 
-// 状态 tab：待发布当前发文链路不会产生，不放假 tab
+// 状态 tab：待发布当前发文链路不会产生，不放假 tab；草稿箱/审核中按用户习惯放已发布左侧
 const tabs = [
   { key: 'all', label: '全部' },
-  { key: '2', label: '已发布' },
   { key: '0', label: '草稿箱' },
   { key: 'auditing', label: '审核中' },
+  { key: '2', label: '已发布' },
   { key: '3', label: '已下架' }
 ] as const
 type TabKey = (typeof tabs)[number]['key']
@@ -88,6 +88,36 @@ const total = ref(0)
 const pageNum = ref(1)
 const loading = ref(false)
 const loadError = ref('')
+
+// 各 tab 的文章数量：进页与写操作后刷新（只取 total，pageSize=1 最小开销）；审核中 = 审核中 + 审核失败 之和
+const counts = ref<Record<TabKey, number> | null>(null)
+const countText = (key: TabKey) => {
+  const value = counts.value?.[key]
+  return value === undefined ? '' : `（${value}）`
+}
+const loadCounts = async () => {
+  if (!user.value) {
+    return
+  }
+  try {
+    const base = { userId: user.value.userId, pageNum: 1, pageSize: 1 }
+    const countQuery = (overrides: Record<string, any>) =>
+      apiFetch<{ list?: ArticleRowData[]; total?: number }>('/api/post/article/list', {
+        query: { ...base, ...overrides }
+      }).then((res) => res.data?.total ?? 0)
+    const [all, published, draft, offline, auditing, rejected] = await Promise.all([
+      countQuery({}),
+      countQuery({ publishStatus: '2' }),
+      countQuery({ publishStatus: '0' }),
+      countQuery({ publishStatus: '3' }),
+      countQuery({ auditStatus: '1' }),
+      countQuery({ auditStatus: '3' })
+    ])
+    counts.value = { all, '2': published, '0': draft, '3': offline, auditing: auditing + rejected }
+  } catch {
+    // 数量加载失败不阻塞列表，tab 不显示括号数字
+  }
+}
 
 // 组装基础查询条件（userId 固定只查自己的文章）
 const buildQuery = (overrides: Record<string, any>) => {
@@ -210,6 +240,7 @@ watch(
     if (val) {
       loadList()
       loadSubjects()
+      loadCounts()
     }
   },
   { immediate: true }
@@ -250,6 +281,7 @@ const togglePublish = async (row: ArticleRowData) => {
       method: 'PUT',
       body: { id: row.id, title: row.title, subjectId: row.subjectId, publishStatus: target }
     })
+    loadCounts()
     return loadList()
   } catch (error: any) {
     showToast(error?.message || '操作失败，请稍后重试')
@@ -269,6 +301,7 @@ const removeRow = async (row: ArticleRowData) => {
   }
   try {
     await apiFetch(`/api/post/article/${row.id}`, { method: 'DELETE' })
+    loadCounts()
     return loadList()
   } catch (error: any) {
     showToast(error?.message || '删除失败，请稍后重试')
