@@ -62,7 +62,7 @@
               <input ref="fileInput" class="avatar-input" type="file" accept="image/*" @change="handleAvatarChange" />
               <span class="avatar-label">{{ avatarUploading ? '上传中…' : '上传头像' }}</span>
               <span class="avatar-hint">格式：支持 JPG、PNG、JPEG</span>
-              <span class="avatar-hint">大小：10M 以内</span>
+              <span class="avatar-hint">大小：5M 以内</span>
             </div>
           </div>
         </template>
@@ -252,8 +252,8 @@ const handleAvatarChange = async (event: Event) => {
   if (!/^image\//.test(file.type)) {
     return setProfileTip('请选择图片文件', true)
   }
-  if (file.size > 10 * 1024 * 1024) {
-    return setProfileTip('图片不能超过 10MB', true)
+  if (file.size > 5 * 1024 * 1024) {
+    return showToast('图片不能超过 5MB', 'error')
   }
   // 先裁剪成方形再上传；取消裁剪则静默结束
   let cropped: File

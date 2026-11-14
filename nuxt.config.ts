@@ -31,7 +31,11 @@ export default defineNuxtConfig({
     '/user/space': { ssr: false },
     '/user/settings': { ssr: false },
     // 写文章：独立编辑器流程，依赖客户端 token
-    '/editor/new': { ssr: false }
+    '/editor/new': { ssr: false },
+    // 创作者中心：依赖客户端 token 与登录态，关闭 SSR
+    '/creator': { ssr: false },
+    '/creator/article': { ssr: false },
+    '/creator/column': { ssr: false }
   },
   runtimeConfig: {
     public: {

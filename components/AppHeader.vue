@@ -36,8 +36,24 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
-        <!-- 写文章入口：独立全屏编辑器流程，未登录先拉起登录框 -->
-        <button class="write-btn" type="button" @click="goWrite">写文章</button>
+        <!-- 创作者中心入口：仿掘金——悬停展开面板，点击新窗口进创作者中心（保留主站浏览状态） -->
+        <div class="creator-entry" @mouseenter="openPanel" @mouseleave="closePanelSoon">
+          <NuxtLink to="/creator" class="creator-btn" target="_blank">
+            创作者中心
+            <svg class="arrow" :class="{ open: creatorOpen }" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </NuxtLink>
+
+          <div class="creator-panel" :class="{ open: creatorOpen }">
+            <div class="entry-grid">
+              <button v-for="entry in creatorEntries" :key="entry.key" class="entry-item" type="button" @click="handleEntry(entry)">
+                <span class="entry-icon" :class="`icon-${entry.key}`" v-html="entry.icon" />
+                <span class="entry-label">{{ entry.label }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
         <template v-if="isLoggedIn">
@@ -99,13 +115,54 @@ const { openLogin, openRegister } = useAuthModal()
 const config = useRuntimeConfig()
 const { user, isLoggedIn, fetchUserInfo, logout } = useUser()
 
-// 写文章：未登录先拉起登录框，登录后进入独立编辑器流程
-const goWrite = () => {
-  if (!getToken()) {
-    openLogin()
-    return
+// ---------- 创作者中心入口（悬停出面板，点击进 /creator，页面守卫负责登录拦截） ----------
+// 创作入口清单：未来扩展（沸点/笔记等）往数组加项即可
+const creatorEntries = [
+  {
+    key: 'write',
+    label: '写文章',
+    icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>'
+  },
+  {
+    key: 'drafts',
+    label: '草稿箱',
+    icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
   }
-  return navigateTo('/editor/new')
+] as const
+
+type CreatorEntry = (typeof creatorEntries)[number]
+
+// 入口 → 跳转目标（草稿箱带 ?drafts=1，编辑器载入后自动展开草稿箱面板）
+const entryRoute = (entry: CreatorEntry) => {
+  if (entry.key === 'drafts') {
+    return '/editor/new?drafts=1'
+  }
+  return '/editor/new'
+}
+
+const handleEntry = (entry: CreatorEntry) => {
+  return navigateTo(entryRoute(entry))
+}
+
+// 面板显隐：悬停打开，离开后延迟 250ms 关闭——鼠标穿过按钮与面板的空隙、或短暂划出都不会立刻消失
+const creatorOpen = ref(false)
+let closeTimer: ReturnType<typeof setTimeout> | null = null
+
+const openPanel = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
+  creatorOpen.value = true
+}
+
+const closePanelSoon = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+  }
+  closeTimer = setTimeout(() => {
+    creatorOpen.value = false
+  }, 250)
 }
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
@@ -187,7 +244,7 @@ const handleLogout = async () => {
   .nav-link {
     display: inline-block;
     padding: 6px 14px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 14px;
     color: var(--color-text-2);
     transition:
@@ -218,7 +275,7 @@ const handleLogout = async () => {
     gap: 6px;
     width: 180px;
     padding: 4px 8px 4px 12px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     background-color: var(--color-bg);
     border: 1px solid transparent;
     color: var(--color-text-3);
@@ -261,7 +318,7 @@ const handleLogout = async () => {
 
   .auth-btn {
     padding: 5px 16px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 13px;
     white-space: nowrap;
     transition:
@@ -288,19 +345,130 @@ const handleLogout = async () => {
     }
   }
 
-  .write-btn {
-    padding: 5px 16px;
-    border: 0;
-    border-radius: var(--radius-full);
-    background-color: var(--color-primary);
-    font-size: 13px;
-    color: #fff;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+  // 创作者中心入口：主色按钮 + 悬停下拉面板（参考掘金：悬停出面板，点击进页面）
+  // 显隐由 JS（mouseenter/mouseleave + 关闭延迟）驱动 .open 类，配透明桥解决按钮与面板间空隙的 hover 断链
+  .creator-entry {
+    position: relative;
 
-    &:hover {
-      background-color: var(--color-primary-hover);
+    .creator-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 16px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-primary);
+      font-size: 13px;
+      color: #fff;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-primary-hover);
+      }
+
+      .arrow {
+        transition: transform 0.2s ease;
+
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .creator-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      padding: 24px 20px;
+      border-radius: var(--radius-md);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      box-shadow: var(--shadow-2);
+      z-index: 101;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s;
+      pointer-events: none;
+
+      // 透明桥：盖住按钮与面板之间的空隙，鼠标划过不脱离悬停链
+      &::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 0;
+        right: 0;
+        height: 12px;
+      }
+
+      &.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      // 入口网格：图标方块 + 文字竖排（未来加项自动横排延伸）
+      .entry-grid {
+        display: flex;
+        gap: 24px;
+      }
+
+      .entry-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        background-color: transparent;
+        cursor: pointer;
+
+        .entry-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition:
+            transform 0.2s ease,
+            filter 0.2s ease;
+
+          // 写文章：品牌蓝实底白图标；草稿箱：绿色浅底描边图标
+          &.icon-write {
+            background-color: var(--color-primary);
+            color: #fff;
+          }
+
+          &.icon-drafts {
+            background-color: rgba(63, 176, 96, 0.12);
+            color: #3fb060;
+          }
+        }
+
+        .entry-label {
+          font-size: 12px;
+          color: var(--color-text-2);
+          transition: color 0.2s ease;
+        }
+
+        &:hover {
+          .entry-icon {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+          }
+
+          .entry-label {
+            color: var(--color-text-1);
+          }
+        }
+      }
     }
   }
 
