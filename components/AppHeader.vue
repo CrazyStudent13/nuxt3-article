@@ -275,18 +275,19 @@ const handleLogout = async () => {
     align-items: center;
     gap: 6px;
     width: 180px;
-    padding: 4px 8px 4px 12px;
+    // 上下内边距与创作者中心/登录按钮一致（5px）
+    padding: 5px 8px 5px 12px;
     border-radius: var(--radius-sm);
     background-color: var(--color-bg);
-    border: 1px solid transparent;
     color: var(--color-text-3);
     transition:
-      border-color 0.2s ease,
+      box-shadow 0.2s ease,
       background-color 0.2s ease;
 
+    // 焦点环用 inset box-shadow：不占布局空间（border 会把搜索框撑得比创作者中心按钮高 2px）
     &:focus-within {
       background-color: var(--color-surface);
-      border-color: var(--color-primary);
+      box-shadow: inset 0 0 0 1px var(--color-primary);
       color: var(--color-primary);
     }
 
@@ -309,6 +310,8 @@ const handleLogout = async () => {
       outline: none;
       background-color: transparent;
       font-size: 13px;
+      // 显式行高对齐按钮文字（13px × 1.75 = 22.75px，UA 默认 normal 偏矮），搜索框总高与创作者中心按钮一致
+      line-height: 1.75;
       color: var(--color-text-1);
 
       &::placeholder {
