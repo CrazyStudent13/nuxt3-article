@@ -94,7 +94,7 @@ const loadList = async (reset = true) => {
   } catch (error: any) {
     loadError.value = error?.message || '加载失败，请稍后重试'
     if (!reset) {
-      alert(loadError.value)
+      showToast(loadError.value)
     }
   } finally {
     loading.value = false
@@ -168,9 +168,15 @@ const goView = (row: ColumnRowData) => {
   return navigateTo({ path: '/column/detail', query: { id: String(row.id) } })
 }
 
-// 删除：软删除，二次确认后从列表移除（前端只对自己的专栏展示该按钮）
+// 删除：软删除，确认弹窗后从列表移除（前端只对自己的专栏展示该按钮）
 const removeRow = async (row: ColumnRowData) => {
-  if (!window.confirm(`确定删除专栏「${row.title}」吗？删除后不可恢复。`)) {
+  const ok = await confirmAction({
+    title: '删除专栏',
+    message: `确定删除专栏「${row.title}」吗？删除后不可恢复。`,
+    confirmText: '删除',
+    danger: true
+  })
+  if (!ok) {
     return
   }
   try {
@@ -178,7 +184,7 @@ const removeRow = async (row: ColumnRowData) => {
     rows.value = rows.value.filter((item) => item.id !== row.id)
     total.value = Math.max(0, total.value - 1)
   } catch (error: any) {
-    alert(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试')
   }
 }
 </script>

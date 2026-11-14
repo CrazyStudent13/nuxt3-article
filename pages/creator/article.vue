@@ -117,7 +117,7 @@ const loadList = async (reset = true) => {
   } catch (error: any) {
     loadError.value = error?.message || '加载失败，请稍后重试'
     if (!reset) {
-      alert(loadError.value)
+      showToast(loadError.value)
     }
   } finally {
     loading.value = false
@@ -220,13 +220,19 @@ const togglePublish = async (row: ArticleRowData) => {
       row.publishTime = dayjs().format('YYYY-MM-DD HH:mm:ss')
     }
   } catch (error: any) {
-    alert(error?.message || '操作失败，请稍后重试')
+    showToast(error?.message || '操作失败，请稍后重试')
   }
 }
 
-// 删除：软删除，二次确认后从列表移除
+// 删除：软删除，确认弹窗后从列表移除
 const removeRow = async (row: ArticleRowData) => {
-  if (!window.confirm(`确定删除文章「${row.title}」吗？删除后不可恢复。`)) {
+  const ok = await confirmAction({
+    title: '删除文章',
+    message: `确定删除文章「${row.title}」吗？删除后不可恢复。`,
+    confirmText: '删除',
+    danger: true
+  })
+  if (!ok) {
     return
   }
   try {
@@ -234,7 +240,7 @@ const removeRow = async (row: ArticleRowData) => {
     rows.value = rows.value.filter((item) => item.id !== row.id)
     total.value = Math.max(0, total.value - 1)
   } catch (error: any) {
-    alert(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试')
   }
 }
 </script>

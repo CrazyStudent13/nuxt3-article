@@ -150,7 +150,13 @@ const goEdit = () => navigateTo({ path: '/editor/new', query: { id: String(artic
 // 删除后回首页（需 post:article:remove 权限，失败透传后端 msg）
 const deleting = ref(false)
 const removeArticle = async () => {
-  if (!window.confirm(`确定删除「${article.value.title || '无标题'}」吗？删除后不可恢复。`)) {
+  const ok = await confirmAction({
+    title: '删除文章',
+    message: `确定删除「${article.value.title || '无标题'}」吗？删除后不可恢复。`,
+    confirmText: '删除',
+    danger: true
+  })
+  if (!ok) {
     return
   }
   deleting.value = true
@@ -158,7 +164,7 @@ const removeArticle = async () => {
     await apiFetch(`/api/post/article/${article.value.id}`, { method: 'DELETE' })
     return navigateTo('/')
   } catch (error: any) {
-    window.alert(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试')
   } finally {
     deleting.value = false
   }
