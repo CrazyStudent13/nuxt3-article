@@ -1,4 +1,4 @@
-<!-- 个人空间页：带 ?id= 看他人空间（仅公开昵称/头像+文章统计），否则自己的空间（完整账号信息+编辑资料入口，多点赞/通知占位 tab）；文章 tab 标题搜索+时间正/倒序（400ms 防抖），专栏 tab 复用 ColumnCard -->
+<!-- 个人空间页：带 ?id= 看他人空间（仅公开昵称/头像+文章统计），否则自己的空间（完整账号信息+编辑资料入口，点赞占位 tab）；文章 tab 标题搜索+时间正/倒序（400ms 防抖），专栏 tab 复用 ColumnCard -->
 <template>
   <div class="space-page">
     <!-- 资料卡：自己的空间展示完整字段，他人空间只展示公开信息 -->
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <!-- 内容卡：文章 / 专栏 tab 统一，点赞/通知仅本人空间占位 -->
+    <!-- 内容卡：文章 / 专栏 tab 统一，点赞占位（仅本人空间）；通知入口统一收归头部铃铛 -->
     <div class="feed-panel content-panel">
       <div class="tab-bar">
         <div class="tab-items">
@@ -106,7 +106,7 @@
         </CommonEmptyState>
       </template>
 
-      <!-- 点赞/通知：仅本人空间占位 -->
+      <!-- 点赞：仅本人空间占位 -->
       <CommonEmptyState v-else>该功能暂未开放，敬请期待</CommonEmptyState>
     </div>
   </div>
@@ -197,13 +197,13 @@ const goSettings = () => {
   return navigateTo('/user/settings')
 }
 
-// ---------- 内容 tab：文章/专栏统一，点赞/通知仅本人占位 ----------
+// ---------- 内容 tab：文章/专栏统一，点赞仅本人占位（通知走头部铃铛入口，保证入口统一） ----------
 const tabs = computed(() => {
   const base = [
     { key: 'article', label: '文章' },
     { key: 'subject', label: '专栏' }
   ]
-  return isSelf.value ? [...base, { key: 'like', label: '点赞' }, { key: 'notice', label: '通知' }] : base
+  return isSelf.value ? [...base, { key: 'like', label: '点赞' }] : base
 })
 const activeTab = ref('article')
 const articles = ref<any[]>([])
