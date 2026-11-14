@@ -30,6 +30,8 @@ export default defineNuxtConfig({
     // 个人中心 / 设置页依赖客户端 token 与登录态，关闭 SSR
     '/user/space': { ssr: false },
     '/user/settings': { ssr: false },
+    // 通知中心：依赖客户端 token 与登录态，关闭 SSR
+    '/notification': { ssr: false },
     // 写文章：独立编辑器流程，依赖客户端 token
     '/editor/new': { ssr: false },
     // 创作者中心：依赖客户端 token 与登录态，关闭 SSR
