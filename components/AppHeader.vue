@@ -1,4 +1,4 @@
-<!-- 全站吸顶导航：品牌+栏目导航+文章搜索（回车跳首页带 title 参数）；创作者中心入口悬停展开面板（250ms 延迟关闭防误消）、点击新窗口进 /creator；已登录头像+退出，未登录登录/注册按钮 -->
+<!-- 全站吸顶导航：品牌+栏目导航+文章搜索（回车跳首页带 title 参数）；创作者中心入口悬停展开面板（250ms 延迟关闭防误消）、点击新窗口进 /creator；已登录通知铃铛（点击进 /notification、悬停下拉四分类）+头像+退出，未登录登录/注册按钮 -->
 <template>
   <header class="header">
     <div class="inner">
@@ -56,8 +56,30 @@
           </div>
         </div>
 
-        <!-- 已登录：头像 + 昵称 + 退出；未登录：登录/注册按钮 -->
+        <!-- 已登录：通知铃铛 + 头像昵称 + 退出；未登录：登录/注册按钮 -->
         <template v-if="isLoggedIn">
+          <!-- 通知入口：仿掘金——铃铛点击进通知中心，悬停展开五分类面板 -->
+          <div class="notice-entry" @mouseenter="openNoticePanel" @mouseleave="closeNoticePanelSoon">
+            <button class="notice-btn" type="button" aria-label="通知" @click="goNotification">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </button>
+
+            <div class="notice-panel" :class="{ open: noticeOpen }">
+              <NuxtLink
+                v-for="cat in noticeCats"
+                :key="cat.key"
+                class="notice-cat"
+                :to="catRoute(cat)"
+                @click="noticeOpen = false"
+              >
+                {{ cat.label }}
+              </NuxtLink>
+            </div>
+          </div>
+
           <span class="user-area">
             <NuxtLink to="/user/space" class="user-link" title="进入个人中心">
               <img v-if="avatarUrl" class="user-avatar" :src="avatarUrl" alt="头像" />
@@ -163,6 +185,45 @@ const closePanelSoon = () => {
   }
   closeTimer = setTimeout(() => {
     creatorOpen.value = false
+  }, 250)
+}
+
+// ---------- 通知入口：铃铛点击进通知中心，悬停出四分类面板（与创作者中心面板同套交互；私信工作量大暂缓） ----------
+const noticeCats = [
+  { key: 'comment', label: '评论' },
+  { key: 'like', label: '赞和收藏' },
+  { key: 'follower', label: '新增粉丝' },
+  { key: 'system', label: '系统通知' }
+] as const
+
+type NoticeCat = (typeof noticeCats)[number]
+
+// 分类直达：系统通知是默认 tab 不带参数，其余带 ?tab=
+const catRoute = (cat: NoticeCat) => {
+  return cat.key === 'system' ? '/notification' : `/notification?tab=${cat.key}`
+}
+
+const goNotification = () => {
+  return navigateTo('/notification')
+}
+
+const noticeOpen = ref(false)
+let noticeCloseTimer: ReturnType<typeof setTimeout> | null = null
+
+const openNoticePanel = () => {
+  if (noticeCloseTimer) {
+    clearTimeout(noticeCloseTimer)
+    noticeCloseTimer = null
+  }
+  noticeOpen.value = true
+}
+
+const closeNoticePanelSoon = () => {
+  if (noticeCloseTimer) {
+    clearTimeout(noticeCloseTimer)
+  }
+  noticeCloseTimer = setTimeout(() => {
+    noticeOpen.value = false
   }, 250)
 }
 
@@ -471,6 +532,87 @@ const handleLogout = async () => {
           .entry-label {
             color: var(--color-text-1);
           }
+        }
+      }
+    }
+  }
+
+  // 通知入口：铃铛圆角钮 + 悬停下拉五分类面板（交互与创作者中心面板一致）
+  .notice-entry {
+    position: relative;
+
+    .notice-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background-color: transparent;
+      color: var(--color-text-2);
+      cursor: pointer;
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+
+      &:hover {
+        background-color: var(--color-bg);
+        color: var(--color-text-1);
+      }
+    }
+
+    .notice-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      min-width: 132px;
+      padding: 6px 0;
+      border-radius: var(--radius-md);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      box-shadow: var(--shadow-2);
+      z-index: 101;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, -4px);
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s;
+      pointer-events: none;
+
+      // 透明桥：盖住按钮与面板之间的空隙，鼠标划过不脱离悬停链
+      &::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 0;
+        right: 0;
+        height: 12px;
+      }
+
+      &.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, 0);
+        pointer-events: auto;
+      }
+
+      .notice-cat {
+        display: block;
+        padding: 9px 20px;
+        font-size: 14px;
+        color: var(--color-text-2);
+        white-space: nowrap;
+        transition:
+          color 0.2s ease,
+          background-color 0.2s ease;
+
+        &:hover {
+          color: var(--color-primary);
+          background-color: var(--color-bg);
         }
       }
     }
