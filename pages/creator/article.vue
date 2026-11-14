@@ -171,7 +171,7 @@ const loadList = async () => {
   } catch (error: any) {
     loadError.value = error?.message || '加载失败，请稍后重试'
     rows.value = []
-    showToast(loadError.value)
+    showToast(loadError.value, 'error')
   } finally {
     loading.value = false
   }
@@ -284,7 +284,7 @@ const togglePublish = async (row: ArticleRowData) => {
     loadCounts()
     return loadList()
   } catch (error: any) {
-    showToast(error?.message || '操作失败，请稍后重试')
+    showToast(error?.message || '操作失败，请稍后重试', 'error')
   }
 }
 
@@ -304,7 +304,7 @@ const removeRow = async (row: ArticleRowData) => {
     loadCounts()
     return loadList()
   } catch (error: any) {
-    showToast(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试', 'error')
   }
 }
 </script>

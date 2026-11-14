@@ -128,7 +128,7 @@ const handleCoverChange = async (event: Event) => {
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    showToast('图片不能超过 5MB')
+    showToast('图片不能超过 5MB', 'error')
     return
   }
   coverUploading.value = true

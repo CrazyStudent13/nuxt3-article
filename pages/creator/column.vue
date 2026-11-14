@@ -94,7 +94,7 @@ const loadList = async (reset = true) => {
   } catch (error: any) {
     loadError.value = error?.message || '加载失败，请稍后重试'
     if (!reset) {
-      showToast(loadError.value)
+      showToast(loadError.value, 'error')
     }
   } finally {
     loading.value = false
@@ -184,7 +184,7 @@ const removeRow = async (row: ColumnRowData) => {
     rows.value = rows.value.filter((item) => item.id !== row.id)
     total.value = Math.max(0, total.value - 1)
   } catch (error: any) {
-    showToast(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试', 'error')
   }
 }
 </script>

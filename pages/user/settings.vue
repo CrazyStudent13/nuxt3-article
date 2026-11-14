@@ -253,7 +253,7 @@ const handleAvatarChange = async (event: Event) => {
     return setProfileTip('请选择图片文件', true)
   }
   if (file.size > 5 * 1024 * 1024) {
-    return showToast('图片不能超过 5MB')
+    return showToast('图片不能超过 5MB', 'error')
   }
   // 先裁剪成方形再上传；取消裁剪则静默结束
   let cropped: File

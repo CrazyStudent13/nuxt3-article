@@ -466,7 +466,7 @@ const insertImage = (file: File) => {
     return Promise.resolve()
   }
   if (file.size > 5 * 1024 * 1024) {
-    showToast('图片不能超过 5MB')
+    showToast('图片不能超过 5MB', 'error')
     return Promise.resolve()
   }
   const start = el.selectionStart
@@ -682,7 +682,7 @@ const handleCoverChange = async (event: Event) => {
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    showToast('图片不能超过 5MB')
+    showToast('图片不能超过 5MB', 'error')
     return
   }
   // 封面按 16:9 裁剪后再上传，取消则静默结束

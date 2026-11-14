@@ -164,7 +164,7 @@ const removeArticle = async () => {
     await apiFetch(`/api/post/article/${article.value.id}`, { method: 'DELETE' })
     return navigateTo('/')
   } catch (error: any) {
-    showToast(error?.message || '删除失败，请稍后重试')
+    showToast(error?.message || '删除失败，请稍后重试', 'error')
   } finally {
     deleting.value = false
   }
