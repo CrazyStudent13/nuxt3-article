@@ -36,16 +36,16 @@
           <input v-model="keyword" type="search" placeholder="搜索文章" />
         </form>
 
-        <!-- 创作者中心入口：下拉面板聚合创作入口（写文章/草稿箱，未来扩展往 creatorEntries 加项） -->
-        <div ref="creatorRef" class="creator-entry">
-          <button class="creator-btn" type="button" @click="creatorOpen = !creatorOpen">
+        <!-- 创作者中心入口：仿掘金——悬停展开面板，点击直接进创作者中心（面板入口未来扩展往 creatorEntries 加项） -->
+        <div class="creator-entry">
+          <button class="creator-btn" type="button" @click="goCreator">
             创作者中心
-            <svg class="arrow" :class="{ open: creatorOpen }" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
 
-          <div v-if="creatorOpen" class="creator-panel">
+          <div class="creator-panel">
             <div class="entry-grid">
               <button v-for="entry in creatorEntries" :key="entry.key" class="entry-item" type="button" @click="handleEntry(entry)">
                 <span class="entry-icon" :class="`icon-${entry.key}`" v-html="entry.icon" />
@@ -115,10 +115,7 @@ const { openLogin, openRegister } = useAuthModal()
 const config = useRuntimeConfig()
 const { user, isLoggedIn, fetchUserInfo, logout } = useUser()
 
-// ---------- 创作者中心下拉面板 ----------
-const creatorOpen = ref(false)
-const creatorRef = ref<HTMLElement | null>(null)
-
+// ---------- 创作者中心入口（悬停出面板，点击进 /creator，页面守卫负责登录拦截） ----------
 // 创作入口清单：未来扩展（沸点/笔记等）往数组加项即可
 const creatorEntries = [
   {
@@ -144,36 +141,17 @@ const entryRoute = (entry: CreatorEntry) => {
 }
 
 const handleEntry = (entry: CreatorEntry) => {
-  creatorOpen.value = false
-  // 未登录先拉起登录框（与原写文章入口一致）
-  if (!getToken()) {
-    openLogin()
-    return
-  }
   return navigateTo(entryRoute(entry))
 }
 
-// 点击面板外关闭（编辑器草稿箱同款监听模式）
-const onDocClick = (event: MouseEvent) => {
-  if (creatorOpen.value && creatorRef.value && !creatorRef.value.contains(event.target as Node)) {
-    creatorOpen.value = false
-  }
+// 点击按钮本体：直接进创作者中心（登录拦截由 /creator 页面守卫负责）
+const goCreator = () => {
+  return navigateTo('/creator')
 }
-onMounted(() => {
-  document.addEventListener('click', onDocClick)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocClick)
-})
 
 // 头像地址：后端返回相对路径（/profile/...）时补全服务器前缀
 const avatarUrl = computed(() => toCoverUrl(config.public.apiBase, user.value?.avatar))
 const avatarFallback = computed(() => (user.value?.nickName || user.value?.userName || '用户').slice(0, 1))
-
-// 创作者中心入口：prevent 阻止外层个人中心链接的默认跳转
-const goCreator = () => {
-  return navigateTo('/creator')
-}
 
 // 页面刷新后恢复登录态：有 token 但还没有用户信息时静默拉取
 onMounted(() => {
@@ -351,102 +329,118 @@ const handleLogout = async () => {
     }
   }
 
-  // 创作者中心入口：主色按钮 + 下拉面板（参考掘金）
+  // 创作者中心入口：主色按钮 + 悬停下拉面板（参考掘金：悬停出面板，点击进页面）
   .creator-entry {
     position: relative;
-  }
 
-  .creator-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 16px;
-    border: 0;
-    border-radius: var(--radius-full);
-    background-color: var(--color-primary);
-    font-size: 13px;
-    color: #fff;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: var(--color-primary-hover);
+    // 悬停整块（按钮+面板）时：箭头翻转 + 面板显现（面板常驻 DOM，user-tip 同款过渡手法）
+    &:hover .arrow {
+      transform: rotate(180deg);
     }
 
-    .arrow {
-      transition: transform 0.2s ease;
-
-      &.open {
-        transform: rotate(180deg);
-      }
+    &:hover .creator-panel {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
     }
-  }
 
-  .creator-panel {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    padding: 24px 20px;
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border-light);
-    box-shadow: var(--shadow-2);
-    z-index: 101;
-
-    // 入口网格：图标方块 + 文字竖排（未来加项自动横排延伸）
-    .entry-grid {
+    .creator-btn {
       display: flex;
-      gap: 24px;
-    }
-
-    .entry-item {
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 0;
+      gap: 6px;
+      padding: 5px 16px;
       border: 0;
-      background-color: transparent;
+      border-radius: var(--radius-full);
+      background-color: var(--color-primary);
+      font-size: 13px;
+      color: #fff;
+      white-space: nowrap;
       cursor: pointer;
-
-      .entry-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition:
-          transform 0.2s ease,
-          filter 0.2s ease;
-
-        // 写文章：品牌蓝实底白图标；草稿箱：绿色浅底描边图标
-        &.icon-write {
-          background-color: var(--color-primary);
-          color: #fff;
-        }
-
-        &.icon-drafts {
-          background-color: rgba(63, 176, 96, 0.12);
-          color: #3fb060;
-        }
-      }
-
-      .entry-label {
-        font-size: 12px;
-        color: var(--color-text-2);
-        transition: color 0.2s ease;
-      }
+      transition: background-color 0.2s ease;
 
       &:hover {
+        background-color: var(--color-primary-hover);
+      }
+
+      .arrow {
+        transition: transform 0.2s ease;
+      }
+    }
+
+    .creator-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      padding: 24px 20px;
+      border-radius: var(--radius-md);
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border-light);
+      box-shadow: var(--shadow-2);
+      z-index: 101;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease,
+        visibility 0.15s;
+      pointer-events: none;
+
+      // 入口网格：图标方块 + 文字竖排（未来加项自动横排延伸）
+      .entry-grid {
+        display: flex;
+        gap: 24px;
+      }
+
+      .entry-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 0;
+        border: 0;
+        background-color: transparent;
+        cursor: pointer;
+
         .entry-icon {
-          transform: translateY(-2px);
-          filter: brightness(1.05);
+          width: 40px;
+          height: 40px;
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition:
+            transform 0.2s ease,
+            filter 0.2s ease;
+
+          // 写文章：品牌蓝实底白图标；草稿箱：绿色浅底描边图标
+          &.icon-write {
+            background-color: var(--color-primary);
+            color: #fff;
+          }
+
+          &.icon-drafts {
+            background-color: rgba(63, 176, 96, 0.12);
+            color: #3fb060;
+          }
         }
 
         .entry-label {
-          color: var(--color-text-1);
+          font-size: 12px;
+          color: var(--color-text-2);
+          transition: color 0.2s ease;
+        }
+
+        &:hover {
+          .entry-icon {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+          }
+
+          .entry-label {
+            color: var(--color-text-1);
+          }
         }
       }
     }
