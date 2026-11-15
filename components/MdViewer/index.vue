@@ -10,8 +10,8 @@ import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import ClipboardJS from 'clipboard'
 import 'highlight.js/styles/github-dark.css'
-import '@/assets/style/github-markdown.less'
-import '@/assets/style/markdown.less'
+import './styles/github-markdown.less'
+import './styles/markdown.less'
 
 const props = withDefaults(
   defineProps<{

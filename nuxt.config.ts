@@ -43,7 +43,7 @@ export default defineNuxtConfig({
     public: {
       // 后端服务器地址：接口路径与封面等静态资源的共同前缀
       // 通过环境变量 NUXT_PUBLIC_API_BASE 注入（见 .env.example），代码中不保存真实地址
-      apiBase: ''
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || process.env.VITE_BASE_API || 'http://124.222.189.233:8888'
     }
   }
 })

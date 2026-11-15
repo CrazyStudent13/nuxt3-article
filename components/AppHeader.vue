@@ -68,15 +68,15 @@
             </button>
 
             <div class="notice-panel" :class="{ open: noticeOpen }">
-              <NuxtLink
+              <a
                 v-for="cat in noticeCats"
                 :key="cat.key"
                 class="notice-cat"
-                :to="catRoute(cat)"
-                @click="noticeOpen = false"
+                :href="catRoute(cat)"
+                @click.stop="noticeOpen = false"
               >
                 {{ cat.label }}
-              </NuxtLink>
+              </a>
             </div>
           </div>
 
@@ -602,10 +602,13 @@ const handleLogout = async () => {
 
       .notice-cat {
         display: block;
+        width: 100%;
         padding: 9px 20px;
+        text-align: left;
         font-size: 14px;
         color: var(--color-text-2);
         white-space: nowrap;
+        text-decoration: none;
         transition:
           color 0.2s ease,
           background-color 0.2s ease;
