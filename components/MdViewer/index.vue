@@ -1,120 +1,116 @@
+<!-- Markdown 渲染器（文章详情/编辑器预览共用）：markdown-it+highlight.js（高亮/行号/语言名），代码块右上角复制按钮（成功后 1.5s 显示"已复制"）；入参兼容引号包裹内容与字面 \n -->
 <template>
   <div class="markdown-body">
     <div v-html="resultStr"></div>
   </div>
 </template>
 
-<script setup>
-/* 安装流程
- * pnpm install markdown-it
- * pnpm install highlight.js
- * pnpm install clipboard --save
- * https://juejin.cn/post/6844904105970761741?searchId=20241219215618B6B10490F62417012BAF
- */
-
+<script setup lang="ts">
 import MarkdownIt from 'markdown-it'
-import Clipboard from 'clipboard'
+import hljs from 'highlight.js'
+import ClipboardJS from 'clipboard'
 import 'highlight.js/styles/github-dark.css'
-import './styles/github-markdown.less'
-import './styles/github-markdown-dark.less'
-import './styles/github-markdown-light.less'
+import '@/assets/style/github-markdown.less'
+import '@/assets/style/markdown.less'
 
-const props = defineProps({
-  value: {
-    type: String,
-    default: ''
+const props = withDefaults(
+  defineProps<{
+    value?: string
+  }>(),
+  {
+    value: ''
   }
-})
+)
 
-// MarkdownIt 配置
+let clipboard: ClipboardJS | null = null
+
+const escapeTextarea = (value: string) => value.replace(/<\/textarea>/g, '&lt;/textarea>')
+
+// 接口返回的内容可能被引号包裹，仅在两端引号匹配时才剥离，避免截断正常内容
+const normalizeContent = (value: string) => {
+  let temp = value
+
+  const wrappedBy =
+    (temp.length >= 2 && temp.startsWith('"') && temp.endsWith('"')) ||
+    (temp.length >= 2 && temp.startsWith("'") && temp.endsWith("'"))
+
+  if (wrappedBy) {
+    temp = temp.slice(1, -1)
+  }
+
+  return temp.replace(/\\n/g, '\n')
+}
+
 const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true,
   highlight: (str, lang) => {
-    // 当前时间加随机数生成唯一的id标识
-    const codeIndex = parseInt(Date.now()) + Math.floor(Math.random() * 10000000)
-    // 复制功能主要使用的是 clipboard.js
+    const codeIndex = Date.now() + Math.floor(Math.random() * 10000000)
     let html = `<button class="copy-btn" type="button" data-clipboard-action="copy" data-clipboard-target="#copy${codeIndex}">复制</button>`
     const linesLength = str.split(/\n/).length - 1
-    // 生成行号
     let linesNum = '<span aria-hidden="true" class="line-numbers-rows">'
+
     for (let index = 0; index < linesLength; index++) {
-      linesNum = linesNum + '<span></span>'
+      linesNum += '<span></span>'
     }
+
     linesNum += '</span>'
+
     if (lang && hljs.getLanguage(lang)) {
       try {
-        // highlight.js 高亮代码
-        const preCode = hljs.highlight(lang, str, true).value
-        html = html + preCode
+        const preCode = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value
+        html += preCode
+
         if (linesLength) {
-          html += '<b class="name">' + lang + '</b>'
+          html += `<b class="name">${lang}</b>`
         }
-        // 将代码包裹在 textarea 中，由于防止textarea渲染出现问题，这里将 "<" 用 "&lt;" 代替，不影响复制功能
-        return `<pre class="hljs"><code>${html}</code>${linesNum}</pre><textarea style="position: absolute;top: -9999px;left: -9999px;z-index: -9999;" id="copy${codeIndex}">${str.replace(
-          /<\/textarea>/g,
-          '&lt;/textarea>'
-        )}</textarea>`
+
+        return `<pre class="hljs"><code>${html}</code>${linesNum}</pre><textarea style="position:absolute;top:-9999px;left:-9999px;z-index:-9999;" id="copy${codeIndex}">${escapeTextarea(str)}</textarea>`
       } catch (error) {
-        console.log(error)
+        console.error(error)
       }
     }
 
-    const preCode = md.utils.escapeHtml(str)
-    html = html + preCode
-    return `<pre class="hljs"><code>${html}</code>${linesNum}</pre><textarea style="position: absolute;top: -9999px;left: -9999px;z-index: -9999;" id="copy${codeIndex}">${str.replace(
-      /<\/textarea>/g,
-      '&lt;/textarea>'
-    )}</textarea>`
+    html += md.utils.escapeHtml(str)
+    return `<pre class="hljs"><code>${html}</code>${linesNum}</pre><textarea style="position:absolute;top:-9999px;left:-9999px;z-index:-9999;" id="copy${codeIndex}">${escapeTextarea(str)}</textarea>`
   }
 })
 
-// 创建 clipboard 实例, 并挂载到页面
-// onMounted(() => {
-//   const clipboard = new Clipboard('.copy-btn')
+onMounted(() => {
+  clipboard = new ClipboardJS('.copy-btn')
+  clipboard.on('success', (event) => {
+    event.clearSelection()
+    const trigger = event.trigger as HTMLElement | undefined
+    if (trigger) {
+      trigger.textContent = '已复制'
+      trigger.classList.add('copied')
+      setTimeout(() => {
+        trigger.textContent = '复制'
+        trigger.classList.remove('copied')
+      }, 1500)
+    }
+  })
+  clipboard.on('error', (event) => {
+    console.error('Action:', event.action)
+    console.error('Trigger:', event.trigger)
+  })
+})
 
-//   clipboard.on('success', (e) => {
-//     e.clearSelection()
-//   })
-//   clipboard.on('error', (e) => {
-//     console.error('Action:', e.action)
-//     console.error('Trigger:', e.trigger)
-//   })
-// })
+onBeforeUnmount(() => {
+  clipboard?.destroy()
+  clipboard = null
+})
 
-// 渲染 markdown,处理 markdown 字符串
 const resultStr = computed(() => {
   const val = props.value
-  let result = ''
 
-  if (typeof val === 'string' && val.length > 0) {
-    // 处理换行及首尾引号
-    const tempStr = val.length >= 2 ? val.slice(1, -1).replace(/\\n/g, '\n') : ''
-
-    // 替换 '<', '>', '&'
-    const decodedContent = tempStr.replace(/\\u003c|\\u003e|\\u0026/g, (match) => {
-      switch (match) {
-        case '\\u003c':
-          return '<'
-        case '\\u003e':
-          return '>'
-        case '\\u0026':
-          return '&'
-        default:
-          return match
-      }
-    })
-
-    // 确保 md 已正确初始化
-    if (typeof md !== 'undefined' && md.render) {
-      result = md.render(decodedContent)
-    } else {
-      console.warn('Markdown 渲染器未定义')
-    }
+  if (!val) {
+    return ''
   }
 
-  return result || ''
+  const tempStr = normalizeContent(val)
+  return md.render(tempStr)
 })
 </script>
 
@@ -149,23 +145,28 @@ const resultStr = computed(() => {
       z-index: 11;
       width: 6px;
     }
+
     &::-webkit-scrollbar:horizontal {
       height: 6px;
     }
+
     &::-webkit-scrollbar-thumb {
       border-radius: 5px;
       width: 6px;
       background: #666;
     }
+
     &::-webkit-scrollbar-corner,
     &::-webkit-scrollbar-track {
       background: #1e1e1e;
     }
+
     &::-webkit-scrollbar-track-piece {
       background: #1e1e1e;
       width: 6px;
     }
   }
+
   .line-numbers-rows {
     position: absolute;
     pointer-events: none;
@@ -179,10 +180,12 @@ const resultStr = computed(() => {
     border-right: 1px solid rgba(0, 0, 0, 0.35);
     user-select: none;
     counter-reset: linenumber;
+
     span {
       pointer-events: none;
       display: block;
       counter-increment: linenumber;
+
       &:before {
         content: counter(linenumber);
         color: #999;
@@ -191,6 +194,7 @@ const resultStr = computed(() => {
       }
     }
   }
+
   b.name {
     position: absolute;
     top: 2px;
@@ -209,12 +213,22 @@ const resultStr = computed(() => {
     right: 16px;
     top: 0;
     z-index: 99;
-    color: #333;
-    padding: 4px;
+    color: var(--color-text-1);
+    padding: 4px 8px;
     cursor: pointer;
-    background-color: #fff;
+    background-color: var(--color-surface);
     border: 0;
-    border-radius: 2px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+
+    &.copied {
+      color: var(--color-primary);
+    }
   }
 }
 </style>

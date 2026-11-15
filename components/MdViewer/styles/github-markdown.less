@@ -10,9 +10,9 @@
   --fontStack-monospace: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
   --fgColor-accent: Highlight;
 }
-@media (prefers-color-scheme: dark) {
-  .markdown-body,
-  [data-theme='dark'] {
+// 深色变量抽成 mixin：同时被系统深色偏好（media 查询）与站点 html.dark 类触发——
+// 站点主题是类驱动，OS 偏好与站点主题相反时（如系统浅色+站点深色）由类选择器（specificity 更高）兜底覆盖
+.dark-variables() {
     /* dark */
     color-scheme: dark;
     --focus-outlineColor: #1f6feb;
@@ -65,11 +65,20 @@
     --color-prettylights-syntax-markup-ignored-bg: #1158c7;
     --color-prettylights-syntax-meta-diff-range: #d2a8ff;
     --color-prettylights-syntax-sublimelinter-gutter-mark: #3d444d;
+}
+// media 触发：无类控制的独立场景兜底
+@media (prefers-color-scheme: dark) {
+  .markdown-body,
+  [data-theme='dark'] {
+    .dark-variables();
   }
 }
-@media (prefers-color-scheme: light) {
-  .markdown-body,
-  [data-theme='light'] {
+// 站点类触发：html.dark 时覆盖 media 结果
+html.dark .markdown-body,
+html.dark [data-theme='dark'] {
+  .dark-variables();
+}
+.light-variables() {
     /* light */
     color-scheme: light;
     --focus-outlineColor: #0969da;
@@ -122,7 +131,18 @@
     --color-prettylights-syntax-markup-ignored-bg: #0550ae;
     --color-prettylights-syntax-meta-diff-range: #8250df;
     --color-prettylights-syntax-sublimelinter-gutter-mark: #818b98;
+}
+// media 触发：无类控制的独立场景兜底
+@media (prefers-color-scheme: light) {
+  .markdown-body,
+  [data-theme='light'] {
+    .light-variables();
   }
+}
+// 站点类触发：站点浅色（html 无 .dark）时覆盖系统的深色 media 结果
+html:not(.dark) .markdown-body,
+html:not(.dark) [data-theme='light'] {
+  .light-variables();
 }
 
 .markdown-body {

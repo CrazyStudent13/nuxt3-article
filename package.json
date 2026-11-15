@@ -3,34 +3,35 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nuxt dev --mode dev",
-    "build": "nuxt build --mode .env.production",
-    "generate": "nuxt generate --mode .env.production",
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@nuxt/content": "^3.5.1",
-    "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
-    "@pinia/nuxt": "^0.11.0",
+    "@types/markdown-it": "^14.2.0",
     "clipboard": "^2.0.11",
+    "cropperjs": "1.6.2",
     "dayjs": "^1.11.13",
-    "element-plus": "^2.8.8",
     "highlight.js": "^11.11.1",
-    "jsencrypt": "^3.3.2",
     "markdown-it": "^14.1.0",
-    "md-editor-v3": "^5.5.1",
-    "nuxt": "^3.17.3",
-    "vue": "latest",
-    "vue-dompurify-html": "^5.3.0",
-    "vue-router": "latest"
+    "nuxt": "^4.4.2",
+    "typescript": "^5.9.3",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0",
+    "vue-tsc": "^3.3.14"
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee",
+  "engines": {
+    "node": ">=20.18.1 <21",
+    "pnpm": ">=9.12.3 <10"
+  },
   "devDependencies": {
-    "@element-plus/nuxt": "^1.1.0",
     "less": "^4.2.0"
   },
   "volta": {
-    "node": "20.18.1"
+    "node": "20.19.0"
   }
 }
